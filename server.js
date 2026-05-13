@@ -812,8 +812,8 @@ async function sendWelcomeEmail(user) {
                             <h3 style="color: #001F54; margin-top: 2rem;">🎯 Próximos pasos:</h3>
                             <ol style="color: #444; line-height: 1.8;">
                                 <li>Accede a tu <strong>área de cliente</strong></li>
-                                <li>Completa tu <strong>perfil y cuestionario inicial</strong></li>
-                                <li>Recibirás tu <strong>rutina personalizada</strong> en 24-48h</li>
+                                <li>Me pondré en contacto contigo para agendar una <strong>videollamada inicial</strong></li>
+                                <li>Tras conocernos, recibirás tu <strong>rutina personalizada</strong></li>
                                 <li>¡Empieza a entrenar!</li>
                             </ol>
 
@@ -824,7 +824,7 @@ async function sendWelcomeEmail(user) {
                             </div>
                             
                             <p style="color: #666; line-height: 1.6; font-size: 0.95rem;">
-                                Si tienes cualquier duda, responde a este email o escríbeme por WhatsApp.
+                                Si tienes cualquier duda, no dudes en escribirme.
                             </p>
                             
                             <p style="color: #001F54; margin-top: 2rem;">
