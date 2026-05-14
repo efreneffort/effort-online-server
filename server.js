@@ -37,14 +37,32 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Configuración
 const PORT = process.env.PORT || 3000;
-const JWT_SECRET = process.env.JWT_SECRET || 'effort_online_secret_key_2025';
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/effort-online';
-const RESEND_API_KEY = process.env.RESEND_API_KEY || 're_BiC1NgD5_5CqHZ6HFSaJFAkoRCqQ3tG9M';
 const FROM_EMAIL = process.env.FROM_EMAIL || 'Effort Online <onboarding@resend.dev>';
 const REPLY_TO = process.env.REPLY_TO || 'effortentrenador@gmail.com';
 
+// Variables críticas — deben estar en .env
+const JWT_SECRET = process.env.JWT_SECRET;
+const RESEND_API_KEY = process.env.RESEND_API_KEY;
+
+// Validación de arranque: fallar rápido si faltan vars requeridas en producción
+if (process.env.NODE_ENV === 'production') {
+  const required = ['JWT_SECRET', 'RESEND_API_KEY', 'MONGODB_URI', 'STRIPE_SECRET_KEY', 'STRIPE_WEBHOOK_SECRET'];
+  const missing = required.filter(k => !process.env[k]);
+  if (missing.length > 0) {
+    console.error('❌ Variables de entorno requeridas no configuradas:', missing.join(', '));
+    process.exit(1);
+  }
+} else {
+  if (!JWT_SECRET) {
+    console.warn('⚠️  JWT_SECRET no configurado. Usa una clave segura en .env para producción.');
+  }
+}
+
+const JWT_SECRET_EFFECTIVE = JWT_SECRET || 'effort_online_secret_key_dev_only';
+
 // Inicializar Resend para envío de emails
-const resend = new Resend(RESEND_API_KEY);
+const resend = RESEND_API_KEY ? new Resend(RESEND_API_KEY) : null;
 
 // Rate limiting para endpoints de autenticación
 const authLimiter = rateLimit({
@@ -123,6 +141,8 @@ const UserSchema = new mongoose.Schema({
     role: { type: String, enum: ['client', 'admin'], default: 'client' },
     createdAt: { type: Date, default: Date.now }
 });
+// email ya tiene unique:true (índice implícito). Índice extra para filtrar clientes activos por plan.
+UserSchema.index({ isActive: 1, plan: 1 });
 
 const User = mongoose.model('User', UserSchema);
 
@@ -137,12 +157,14 @@ const ExerciseSchema = new mongoose.Schema({
     videoUrl: String,
     createdAt: { type: Date, default: Date.now }
 });
+// Filtrado frecuente por equipment en GET /api/admin/exercises
+ExerciseSchema.index({ equipment: 1 });
 
 const Exercise = mongoose.model('Exercise', ExerciseSchema);
 
 // Rutina
 const RoutineSchema = new mongoose.Schema({
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, unique: true },
     exercises: [{
         exerciseId: { type: mongoose.Schema.Types.ObjectId, ref: 'Exercise' },
         sets: Number,
@@ -152,6 +174,7 @@ const RoutineSchema = new mongoose.Schema({
     }],
     updatedAt: { type: Date, default: Date.now }
 });
+// unique:true en userId garantiza una sola rutina por usuario
 
 const Routine = mongoose.model('Routine', RoutineSchema);
 
@@ -161,6 +184,8 @@ const WorkoutSessionSchema = new mongoose.Schema({
     duration: { type: Number, required: true }, // en minutos
     completedAt: { type: Date, default: Date.now }
 });
+// Queries más frecuentes: sesiones de un usuario ordenadas por fecha (stats, streak, logros)
+WorkoutSessionSchema.index({ userId: 1, completedAt: -1 });
 
 const WorkoutSession = mongoose.model('WorkoutSession', WorkoutSessionSchema);
 
@@ -173,6 +198,9 @@ const VideoCallSchema = new mongoose.Schema({
     notes: String,
     completed: { type: Boolean, default: false }
 });
+// Listado de llamadas ordenado por fecha; filtrado de "hoy" en stats de admin
+VideoCallSchema.index({ scheduledFor: 1 });
+VideoCallSchema.index({ userId: 1 });
 
 const VideoCall = mongoose.model('VideoCall', VideoCallSchema);
 
@@ -182,6 +210,8 @@ const AchievementSchema = new mongoose.Schema({
     badgeType: { type: String, required: true },
     unlockedAt: { type: Date, default: Date.now }
 });
+// Evitar logros duplicados y acelerar lookup por usuario
+AchievementSchema.index({ userId: 1, badgeType: 1 }, { unique: true });
 
 const Achievement = mongoose.model('Achievement', AchievementSchema);
 
@@ -197,7 +227,7 @@ function authenticateToken(req, res, next) {
         return res.status(401).json({ error: 'Token no proporcionado' });
     }
 
-    jwt.verify(token, JWT_SECRET, (err, user) => {
+    jwt.verify(token, JWT_SECRET_EFFECTIVE, (err, user) => {
         if (err) {
             return res.status(403).json({ error: 'Token inválido' });
         }
@@ -254,7 +284,7 @@ app.post('/api/auth/register', authLimiter, async (req, res) => {
         // Generar token
         const token = jwt.sign(
             { userId: user._id, email: user.email, role: user.role },
-            JWT_SECRET,
+            JWT_SECRET_EFFECTIVE,
             { expiresIn: '30d' }
         );
 
@@ -300,7 +330,7 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
         // Generar token
         const token = jwt.sign(
             { userId: user._id, email: user.email, role: user.role },
-            JWT_SECRET,
+            JWT_SECRET_EFFECTIVE,
             { expiresIn: '30d' }
         );
 
@@ -728,8 +758,8 @@ async function calculateStreak(userId) {
 
 // Verificar y desbloquear logros
 async function checkAndUnlockAchievements(userId) {
-    const sessions = await WorkoutSession.find({ userId });
-    const achievements = await Achievement.find({ userId });
+    const sessions = await WorkoutSession.find({ userId }).sort({ completedAt: -1 }).limit(31);
+    const achievements = await Achievement.find({ userId }, { badgeType: 1 });
     const unlockedTypes = achievements.map(a => a.badgeType);
 
     // First Step
@@ -767,6 +797,7 @@ async function checkAndUnlockAchievements(userId) {
 
 // Email de bienvenida al registrarse
 async function sendWelcomeEmail(user) {
+    if (!resend) { console.warn('⚠️  RESEND_API_KEY no configurado, email omitido'); return; }
     try {
         const planNames = {
             basico: 'BÁSICO',
@@ -861,6 +892,7 @@ async function sendWelcomeEmail(user) {
 
 // Email de recuperación de contraseña
 async function sendPasswordResetEmail(email, resetToken) {
+    if (!resend) { console.warn('⚠️  RESEND_API_KEY no configurado, email omitido'); return false; }
     try {
         const resetUrl = `${process.env.APP_URL || 'http://localhost:3000'}/reset-password.html?token=${resetToken}`;
 
@@ -934,6 +966,7 @@ async function sendPasswordResetEmail(email, resetToken) {
 
 // Email de confirmación de pago
 async function sendPaymentConfirmationEmail(user, amount, plan, period) {
+    if (!resend) { console.warn('⚠️  RESEND_API_KEY no configurado, email omitido'); return; }
     try {
         const planNames = {
             basico: 'BÁSICO',
@@ -1028,6 +1061,7 @@ async function sendPaymentConfirmationEmail(user, amount, plan, period) {
 
 // Email de recordatorio de videollamada
 async function sendVideoCallReminderEmail(user, callDate, callType) {
+    if (!resend) { console.warn('⚠️  RESEND_API_KEY no configurado, email omitido'); return; }
     try {
         const formattedDate = new Date(callDate).toLocaleString('es-ES', {
             weekday: 'long',
@@ -1123,7 +1157,7 @@ app.post('/api/auth/forgot-password', async (req, res) => {
         // Generar token temporal (1 hora)
         const resetToken = jwt.sign(
             { userId: user._id, purpose: 'password-reset' },
-            JWT_SECRET,
+            JWT_SECRET_EFFECTIVE,
             { expiresIn: '1h' }
         );
 
@@ -1151,7 +1185,7 @@ app.post('/api/auth/reset-password', async (req, res) => {
         // Verificar token
         let decoded;
         try {
-            decoded = jwt.verify(token, JWT_SECRET);
+            decoded = jwt.verify(token, JWT_SECRET_EFFECTIVE);
         } catch (err) {
             return res.status(401).json({ error: 'Token inválido o expirado' });
         }

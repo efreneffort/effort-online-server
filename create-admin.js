@@ -5,9 +5,14 @@ require('dns').setServers(['8.8.8.8', '8.8.4.4']);
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
-const ADMIN_EMAIL    = 'efren@effortonline.com';
-const ADMIN_PASSWORD = 'Admin2026!';
-const ADMIN_NAME     = 'Efrén Pérez';
+const ADMIN_EMAIL    = process.env.ADMIN_EMAIL    || 'efren@effortonline.com';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+const ADMIN_NAME     = process.env.ADMIN_NAME     || 'Efrén Pérez';
+
+if (!ADMIN_PASSWORD) {
+    console.error('❌ Define ADMIN_PASSWORD en .env antes de ejecutar este script.');
+    process.exit(1);
+}
 
 async function main() {
     await mongoose.connect(process.env.MONGODB_URI);
