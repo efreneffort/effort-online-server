@@ -797,6 +797,8 @@ async function sendWelcomeEmail(user) {
             elite: 'ÉLITE'
         };
 
+        const APP_URL = process.env.APP_URL || 'http://localhost:3000';
+
         const { data, error } = await resend.emails.send({
             from: FROM_EMAIL,
             to: user.email,
@@ -815,37 +817,37 @@ async function sendWelcomeEmail(user) {
                             </h1>
                             <p style="color: #00D9A3; margin: 0.5rem 0 0; font-size: 0.9rem;">ASESORÍAS ONLINE</p>
                         </div>
-                        
+
                         <!-- Contenido -->
                         <div style="padding: 2rem;">
                             <h2 style="color: #001F54; margin-top: 0;">¡Hola ${user.name}! 👋</h2>
-                            
+
                             <p style="color: #444; line-height: 1.6; font-size: 1rem;">
                                 Bienvenido a <strong>Effort Online</strong>. Me alegra mucho que hayas decidido dar el paso hacia una vida más activa y saludable.
                             </p>
-                            
+
                             <div style="background: #f8f9fa; border-left: 4px solid #00D9A3; padding: 1rem 1.5rem; margin: 1.5rem 0; border-radius: 8px;">
                                 <p style="margin: 0; color: #001F54;">
                                     <strong>Tu plan activo:</strong> ${planNames[user.plan]}
                                 </p>
                             </div>
-                            
+
                             <h3 style="color: #001F54; margin-top: 2rem;">🎯 Próximos pasos:</h3>
                             <ol style="color: #444; line-height: 1.8;">
                                 <li>Accede a tu <strong>área de cliente</strong></li>
-                                <li>Completa tu <strong>perfil y cuestionario inicial</strong></li>
-                                <li>Recibirás tu <strong>rutina personalizada</strong> en 24-48h</li>
+                                <li>Me pondré en contacto contigo para agendar una <strong>videollamada inicial</strong></li>
+                                <li>Tras conocernos, recibirás tu <strong>rutina personalizada</strong></li>
                                 <li>¡Empieza a entrenar!</li>
                             </ol>
-                            
+
                             <div style="text-align: center; margin: 2rem 0;">
-                                <a href="https://effortonline.com/login.html" style="display: inline-block; background: #00D9A3; color: #001F54; padding: 1rem 2rem; text-decoration: none; border-radius: 8px; font-weight: bold; max-width: 100%; box-sizing: border-box;">
+                                <a href="${APP_URL}/login.html" style="display: inline-block; background: #00D9A3; color: #001F54; padding: 1rem 2rem; text-decoration: none; border-radius: 8px; font-weight: bold; max-width: 100%; box-sizing: border-box;">
                                     Acceder a mi cuenta
                                 </a>
                             </div>
                             
                             <p style="color: #666; line-height: 1.6; font-size: 0.95rem;">
-                                Si tienes cualquier duda, responde a este email o escríbeme por WhatsApp.
+                                Si tienes cualquier duda, no dudes en escribirme.
                             </p>
                             
                             <p style="color: #001F54; margin-top: 2rem;">
@@ -971,6 +973,8 @@ async function sendPaymentConfirmationEmail(user, amount, plan, period) {
             annual: 'Anual'
         };
 
+        const APP_URL = process.env.APP_URL || 'http://localhost:3000';
+
         const { data, error } = await resend.emails.send({
             from: FROM_EMAIL,
             to: user.email,
@@ -1016,7 +1020,7 @@ async function sendPaymentConfirmationEmail(user, amount, plan, period) {
                             </p>
                             
                             <div style="text-align: center; margin: 2rem 0;">
-                                <a href="https://effortonline.com/dashboard.html" style="display: inline-block; background: #00D9A3; color: #001F54; padding: 1rem 2rem; text-decoration: none; border-radius: 8px; font-weight: bold; max-width: 100%; box-sizing: border-box;">
+                                <a href="${APP_URL}/dashboard.html" style="display: inline-block; background: #00D9A3; color: #001F54; padding: 1rem 2rem; text-decoration: none; border-radius: 8px; font-weight: bold; max-width: 100%; box-sizing: border-box;">
                                     Acceder a mi dashboard
                                 </a>
                             </div>
