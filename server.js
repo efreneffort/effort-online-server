@@ -558,6 +558,18 @@ app.get('/api/user/stats', authenticateToken, async (req, res) => {
     }
 });
 
+// Historial de sesiones del usuario
+app.get('/api/user/sessions', authenticateToken, async (req, res) => {
+    try {
+        const sessions = await WorkoutSession.find({ userId: req.user.userId })
+            .sort({ completedAt: -1 })
+            .limit(20);
+        res.json(sessions);
+    } catch (error) {
+        res.status(500).json({ error: 'Error al obtener sesiones' });
+    }
+});
+
 // Obtener logros
 app.get('/api/user/achievements', authenticateToken, async (req, res) => {
     try {
@@ -579,6 +591,17 @@ app.get('/api/admin/clients', authenticateToken, isAdmin, async (req, res) => {
         res.json(clients);
     } catch (error) {
         res.status(500).json({ error: 'Error al obtener clientes' });
+    }
+});
+
+// Obtener rutina de un cliente (admin)
+app.get('/api/admin/clients/:clientId/routine', authenticateToken, isAdmin, async (req, res) => {
+    try {
+        const routine = await Routine.findOne({ userId: req.params.clientId })
+            .populate('exercises.exerciseId');
+        res.json(routine || null);
+    } catch (error) {
+        res.status(500).json({ error: 'Error al obtener rutina' });
     }
 });
 

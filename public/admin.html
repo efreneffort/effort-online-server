@@ -17997,10 +17997,28 @@ gg==" alt="Effort Online">
         // ─── Rutina ──────────────────────────────────────────────────
         async function loadRoutineForClient(clientId) {
             try {
-                const res = await fetch(`/api/admin/clients`, { headers: authHeaders() });
-                // Mostrar rutina vacía de inicio
+                const res = await fetch(`/api/admin/clients/${clientId}/routine`, { headers: authHeaders() });
+                if (!res.ok) { renderCurrentExercises([]); return; }
+                const routine = await res.json();
+                if (!routine || !routine.exercises || !routine.exercises.length) {
+                    renderCurrentExercises([]);
+                    return;
+                }
+                currentRoutineExercises = routine.exercises.map(ex => {
+                    const exercise = ex.exerciseId;
+                    return {
+                        exerciseId: exercise?._id || ex.exerciseId,
+                        name: exercise?.name || ex.exerciseId,
+                        sets: ex.sets,
+                        reps: ex.reps,
+                        rest: ex.rest,
+                        notes: ex.notes || ''
+                    };
+                });
+                renderCurrentExercises(currentRoutineExercises);
+            } catch(e) {
                 renderCurrentExercises([]);
-            } catch(e) {}
+            }
         }
 
         function renderCurrentExercises(exercises) {

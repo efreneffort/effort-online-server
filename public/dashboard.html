@@ -17545,6 +17545,13 @@ gg==" alt="Effort Online">
 
                     <div id="workoutFeedback" style="display:none; margin-top: 1.5rem;"></div>
                 </div>
+
+                <div class="card" style="margin-top: 1.5rem;">
+                    <h2 class="card-title">Mis Últimas Sesiones</h2>
+                    <div id="sessionHistoryContent">
+                        <div style="text-align:center; padding: 1.5rem; color: #999;">⏳ Cargando...</div>
+                    </div>
+                </div>
             </div>
 
             <!-- Progreso Section -->
@@ -18223,6 +18230,31 @@ gg==" alt="Effort Online">
 
         let currentUser = null;
 
+        async function loadSessionHistory(token) {
+            const container = document.getElementById('sessionHistoryContent');
+            if (!container) return;
+            try {
+                const res = await fetch('/api/user/sessions', { headers: { 'Authorization': `Bearer ${token}` } });
+                const sessions = res.ok ? await res.json() : [];
+                if (!sessions.length) {
+                    container.innerHTML = `<p style="color:#999; text-align:center; padding:1rem;">Aún no has registrado ninguna sesión. ¡A entrenar! 💪</p>`;
+                    return;
+                }
+                container.innerHTML = `<ul style="list-style:none; padding:0; margin:0;">` +
+                    sessions.map(s => {
+                        const fecha = new Date(s.completedAt).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' });
+                        const hora  = new Date(s.completedAt).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+                        return `<li style="display:flex; justify-content:space-between; align-items:center; padding:0.75rem 0; border-bottom:1px solid #f0f0f0;">
+                            <span>💪 <strong>${s.duration} min</strong></span>
+                            <span style="color:#888; font-size:0.9rem;">${fecha} · ${hora}</span>
+                        </li>`;
+                    }).join('') +
+                    `</ul>`;
+            } catch (err) {
+                container.innerHTML = `<p style="color:#999; text-align:center; padding:1rem;">No se pudo cargar el historial.</p>`;
+            }
+        }
+
         async function loadRoutine(token) {
             try {
                 const res = await fetch('/api/user/routine', { headers: { 'Authorization': `Bearer ${token}` } });
@@ -18283,6 +18315,7 @@ gg==" alt="Effort Online">
             }
 
             loadRoutine(token);
+            loadSessionHistory(token);
 
             try {
                 const [userRes, statsRes] = await Promise.all([
