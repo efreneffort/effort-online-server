@@ -1,0 +1,16 @@
+{
+  "name": "Effort Online",
+  "short_name": "Effort",
+  "description": "Tu plataforma de entrenamiento personal online",
+  "start_url": "/login.html",
+  "display": "standalone",
+  "background_color": "#001F54",
+  "theme_color": "#001F54",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' fill='%23001F54' rx='32'/><text x='96' y='130' font-size='100' text-anchor='middle' fill='%2300D9A3'>E</text></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    }
+  ]
+}
