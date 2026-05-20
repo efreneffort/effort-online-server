@@ -47,7 +47,10 @@
             box-shadow: 0 30px 80px rgba(0,0,0,0.55);
             max-width: 440px;
             width: 100%;
-            overflow: hidden;
+            transition: max-width 0.3s ease;
+        }
+        .container.wide {
+            max-width: 660px;
         }
 
         .header {
@@ -239,7 +242,39 @@
         .pricing-table th:first-child {
             text-align: left;
             padding-left: 0.8rem;
-            width: 30%;
+            width: 28%;
+        }
+
+        /* Columna ÉLITE destacada */
+        .pricing-table th.elite-col {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border-left: 2px solid #ffc300;
+            border-right: 2px solid #ffc300;
+            border-top: 3px solid #ffc300;
+            position: relative;
+        }
+        .pricing-table th.elite-col::before {
+            content: '★ ÉLITE';
+            display: block;
+            font-size: 0.72rem;
+            color: #ffc300;
+            letter-spacing: 0.08em;
+        }
+        .pricing-table th.elite-col .pt-plan-name {
+            display: none;
+        }
+        .pricing-table td.elite-col {
+            border-left: 2px solid #ffc300;
+            border-right: 2px solid #ffc300;
+            background: #fffbef;
+            font-weight: 700;
+            color: #1a1a2e;
+        }
+        .pricing-table tr:last-child td.elite-col {
+            border-bottom: 2px solid #ffc300;
+        }
+        .pricing-table tr:hover td.elite-col:not(.selected-cell) {
+            background: #fff5cc !important;
         }
 
         .pricing-table td {
@@ -17280,13 +17315,14 @@ gg==" alt="Effort Online">
                     <form onsubmit="handleRegister(event)">
                         <div class="form-group">
                             <label>Elige tu plan y periodicidad</label>
-                            <table class="pricing-table">
+                            <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:12px;">
+                            <table class="pricing-table" style="min-width:420px;margin-bottom:0;">
                                 <thead>
                                     <tr>
                                         <th></th>
                                         <th>BÁSICO<span class="pt-features">Rutina · Vídeos · 1 llamada/mes</span></th>
                                         <th>PREMIUM ⭐<span class="pt-features">Básico + Chat · 2 llamadas/mes</span></th>
-                                        <th>ÉLITE<span class="pt-features">Premium · 4 llamadas/mes</span></th>
+                                        <th class="elite-col"><span class="pt-plan-name">ÉLITE</span><span class="pt-features">Premium · 4 llamadas/mes</span></th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -17294,28 +17330,29 @@ gg==" alt="Effort Online">
                                         <td>Mensual</td>
                                         <td id="cell-basico-monthly"   onclick="selectCombo('basico','monthly')">149€</td>
                                         <td id="cell-premium-monthly"  onclick="selectCombo('premium','monthly')" class="selected-cell">199€</td>
-                                        <td id="cell-elite-monthly"    onclick="selectCombo('elite','monthly')">249€</td>
+                                        <td id="cell-elite-monthly"    onclick="selectCombo('elite','monthly')" class="elite-col">249€</td>
                                     </tr>
                                     <tr>
                                         <td>Trimestral<span class="pt-save">−10%</span></td>
                                         <td id="cell-basico-quarterly"  onclick="selectCombo('basico','quarterly')">133€/mes</td>
                                         <td id="cell-premium-quarterly" onclick="selectCombo('premium','quarterly')">183€/mes</td>
-                                        <td id="cell-elite-quarterly"   onclick="selectCombo('elite','quarterly')">233€/mes</td>
+                                        <td id="cell-elite-quarterly"   onclick="selectCombo('elite','quarterly')" class="elite-col">233€/mes</td>
                                     </tr>
                                     <tr>
                                         <td>Semestral<span class="pt-save">−14%</span></td>
                                         <td id="cell-basico-biannual"  onclick="selectCombo('basico','biannual')">116€/mes</td>
                                         <td id="cell-premium-biannual" onclick="selectCombo('premium','biannual')">166€/mes</td>
-                                        <td id="cell-elite-biannual"   onclick="selectCombo('elite','biannual')">216€/mes</td>
+                                        <td id="cell-elite-biannual"   onclick="selectCombo('elite','biannual')" class="elite-col">216€/mes</td>
                                     </tr>
                                     <tr>
                                         <td>Anual<span class="pt-save">−20%</span></td>
                                         <td id="cell-basico-annual"  onclick="selectCombo('basico','annual')">99€/mes</td>
                                         <td id="cell-premium-annual" onclick="selectCombo('premium','annual')">129€/mes</td>
-                                        <td id="cell-elite-annual"   onclick="selectCombo('elite','annual')">159€/mes</td>
+                                        <td id="cell-elite-annual"   onclick="selectCombo('elite','annual')" class="elite-col">159€/mes</td>
                                     </tr>
                                 </tbody>
                             </table>
+                            </div>
                         </div>
 
                         <div class="price-summary">
@@ -17430,6 +17467,7 @@ gg==" alt="Effort Online">
             document.getElementById('dot2').className = 'step-dot active';
             document.getElementById('line1').className = 'step-line done';
             document.getElementById('stepLabel').textContent = 'Paso 2 de 2 — Tu plan';
+            document.querySelector('.container').classList.add('wide');
             lucide.createIcons();
         }
 
@@ -17441,6 +17479,7 @@ gg==" alt="Effort Online">
             document.getElementById('dot2').className = 'step-dot';
             document.getElementById('line1').className = 'step-line';
             document.getElementById('stepLabel').textContent = 'Paso 1 de 2 — Tus datos';
+            document.querySelector('.container').classList.remove('wide');
         }
 
         function selectCombo(plan, period) {
