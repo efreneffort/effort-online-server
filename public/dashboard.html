@@ -10,6 +10,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Effort">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -119,8 +120,25 @@
         }
 
         .nav-icon {
-            font-size: 1.3rem;
             flex-shrink: 0;
+            display: flex;
+            align-items: center;
+        }
+        .nav-icon svg {
+            width: 20px;
+            height: 20px;
+            stroke: currentColor;
+        }
+
+        .badge-icon svg {
+            width: 48px;
+            height: 48px;
+        }
+        .badge-item.unlocked .badge-icon svg {
+            stroke: var(--navy);
+        }
+        .badge-item.locked .badge-icon svg {
+            stroke: #999;
         }
 
         /* Main Content */
@@ -17554,7 +17572,7 @@ pD8ejNjwqq7m5YyxrWj6CbKRcFY335AXdpNYreGk66f9ye16ky1Ue+XHHLXxnuTDx0bT04TjYbIn
 PLl+F9SJeGpJHFivHwYI+2aIBFcd5mHUYf+N7OuM6eGsw/Hw7z9YfTzYmwQ6PQAAAABJRU5ErkJg
 gg==" alt="Effort Online">
             <div class="user-menu">
-                <span class="user-name" id="userDisplayName">👤 ...</span>
+                <span class="user-name" id="userDisplayName"><i data-lucide="user" style="width:16px;height:16px;vertical-align:middle;margin-right:4px;"></i><span id="userNameText">...</span></span>
                 <button class="logout-btn" onclick="logout()">Cerrar Sesión</button>
             </div>
         </div>
@@ -17565,31 +17583,31 @@ gg==" alt="Effort Online">
         <!-- Sidebar -->
         <div class="sidebar">
             <div class="nav-item active" onclick="showSection('dashboard')">
-                <span class="nav-icon">🏠</span>
+                <span class="nav-icon"><i data-lucide="home"></i></span>
                 <span>Dashboard</span>
             </div>
             <div class="nav-item" onclick="showSection('entrenar')">
-                <span class="nav-icon">💪</span>
+                <span class="nav-icon"><i data-lucide="dumbbell"></i></span>
                 <span>Entrenar</span>
             </div>
             <div class="nav-item" onclick="showSection('progreso')">
-                <span class="nav-icon">📊</span>
+                <span class="nav-icon"><i data-lucide="bar-chart-2"></i></span>
                 <span>Progreso</span>
             </div>
             <div class="nav-item" onclick="showSection('logros')">
-                <span class="nav-icon">🏆</span>
+                <span class="nav-icon"><i data-lucide="trophy"></i></span>
                 <span>Logros</span>
             </div>
             <div class="nav-item" onclick="showSection('rutina')">
-                <span class="nav-icon">📋</span>
+                <span class="nav-icon"><i data-lucide="clipboard-list"></i></span>
                 <span>Mi Rutina</span>
             </div>
             <div class="nav-item" onclick="showSection('videollamadas')">
-                <span class="nav-icon">📞</span>
+                <span class="nav-icon"><i data-lucide="video"></i></span>
                 <span>Llamadas</span>
             </div>
             <div class="nav-item" id="chatNavItem" onclick="showSection('chat')">
-                <span class="nav-icon">💬</span>
+                <span class="nav-icon"><i data-lucide="message-circle"></i></span>
                 <span>Chat</span>
             </div>
         </div>
@@ -17625,7 +17643,7 @@ gg==" alt="Effort Online">
 
                 <!-- Streak Display -->
                 <div class="streak-display">
-                    <div class="streak-fire">🔥</div>
+                    <div class="streak-fire"><i data-lucide="flame" style="width:48px;height:48px;stroke:var(--green);"></i></div>
                     <div class="streak-number" id="streakCount">—</div>
                     <div class="streak-label">Días Consecutivos</div>
                     <p style="margin-top: 1rem; font-size: 0.95rem;" id="streakMsg"></p>
@@ -17637,10 +17655,10 @@ gg==" alt="Effort Online">
                     <div class="call-card">
                         <div class="call-info">
                             <h4>Seguimiento Quincenal</h4>
-                            <p class="call-date">📅 Viernes, 7 de Febrero - 18:00h</p>
+                            <p class="call-date"><i data-lucide="calendar" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;"></i>Viernes, 7 de Febrero - 18:00h</p>
                         </div>
                         <button class="whatsapp-btn" onclick="openWhatsApp()">
-                            💬 WhatsApp
+                            <i data-lucide="message-circle" style="width:16px;height:16px;vertical-align:middle;margin-right:6px;"></i>WhatsApp
                         </button>
                     </div>
                 </div>
@@ -17672,7 +17690,7 @@ gg==" alt="Effort Online">
                             <h3 style="color: var(--navy); margin-bottom: 1rem;">Timer de Entrenamiento</h3>
                             <div class="timer-display" id="timerDisplay">00:00</div>
                             <div class="timer-buttons">
-                                <button class="btn btn-primary" id="startBtn" onclick="startWorkout()">▶️ Iniciar Sesión</button>
+                                <button class="btn btn-primary" id="startBtn" onclick="startWorkout()"><i data-lucide="play" style="width:16px;height:16px;vertical-align:middle;margin-right:6px;"></i>Iniciar Sesión</button>
                             </div>
                         </div>
                     </div>
@@ -17691,9 +17709,9 @@ gg==" alt="Effort Online">
                                 </div>
                             </div>
                             <div class="timer-buttons" style="margin-top: 2rem;">
-                                <button class="btn btn-secondary" onclick="pauseWorkout()">⏸️ Pausar</button>
-                                <button class="btn btn-danger" onclick="cancelWorkout()">❌ Cancelar</button>
-                                <button class="btn btn-primary" id="finishBtn" onclick="finishWorkout()" disabled>✔️ Finalizar</button>
+                                <button class="btn btn-secondary" onclick="pauseWorkout()"><i data-lucide="pause" style="width:16px;height:16px;vertical-align:middle;margin-right:6px;"></i>Pausar</button>
+                                <button class="btn btn-danger" onclick="cancelWorkout()"><i data-lucide="x" style="width:16px;height:16px;vertical-align:middle;margin-right:6px;"></i>Cancelar</button>
+                                <button class="btn btn-primary" id="finishBtn" onclick="finishWorkout()" disabled><i data-lucide="check" style="width:16px;height:16px;vertical-align:middle;margin-right:6px;"></i>Finalizar</button>
                             </div>
                         </div>
                     </div>
@@ -17716,7 +17734,7 @@ gg==" alt="Effort Online">
 
                     <div class="calendar-toggle" onclick="toggleCalendar()">
                         <h3 style="color: var(--navy); display: flex; align-items: center; justify-content: space-between; cursor: pointer; padding: 1rem; background: #f8f9fa; border-radius: 10px;">
-                            <span>📅 Calendario de Entrenamiento</span>
+                            <span><i data-lucide="calendar" style="width:16px;height:16px;vertical-align:middle;margin-right:6px;"></i>Calendario de Entrenamiento</span>
                             <span id="calendarArrow" style="font-size: 1.5rem;">▼</span>
                         </h3>
                     </div>
@@ -17766,49 +17784,49 @@ gg==" alt="Effort Online">
 
                     <div class="badges-grid">
                         <div class="badge-item unlocked">
-                            <div class="badge-icon">✨</div>
+                            <div class="badge-icon"><i data-lucide="star"></i></div>
                             <div class="badge-name">First Step</div>
                             <div class="badge-desc">Primera sesión completada</div>
                         </div>
 
                         <div class="badge-item unlocked">
-                            <div class="badge-icon">🔥</div>
+                            <div class="badge-icon"><i data-lucide="flame"></i></div>
                             <div class="badge-name">Racha Semanal</div>
                             <div class="badge-desc">5 días seguidos L-V</div>
                         </div>
 
                         <div class="badge-item locked">
-                            <div class="badge-icon">💎</div>
+                            <div class="badge-icon"><i data-lucide="gem"></i></div>
                             <div class="badge-name">Semana Perfecta</div>
                             <div class="badge-desc">7 días consecutivos</div>
                         </div>
 
                         <div class="badge-item unlocked">
-                            <div class="badge-icon">⚡</div>
+                            <div class="badge-icon"><i data-lucide="zap"></i></div>
                             <div class="badge-name">Constancia</div>
                             <div class="badge-desc">20 días en un mes</div>
                         </div>
 
                         <div class="badge-item locked">
-                            <div class="badge-icon">🏆</div>
+                            <div class="badge-icon"><i data-lucide="trophy"></i></div>
                             <div class="badge-name">Veterano</div>
                             <div class="badge-desc">3 meses consecutivos</div>
                         </div>
 
                         <div class="badge-item unlocked">
-                            <div class="badge-icon">🎯</div>
+                            <div class="badge-icon"><i data-lucide="target"></i></div>
                             <div class="badge-name">Madrugador</div>
                             <div class="badge-desc">10 sesiones antes de 8am</div>
                         </div>
 
                         <div class="badge-item locked">
-                            <div class="badge-icon">💪</div>
+                            <div class="badge-icon"><i data-lucide="dumbbell"></i></div>
                             <div class="badge-name">Ironman</div>
                             <div class="badge-desc">50 horas totales</div>
                         </div>
 
                         <div class="badge-item locked">
-                            <div class="badge-icon">👑</div>
+                            <div class="badge-icon"><i data-lucide="crown"></i></div>
                             <div class="badge-name">Campeón</div>
                             <div class="badge-desc">6 meses sin fallar</div>
                         </div>
@@ -17839,11 +17857,11 @@ gg==" alt="Effort Online">
                     <div class="call-card">
                         <div class="call-info">
                             <h4>Seguimiento Quincenal</h4>
-                            <p class="call-date">📅 Viernes, 7 de Febrero - 18:00h</p>
+                            <p class="call-date"><i data-lucide="calendar" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;"></i>Viernes, 7 de Febrero - 18:00h</p>
                             <p style="color: #666; margin-top: 0.5rem;">Duración: 15 minutos</p>
                         </div>
                         <button class="whatsapp-btn" onclick="openWhatsApp()">
-                            💬 WhatsApp
+                            <i data-lucide="message-circle" style="width:16px;height:16px;vertical-align:middle;margin-right:6px;"></i>WhatsApp
                         </button>
                     </div>
 
@@ -17851,7 +17869,7 @@ gg==" alt="Effort Online">
                     <div class="call-card" style="opacity: 0.7;">
                         <div class="call-info">
                             <h4>Evaluación Inicial</h4>
-                            <p class="call-date">📅 Lunes, 15 de Enero - 19:00h</p>
+                            <p class="call-date"><i data-lucide="calendar" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;"></i>Lunes, 15 de Enero - 19:00h</p>
                             <p style="color: var(--green); margin-top: 0.5rem;">✓ Completada</p>
                         </div>
                     </div>
@@ -18156,7 +18174,10 @@ gg==" alt="Effort Online">
 
         function pauseWorkout() {
             isPaused = !isPaused;
-            event.target.textContent = isPaused ? '▶️ Reanudar' : '⏸️ Pausar';
+            event.target.innerHTML = isPaused
+                ? '<i data-lucide="play" style="width:16px;height:16px;vertical-align:middle;margin-right:6px;"></i>Reanudar'
+                : '<i data-lucide="pause" style="width:16px;height:16px;vertical-align:middle;margin-right:6px;"></i>Pausar';
+            lucide.createIcons();
         }
 
         function cancelWorkout() {
@@ -18200,7 +18221,7 @@ gg==" alt="Effort Online">
                     feedback.style.display = 'block';
                     feedback.innerHTML = `<div class="alert alert-warning">⚠️ La sesión terminó pero no se pudo guardar. Inténtalo de nuevo.</div>`;
                     finishBtn.disabled = false;
-                    finishBtn.textContent = '✔️ Finalizar';
+                    finishBtn.innerHTML = '<i data-lucide="check" style="width:16px;height:16px;vertical-align:middle;margin-right:6px;"></i>Finalizar'; lucide.createIcons();
                 }
             } catch (err) {
                 feedback.style.display = 'block';
@@ -18602,7 +18623,7 @@ gg==" alt="Effort Online">
                 currentUser = user;
 
                 // Header
-                document.getElementById('userDisplayName').textContent = `👤 ${user.name}`;
+                document.getElementById('userNameText').textContent = user.name;
 
                 // Tarjeta de bienvenida
                 const firstName = user.name.split(' ')[0];
@@ -18670,6 +18691,7 @@ gg==" alt="Effort Online">
 
             // Cargar datos reales del usuario (llama a initializeChat internamente)
             loadUserData();
+            lucide.createIcons();
         });
     </script>
 </body>
