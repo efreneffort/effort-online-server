@@ -10,335 +10,371 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Effort">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #001F54 0%, #003875 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         :root {
             --navy: #001F54;
             --green: #00D9A3;
-            --white: #FFFFFF;
         }
 
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(160deg, #000814 0%, #001540 55%, #000d20 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse at 25% 15%, rgba(0,217,163,0.07) 0%, transparent 55%),
+                radial-gradient(ellipse at 80% 85%, rgba(0,31,84,0.5) 0%, transparent 55%);
+            pointer-events: none;
+        }
+
+        /* Social proof bar */
+        .social-proof {
+            color: rgba(255,255,255,0.6);
+            font-size: 0.82rem;
+            margin-bottom: 1.2rem;
+            text-align: center;
+            letter-spacing: 0.02em;
+        }
+        .social-proof strong { color: var(--green); }
+
+        /* Card */
         .container {
             background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            max-width: 500px;
+            border-radius: 18px;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.55);
+            max-width: 440px;
             width: 100%;
             overflow: hidden;
         }
 
         .header {
-            background: var(--navy);
-            padding: 2rem;
+            padding: 1.8rem 2rem 1rem;
             text-align: center;
+            background: white;
+            border-bottom: 1px solid #f0f0f0;
         }
 
-        .logo-img {
-            height: 80px;
-            margin-bottom: 1rem;
-        }
+        .logo-img { height: 60px; }
 
         .header-text {
-            color: white;
-            font-size: 1.2rem;
+            color: #999;
+            font-size: 0.85rem;
+            margin-top: 0.4rem;
         }
 
-        .content {
-            padding: 2.5rem;
-        }
+        .content { padding: 1.5rem 2rem 2rem; }
 
+        /* Tabs */
         .tabs {
             display: flex;
-            gap: 1rem;
-            margin-bottom: 2rem;
-            border-bottom: 2px solid #e0e0e0;
+            background: #f4f5f7;
+            border-radius: 10px;
+            padding: 4px;
+            margin-bottom: 1.5rem;
+            gap: 4px;
         }
 
         .tab {
             flex: 1;
-            padding: 1rem;
-            background: none;
+            padding: 0.65rem;
+            background: transparent;
             border: none;
-            font-size: 1.1rem;
-            font-weight: bold;
-            color: #666;
+            font-size: 0.93rem;
+            font-weight: 600;
+            color: #999;
             cursor: pointer;
-            border-bottom: 3px solid transparent;
-            transition: all 0.3s;
+            border-radius: 7px;
+            transition: all 0.2s;
         }
 
         .tab.active {
+            background: white;
             color: var(--navy);
-            border-bottom-color: var(--green);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
-        .tab:hover {
-            color: var(--navy);
+        /* Step indicator */
+        .step-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 0.4rem;
         }
 
-        .form-section {
-            display: none;
+        .step-dot {
+            width: 26px; height: 26px;
+            border-radius: 50%;
+            background: #e8e8e8;
+            color: #bbb;
+            font-size: 0.78rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .form-section.active {
-            display: block;
-            animation: fadeIn 0.3s;
+        .step-dot.active { background: var(--navy); color: white; }
+        .step-dot.done   { background: var(--green); color: var(--navy); }
+
+        .step-line {
+            flex: 1; max-width: 70px;
+            height: 2px;
+            background: #e8e8e8;
+            border-radius: 2px;
         }
+        .step-line.done { background: var(--green); }
+
+        .step-label {
+            text-align: center;
+            font-size: 0.78rem;
+            color: #aaa;
+            margin-bottom: 1.3rem;
+        }
+
+        /* Forms */
+        .form-section { display: none; }
+        .form-section.active { display: block; animation: fadeIn 0.25s; }
 
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(6px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
 
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
+        .form-group { margin-bottom: 1.1rem; }
 
         .form-group label {
             display: block;
-            margin-bottom: 0.5rem;
-            font-weight: bold;
-            color: var(--navy);
+            margin-bottom: 0.35rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #444;
         }
 
-        .form-group input,
-        .form-group select {
+        .form-group input, .form-group select {
             width: 100%;
-            padding: 1rem;
-            border: 2px solid #e0e0e0;
+            padding: 0.8rem 1rem;
+            border: 1.5px solid #dde0e4;
             border-radius: 10px;
-            font-size: 1rem;
-            transition: all 0.3s;
+            font-size: 0.95rem;
+            background: #fafafa;
+            transition: border-color 0.2s, background 0.2s;
+            font-family: inherit;
         }
 
-        .form-group input:focus,
-        .form-group select:focus {
+        .form-group input:focus, .form-group select:focus {
             outline: none;
             border-color: var(--green);
+            background: white;
         }
 
+        /* Main CTA button */
         .btn {
             width: 100%;
-            padding: 1.2rem;
+            padding: 0.95rem;
             background: var(--green);
             color: var(--navy);
             border: none;
             border-radius: 50px;
-            font-size: 1.1rem;
-            font-weight: bold;
+            font-size: 1rem;
+            font-weight: 700;
             cursor: pointer;
-            transition: all 0.3s;
-            margin-top: 1rem;
+            transition: all 0.2s;
+            margin-top: 0.5rem;
+            letter-spacing: 0.01em;
+            font-family: inherit;
         }
 
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(0, 217, 163, 0.4);
+            box-shadow: 0 6px 24px rgba(0,217,163,0.35);
         }
 
-        .link {
-            text-align: center;
-            margin-top: 1rem;
-            color: #666;
-        }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
-        .link a {
-            color: var(--green);
-            text-decoration: none;
-            font-weight: bold;
+        /* Back button */
+        .btn-back {
+            width: 100%;
+            padding: 0.7rem;
+            background: transparent;
+            color: #aaa;
+            border: none;
+            font-size: 0.88rem;
+            cursor: pointer;
+            margin-top: 0.3rem;
+            transition: color 0.2s;
+            font-family: inherit;
         }
+        .btn-back:hover { color: var(--navy); }
 
-        .link a:hover {
-            text-decoration: underline;
-        }
+        /* Forgot password link */
+        .link { text-align: right; margin-bottom: 0.2rem; }
+        .link a { color: var(--green); text-decoration: none; font-size: 0.83rem; font-weight: 500; }
+        .link a:hover { text-decoration: underline; }
 
-        .plan-selector {
-            display: grid;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
+        /* Plan cards */
+        .plan-selector { display: grid; gap: 0.65rem; margin-bottom: 1.1rem; }
 
         .plan-card {
-            border: 3px solid #e0e0e0;
+            border: 2px solid #dde0e4;
             border-radius: 12px;
-            padding: 1.2rem;
+            padding: 0.9rem 1rem;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.2s;
             position: relative;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        .plan-card:hover {
-            border-color: var(--green);
-        }
+        .plan-card:hover { border-color: var(--green); background: #f9fffe; }
 
         .plan-card.selected {
             border-color: var(--green);
-            background: linear-gradient(135deg, #e8f8f5 0%, #d1f2eb 100%);
+            background: #f0fdf9;
         }
 
         .plan-card.selected::after {
             content: "✓";
             position: absolute;
-            top: 10px;
-            right: 10px;
+            top: 7px; right: 9px;
             background: var(--green);
             color: var(--navy);
-            width: 30px;
-            height: 30px;
+            width: 20px; height: 20px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
+            font-size: 0.7rem;
             font-weight: bold;
         }
 
-        .plan-name {
-            font-weight: bold;
-            color: var(--navy);
-            font-size: 1.2rem;
-            margin-bottom: 0.5rem;
-        }
+        .plan-name { font-weight: 700; color: var(--navy); font-size: 0.95rem; }
+        .plan-features { font-size: 0.75rem; color: #999; margin-top: 0.15rem; }
+        .plan-price { font-size: 1.1rem; font-weight: 700; color: var(--green); white-space: nowrap; padding-right: 1.2rem; }
 
-        .plan-price {
-            color: var(--green);
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin-bottom: 0.5rem;
-        }
-
-        .plan-features {
-            font-size: 0.9rem;
-            color: #666;
-        }
-
+        /* Period selector */
         .period-selector {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 0.8rem;
-            margin-bottom: 1.5rem;
+            gap: 0.55rem;
+            margin-bottom: 1.1rem;
         }
 
         .period-btn {
-            padding: 1rem;
+            padding: 0.65rem 0.5rem;
             background: white;
-            border: 2px solid #e0e0e0;
+            border: 1.5px solid #dde0e4;
             border-radius: 10px;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.2s;
             text-align: center;
         }
 
-        .period-btn:hover {
-            border-color: var(--green);
-        }
+        .period-btn:hover { border-color: var(--green); }
+        .period-btn.selected { border-color: var(--green); background: #f0fdf9; }
+        .period-name { font-weight: 600; color: var(--navy); font-size: 0.88rem; }
+        .period-save { font-size: 0.72rem; color: var(--green); font-weight: 600; }
 
-        .period-btn.selected {
-            border-color: var(--green);
-            background: linear-gradient(135deg, #e8f8f5 0%, #d1f2eb 100%);
-        }
-
-        .period-name {
-            font-weight: bold;
-            color: var(--navy);
-        }
-
-        .period-save {
-            font-size: 0.85rem;
-            color: var(--green);
-            font-weight: bold;
-        }
-
+        /* Price summary */
         .price-summary {
             background: #f8f9fa;
-            padding: 1.5rem;
+            padding: 0.9rem 1.1rem;
             border-radius: 10px;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
+            border-left: 3px solid var(--green);
         }
 
         .price-row {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 0.5rem;
+            font-size: 0.88rem;
+            margin-bottom: 0.25rem;
+            color: #555;
         }
 
         .price-total {
-            font-size: 1.3rem;
-            font-weight: bold;
+            font-size: 1.05rem;
+            font-weight: 700;
             color: var(--navy);
-            padding-top: 0.5rem;
-            border-top: 2px solid #e0e0e0;
-            margin-top: 0.5rem;
+            padding-top: 0.4rem;
+            border-top: 1px solid #e8e8e8;
+            margin-top: 0.4rem;
+        }
+
+        /* Legal */
+        .legal-checkboxes {
+            background: #f8f9fa;
+            padding: 0.9rem 1rem;
+            border-radius: 10px;
+            margin-bottom: 0.8rem;
+            border-left: 3px solid var(--green);
         }
 
         .checkbox-group {
             display: flex;
             align-items: flex-start;
-            gap: 0.8rem;
-            margin: 1.5rem 0;
+            gap: 0.65rem;
+            margin-bottom: 0.7rem;
         }
+
+        .checkbox-group:last-child { margin-bottom: 0; }
 
         .checkbox-group input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
+            width: 16px; height: 16px;
             margin-top: 2px;
             cursor: pointer;
+            accent-color: var(--green);
+            flex-shrink: 0;
         }
 
-        .checkbox-group label {
-            font-size: 0.9rem;
-            color: #666;
-            cursor: pointer;
+        .checkbox-group label { font-size: 0.78rem; color: #555; cursor: pointer; line-height: 1.4; }
+
+        /* Alert */
+        .alert { padding: 0.8rem 1rem; border-radius: 8px; margin-bottom: 0.8rem; font-size: 0.88rem; }
+        .alert-info { background: #e8f8f5; color: #1a6054; border-left: 3px solid var(--green); }
+
+        /* Trust badges below card */
+        .trust-badges {
+            display: flex;
+            gap: 1.2rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 1.1rem;
         }
 
-        .alert {
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
+        .trust-badge {
+            color: rgba(255,255,255,0.45);
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
         }
 
-        .alert-info {
-            background: #e8f8f5;
-            color: #0c5460;
-            border-left: 4px solid var(--green);
-        }
-
-        @media (max-width: 600px) {
-            body {
-                padding: 1rem;
-            }
-
-            .content {
-                padding: 1.5rem;
-            }
-
-            .period-selector {
-                grid-template-columns: 1fr;
-            }
+        @media (max-width: 480px) {
+            body { padding: 1rem; }
+            .content { padding: 1.2rem 1.4rem 1.5rem; }
+            .header { padding: 1.4rem 1.4rem 0.8rem; }
+            .period-selector { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
+    <p class="social-proof">💪 Más de <strong>50 personas</strong> ya están transformando su cuerpo con Efrén</p>
     <div class="container">
         <div class="header">
             <img class="logo-img" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABAAAAAQACAIAAADwf7zUAAAAAXNSR0IArs4c6QAAAIRlWElmTU0A
@@ -17190,151 +17226,166 @@ gg==" alt="Effort Online">
         <div class="content">
             <!-- Tabs -->
             <div class="tabs">
-                <button class="tab active" onclick="showTab('login')">Iniciar Sesión</button>
-                <button class="tab" onclick="showTab('register')">Crear Cuenta</button>
+                <button class="tab active" onclick="showTab('login')">Entrar</button>
+                <button class="tab" onclick="showTab('register')">Empezar ahora</button>
             </div>
 
-            <!-- Login Form -->
+            <!-- Login -->
             <div id="login" class="form-section active">
                 <form onsubmit="handleLogin(event)">
                     <div class="form-group">
                         <label for="loginEmail">Email</label>
                         <input type="email" id="loginEmail" placeholder="tu@email.com" required>
                     </div>
-
                     <div class="form-group">
                         <label for="loginPassword">Contraseña</label>
                         <input type="password" id="loginPassword" placeholder="••••••••" required>
                     </div>
-
                     <div class="link">
-                        <a href="javascript:void(0)" onclick="showForgotPassword()" style="color: var(--green); text-decoration: underline; cursor: pointer;">¿Olvidaste tu contraseña?</a>
+                        <a href="javascript:void(0)" onclick="showForgotPassword()">¿Olvidaste tu contraseña?</a>
                     </div>
-
                     <button type="submit" class="btn">Iniciar Sesión</button>
                 </form>
             </div>
 
-            <!-- Register Form -->
+            <!-- Register (2 pasos) -->
             <div id="register" class="form-section">
-                <div class="alert alert-info">
-                    👋 ¡Bienvenido! Completa tus datos para empezar tu transformación
+
+                <!-- Indicador de pasos -->
+                <div class="step-indicator">
+                    <div class="step-dot active" id="dot1">1</div>
+                    <div class="step-line" id="line1"></div>
+                    <div class="step-dot" id="dot2">2</div>
+                </div>
+                <p class="step-label" id="stepLabel">Paso 1 de 2 — Tus datos</p>
+
+                <!-- Paso 1: Datos personales -->
+                <div id="step1">
+                    <form onsubmit="goToStep2(event)">
+                        <div class="form-group">
+                            <label for="registerName">Nombre completo</label>
+                            <input type="text" id="registerName" placeholder="Juan Pérez" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="registerEmail">Email</label>
+                            <input type="email" id="registerEmail" placeholder="tu@email.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="registerPhone">Teléfono</label>
+                            <input type="tel" id="registerPhone" placeholder="612 345 678" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="registerPassword">Contraseña</label>
+                            <input type="password" id="registerPassword" placeholder="Mínimo 8 caracteres" required minlength="8">
+                        </div>
+                        <button type="submit" class="btn">Siguiente →</button>
+                    </form>
                 </div>
 
-                <form onsubmit="handleRegister(event)">
-                    <div class="form-group">
-                        <label for="registerName">Nombre completo</label>
-                        <input type="text" id="registerName" placeholder="Juan Pérez" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="registerEmail">Email</label>
-                        <input type="email" id="registerEmail" placeholder="tu@email.com" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="registerPhone">Teléfono</label>
-                        <input type="tel" id="registerPhone" placeholder="612 345 678" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="registerPassword">Contraseña</label>
-                        <input type="password" id="registerPassword" placeholder="Mínimo 8 caracteres" required minlength="8">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Selecciona tu plan</label>
-                        <div class="plan-selector">
-                            <div class="plan-card" onclick="selectPlan('basico')">
-                                <div class="plan-name">BÁSICO</div>
-                                <div class="plan-price" id="basicoPrice">49€/mes</div>
-                                <div class="plan-features">Rutina personalizada • Vídeos • Videollamada mensual</div>
-                            </div>
-
-                            <div class="plan-card selected" onclick="selectPlan('premium')">
-                                <div class="plan-name">PREMIUM</div>
-                                <div class="plan-price" id="premiumPrice">89€/mes</div>
-                                <div class="plan-features">Todo Básico + WhatsApp • Videollamada quincenal</div>
-                            </div>
-
-                            <div class="plan-card" onclick="selectPlan('elite')">
-                                <div class="plan-name">ÉLITE</div>
-                                <div class="plan-price" id="elitePrice">149€/mes</div>
-                                <div class="plan-features">Todo Premium + 2 videollamadas/mes • Vídeos ilimitados</div>
+                <!-- Paso 2: Plan y pago -->
+                <div id="step2" style="display:none;">
+                    <form onsubmit="handleRegister(event)">
+                        <div class="form-group">
+                            <label>Elige tu plan</label>
+                            <div class="plan-selector">
+                                <div class="plan-card" onclick="selectPlan('basico')">
+                                    <div class="plan-left">
+                                        <div class="plan-name">BÁSICO</div>
+                                        <div class="plan-features">Rutina · Vídeos · Videollamada mensual</div>
+                                    </div>
+                                    <div class="plan-price" id="basicoPrice">149€/mes</div>
+                                </div>
+                                <div class="plan-card selected" onclick="selectPlan('premium')">
+                                    <div class="plan-left">
+                                        <div class="plan-name">PREMIUM ⭐</div>
+                                        <div class="plan-features">Básico + Chat · Videollamada quincenal</div>
+                                    </div>
+                                    <div class="plan-price" id="premiumPrice">199€/mes</div>
+                                </div>
+                                <div class="plan-card" onclick="selectPlan('elite')">
+                                    <div class="plan-left">
+                                        <div class="plan-name">ÉLITE</div>
+                                        <div class="plan-features">Premium + 2 llamadas/mes · Máxima atención</div>
+                                    </div>
+                                    <div class="plan-price" id="elitePrice">249€/mes</div>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="form-group">
-                        <label>Periodicidad de pago</label>
-                        <div class="period-selector">
-                            <div class="period-btn selected" onclick="selectPeriod('monthly')">
-                                <div class="period-name">Mensual</div>
-                                <div style="color: #666; font-size: 0.85rem;">Sin descuento</div>
-                            </div>
-
-                            <div class="period-btn" onclick="selectPeriod('quarterly')">
-                                <div class="period-name">Trimestral</div>
-                                <div class="period-save">Ahorra 10%</div>
-                            </div>
-
-                            <div class="period-btn" onclick="selectPeriod('biannual')">
-                                <div class="period-name">Semestral</div>
-                                <div class="period-save">Ahorra 14%</div>
-                            </div>
-
-                            <div class="period-btn" onclick="selectPeriod('annual')">
-                                <div class="period-name">Anual</div>
-                                <div class="period-save">Ahorra 20%</div>
+                        <div class="form-group">
+                            <label>Periodicidad</label>
+                            <div class="period-selector">
+                                <div class="period-btn selected" onclick="selectPeriod('monthly')">
+                                    <div class="period-name">Mensual</div>
+                                    <div style="color:#bbb;font-size:0.72rem;">Sin descuento</div>
+                                </div>
+                                <div class="period-btn" onclick="selectPeriod('quarterly')">
+                                    <div class="period-name">Trimestral</div>
+                                    <div class="period-save">Ahorra 10%</div>
+                                </div>
+                                <div class="period-btn" onclick="selectPeriod('biannual')">
+                                    <div class="period-name">Semestral</div>
+                                    <div class="period-save">Ahorra 14%</div>
+                                </div>
+                                <div class="period-btn" onclick="selectPeriod('annual')">
+                                    <div class="period-name">Anual</div>
+                                    <div class="period-save">Ahorra 20%</div>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="price-summary">
-                        <div class="price-row">
-                            <span>Plan seleccionado:</span>
-                            <span id="selectedPlanName">PREMIUM</span>
-                        </div>
-                        <div class="price-row">
-                            <span>Periodicidad:</span>
-                            <span id="selectedPeriodName">Mensual</span>
-                        </div>
-                        <div class="price-row price-total">
-                            <span>Total a pagar:</span>
-                            <span id="totalPrice">89€</span>
-                        </div>
-                        <div style="font-size: 0.85rem; color: #666; margin-top: 0.5rem;" id="priceDetails">
-                            Pago mensual • Cancela cuando quieras
-                        </div>
-                    </div>
-
-                    <div class="legal-checkboxes">
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="termsCheck" required>
-                            <label for="termsCheck">
-                                He leído y acepto los <a href="javascript:void(0)" onclick="showTerms()" style="color: var(--green); text-decoration: underline; cursor: pointer;">términos y condiciones</a>, el <a href="javascript:void(0)" onclick="showLegal()" style="color: var(--green); text-decoration: underline; cursor: pointer;">aviso legal</a> y la <a href="javascript:void(0)" onclick="showPrivacy()" style="color: var(--green); text-decoration: underline; cursor: pointer;">política de privacidad</a>
-                            </label>
+                        <div class="price-summary">
+                            <div class="price-row">
+                                <span>Plan:</span>
+                                <span id="selectedPlanName">PREMIUM</span>
+                            </div>
+                            <div class="price-row">
+                                <span>Periodicidad:</span>
+                                <span id="selectedPeriodName">Mensual</span>
+                            </div>
+                            <div class="price-row price-total">
+                                <span>Total:</span>
+                                <span id="totalPrice">199€</span>
+                            </div>
+                            <div style="font-size:0.78rem;color:#aaa;margin-top:0.4rem;" id="priceDetails">Pago mensual · Cancela cuando quieras</div>
                         </div>
 
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="dataCheck" required>
-                            <label for="dataCheck">
-                                Consiento el tratamiento de mis datos personales y de salud para la prestación del servicio
-                            </label>
+                        <div class="legal-checkboxes">
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="termsCheck" required>
+                                <label for="termsCheck">He leído y acepto los <a href="javascript:void(0)" onclick="showTerms()" style="color:var(--green);">términos</a>, el <a href="javascript:void(0)" onclick="showLegal()" style="color:var(--green);">aviso legal</a> y la <a href="javascript:void(0)" onclick="showPrivacy()" style="color:var(--green);">política de privacidad</a></label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="dataCheck" required>
+                                <label for="dataCheck">Consiento el tratamiento de mis datos personales y de salud para la prestación del servicio</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="serviceCheck" required>
+                                <label for="serviceCheck">Solicito el inicio inmediato del servicio y acepto la pérdida del derecho de desistimiento</label>
+                            </div>
                         </div>
 
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="serviceCheck" required>
-                            <label for="serviceCheck">
-                                Solicito el inicio inmediato del servicio y soy consciente de que, una vez comenzado, perderé mi derecho de desistimiento
-                            </label>
-                        </div>
-                    </div>
+                        <button type="submit" class="btn">
+                            <i data-lucide="lock" style="width:15px;height:15px;vertical-align:middle;margin-right:6px;"></i>Ir al Pago
+                        </button>
+                        <button type="button" class="btn-back" onclick="goToStep1()">← Volver</button>
+                    </form>
+                </div>
 
-                    <button type="submit" class="btn">Continuar al Pago 💳</button>
-                </form>
             </div>
         </div>
+    </div>
+
+    <!-- Trust badges -->
+    <div class="trust-badges">
+        <span class="trust-badge">
+            <i data-lucide="lock" style="width:12px;height:12px;stroke:rgba(255,255,255,0.45)"></i>
+            Pago seguro con Stripe
+        </span>
+        <span class="trust-badge">·</span>
+        <span class="trust-badge">Sin permanencia</span>
+        <span class="trust-badge">·</span>
+        <span class="trust-badge">Cancela cuando quieras</span>
     </div>
 
     <script>
@@ -17382,9 +17433,31 @@ gg==" alt="Effort Online">
         function showTab(tab) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.form-section').forEach(s => s.classList.remove('active'));
-            
             event.target.classList.add('active');
             document.getElementById(tab).classList.add('active');
+            if (tab === 'register') goToStep1();
+        }
+
+        function goToStep2(e) {
+            e.preventDefault();
+            document.getElementById('step1').style.display = 'none';
+            document.getElementById('step2').style.display = 'block';
+            document.getElementById('dot1').className = 'step-dot done';
+            document.getElementById('dot1').textContent = '✓';
+            document.getElementById('dot2').className = 'step-dot active';
+            document.getElementById('line1').className = 'step-line done';
+            document.getElementById('stepLabel').textContent = 'Paso 2 de 2 — Tu plan';
+            lucide.createIcons();
+        }
+
+        function goToStep1() {
+            document.getElementById('step1').style.display = 'block';
+            document.getElementById('step2').style.display = 'none';
+            document.getElementById('dot1').className = 'step-dot active';
+            document.getElementById('dot1').textContent = '1';
+            document.getElementById('dot2').className = 'step-dot';
+            document.getElementById('line1').className = 'step-line';
+            document.getElementById('stepLabel').textContent = 'Paso 1 de 2 — Tus datos';
         }
 
         function selectPlan(plan) {
@@ -17518,6 +17591,7 @@ gg==" alt="Effort Online">
 
         // Initialize pricing on load
         updatePricing();
+        lucide.createIcons();
 
         // Mostrar términos y condiciones
         function showTerms() {
