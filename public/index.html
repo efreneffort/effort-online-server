@@ -4,390 +4,533 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Effort Online - Asesorías de Entrenamiento Personal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: #333;
-            line-height: 1.6;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         :root {
             --navy: #001F54;
             --green: #00D9A3;
             --white: #FFFFFF;
-            --light-gray: #F5F5F5;
+            --light-gray: #f0f2f5;
         }
 
-        /* Header */
+        body {
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            color: #333;
+            line-height: 1.6;
+            background: var(--white);
+        }
+
+        /* ── Header ── */
         header {
-            background: var(--navy);
+            background: rgba(0,31,84,0.97);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             padding: 0;
             position: fixed;
             width: 100%;
             top: 0;
             z-index: 1000;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 20px rgba(0,0,0,0.15);
         }
 
         .header-content {
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding-right: 5%;
+            padding: 0 5%;
         }
 
-        .logo-img {
-            height: 120px;
-            display: block;
-        }
+        .logo-img { height: 72px; display: block; }
 
-        .nav-buttons {
-            display: flex;
-            gap: 1rem;
-        }
+        .nav-buttons { display: flex; gap: 0.75rem; align-items: center; }
 
         .nav-buttons button {
             background: transparent;
-            border: 2px solid var(--green);
-            color: var(--green);
-            padding: 0.7rem 1.5rem;
+            border: 1.5px solid rgba(0,217,163,0.5);
+            color: rgba(255,255,255,0.85);
+            padding: 0.55rem 1.2rem;
             cursor: pointer;
-            font-weight: bold;
-            border-radius: 5px;
-            transition: all 0.3s;
+            font-weight: 600;
+            font-size: 0.9rem;
+            border-radius: 50px;
+            transition: all 0.25s;
+            font-family: 'Inter', sans-serif;
         }
 
         .nav-buttons button:hover {
-            background: var(--green);
-            color: var(--navy);
-        }
-
-        /* Hero Section */
-        .hero {
-            background: linear-gradient(135deg, var(--navy) 0%, #003875 100%);
-            color: var(--white);
-            padding: 200px 5% 100px;
-            text-align: center;
-        }
-
-        .hero h1 {
-            font-size: 3.5rem;
-            margin-bottom: 1.5rem;
-            line-height: 1.2;
-        }
-
-        .hero .highlight {
+            background: rgba(0,217,163,0.12);
+            border-color: var(--green);
             color: var(--green);
         }
 
+        .nav-buttons button.nav-cta {
+            background: var(--green);
+            color: var(--navy);
+            border-color: var(--green);
+            font-weight: 700;
+        }
+
+        .nav-buttons button.nav-cta:hover {
+            background: #00c494;
+            transform: translateY(-1px);
+        }
+
+        /* ── Hero ── */
+        .hero {
+            background: linear-gradient(150deg, #000e2e 0%, #001F54 50%, #003875 100%);
+            color: var(--white);
+            padding: 160px 5% 90px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            width: 600px; height: 600px;
+            background: radial-gradient(circle, rgba(0,217,163,0.08) 0%, transparent 70%);
+            top: -100px; left: 50%;
+            transform: translateX(-50%);
+            pointer-events: none;
+        }
+
+        .hero h1 {
+            font-size: 3.4rem;
+            font-weight: 800;
+            margin-bottom: 1.2rem;
+            line-height: 1.15;
+            letter-spacing: -0.02em;
+        }
+
+        .hero .highlight { color: var(--green); }
+
         .hero p {
-            font-size: 1.3rem;
-            margin-bottom: 2.5rem;
-            max-width: 700px;
+            font-size: 1.15rem;
+            margin-bottom: 2.2rem;
+            max-width: 620px;
             margin-left: auto;
             margin-right: auto;
-            opacity: 0.95;
+            color: rgba(255,255,255,0.75);
+            font-weight: 400;
         }
 
         .cta-button {
             background: var(--green);
             color: var(--navy);
-            padding: 1.2rem 3rem;
-            font-size: 1.2rem;
-            font-weight: bold;
+            padding: 1rem 2.8rem;
+            font-size: 1.05rem;
+            font-weight: 800;
             border: none;
             border-radius: 50px;
             cursor: pointer;
             transition: all 0.3s;
-            box-shadow: 0 5px 20px rgba(0, 217, 163, 0.4);
+            box-shadow: 0 6px 24px rgba(0,217,163,0.45);
+            font-family: 'Inter', sans-serif;
+            letter-spacing: 0.01em;
         }
 
         .cta-button:hover {
             transform: translateY(-3px);
-            box-shadow: 0 8px 30px rgba(0, 217, 163, 0.6);
+            box-shadow: 0 10px 32px rgba(0,217,163,0.6);
         }
 
-        /* Section Styling */
+        /* Hero stats */
+        .hero-stats {
+            display: flex;
+            justify-content: center;
+            gap: 2.5rem;
+            margin-top: 2.5rem;
+            flex-wrap: wrap;
+        }
+
+        .hero-stat {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.1rem;
+        }
+
+        .hero-stat-val {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--green);
+            line-height: 1;
+        }
+
+        .hero-stat-lbl {
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.55);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        /* ── Sections ── */
         section {
             padding: 80px 5%;
             max-width: 1200px;
             margin: 0 auto;
         }
 
-        h2 {
-            font-size: 2.5rem;
-            text-align: center;
-            margin-bottom: 3rem;
-            color: var(--navy);
+        .section-full {
+            max-width: 100%;
+            padding: 80px 0;
         }
 
-        /* Como Funciona */
+        .section-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 5%;
+        }
+
+        h2 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 0.75rem;
+            color: var(--navy);
+            letter-spacing: -0.02em;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            color: #666;
+            font-size: 1rem;
+            margin-bottom: 3rem;
+        }
+
+        /* ── Como Funciona ── */
         .steps {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 3rem;
-            margin-top: 3rem;
+            gap: 1.5rem;
         }
 
         .step {
             text-align: center;
-            padding: 2rem;
+            padding: 2.2rem 1.8rem;
             background: var(--white);
-            border-radius: 10px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
-            transition: transform 0.3s;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+            border-top: 3px solid var(--green);
+            transition: transform 0.25s, box-shadow 0.25s;
         }
 
         .step:hover {
-            transform: translateY(-10px);
+            transform: translateY(-6px);
+            box-shadow: 0 12px 32px rgba(0,0,0,0.1);
         }
 
-        .step-number {
-            background: var(--green);
-            color: var(--navy);
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.8rem;
-            font-weight: bold;
-            margin: 0 auto 1.5rem;
+        .step-icon {
+            background: linear-gradient(135deg, var(--navy), #003875);
+            width: 60px; height: 60px;
+            border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 1.4rem;
         }
+
+        .step-icon svg { width: 26px; height: 26px; stroke: var(--green); }
 
         .step h3 {
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 0.7rem;
             color: var(--navy);
         }
 
-        /* Pricing Section */
+        .step p { color: #666; font-size: 0.92rem; }
+
+        /* ── Pricing ── */
         .pricing-section {
             background: var(--light-gray);
             padding: 80px 5%;
         }
 
+        .pricing-section h2, .pricing-section .section-subtitle {
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
         .period-selector {
             display: flex;
             justify-content: center;
-            gap: 1rem;
+            gap: 0.5rem;
             margin-bottom: 3rem;
             flex-wrap: wrap;
+            background: white;
+            width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 5px;
+            border-radius: 50px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.07);
         }
 
         .period-btn {
-            padding: 0.8rem 2rem;
-            background: var(--white);
-            border: 2px solid var(--navy);
-            color: var(--navy);
-            font-weight: bold;
+            padding: 0.6rem 1.4rem;
+            background: transparent;
+            border: none;
+            color: #888;
+            font-weight: 600;
+            font-size: 0.88rem;
             cursor: pointer;
             border-radius: 50px;
-            transition: all 0.3s;
+            transition: all 0.25s;
+            font-family: 'Inter', sans-serif;
         }
 
         .period-btn.active {
             background: var(--navy);
-            color: var(--white);
+            color: white;
         }
 
-        .period-btn:hover {
-            background: var(--navy);
-            color: var(--white);
-        }
+        .period-btn:hover:not(.active) { color: var(--navy); }
 
         .pricing-cards {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            max-width: 1200px;
+            gap: 1.5rem;
+            max-width: 1000px;
             margin: 0 auto;
+            align-items: start;
         }
 
         .pricing-card {
             background: var(--white);
-            border-radius: 15px;
-            padding: 2.5rem;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            transition: transform 0.3s;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+            transition: transform 0.25s, box-shadow 0.25s;
             position: relative;
         }
 
-        .pricing-card:hover {
-            transform: translateY(-10px);
-        }
+        .pricing-card:hover { transform: translateY(-6px); box-shadow: 0 16px 40px rgba(0,0,0,0.12); }
 
         .pricing-card.featured {
-            border: 3px solid var(--green);
-            transform: scale(1.05);
+            border: 2px solid var(--green);
+            transform: scale(1.03);
+        }
+
+        .pricing-card.elite-card {
+            border: 2px solid #ffc300;
+            background: linear-gradient(160deg, #fffbef 0%, #fff 60%);
         }
 
         .badge {
             position: absolute;
-            top: -15px;
-            right: 20px;
+            top: -13px;
+            left: 50%;
+            transform: translateX(-50%);
             background: var(--green);
             color: var(--navy);
-            padding: 0.5rem 1.5rem;
-            border-radius: 20px;
-            font-weight: bold;
-            font-size: 0.9rem;
+            padding: 0.3rem 1.2rem;
+            border-radius: 50px;
+            font-weight: 800;
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            white-space: nowrap;
         }
 
+        .elite-card .badge { background: #ffc300; color: #1a1a2e; }
+
         .plan-name {
-            font-size: 1.8rem;
+            font-size: 1.1rem;
             color: var(--navy);
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
             margin-bottom: 1rem;
-            font-weight: bold;
+            margin-top: 0.5rem;
         }
 
         .price {
-            font-size: 3rem;
+            font-size: 2.8rem;
             color: var(--green);
-            font-weight: bold;
-            margin-bottom: 0.5rem;
+            font-weight: 800;
+            line-height: 1;
+            letter-spacing: -0.02em;
         }
 
-        .price-period {
-            color: #666;
-            margin-bottom: 1.5rem;
-        }
+        .price-period { color: #999; font-size: 0.85rem; margin: 0.3rem 0 1rem; }
 
         .savings {
-            background: #fff3cd;
-            color: #856404;
-            padding: 0.5rem;
-            border-radius: 5px;
-            margin-bottom: 1.5rem;
-            font-weight: bold;
-            font-size: 0.9rem;
+            background: var(--green);
+            color: var(--navy);
+            padding: 0.3rem 0.8rem;
+            border-radius: 50px;
+            font-weight: 800;
+            font-size: 0.78rem;
+            display: inline-block;
+            margin-bottom: 1rem;
         }
 
         .features-list {
             list-style: none;
-            margin-bottom: 2rem;
+            margin: 1.2rem 0 1.8rem;
         }
 
         .features-list li {
-            padding: 0.8rem 0;
-            border-bottom: 1px solid #eee;
+            padding: 0.55rem 0;
+            border-bottom: 1px solid #f0f0f0;
             display: flex;
             align-items: center;
+            gap: 0.6rem;
+            font-size: 0.9rem;
+            color: #444;
         }
 
-        .features-list li:before {
-            content: "✓";
-            color: var(--green);
-            font-weight: bold;
-            margin-right: 0.8rem;
-            font-size: 1.2rem;
-        }
+        .features-list li:last-child { border-bottom: none; }
+
+        .feat-icon { flex-shrink: 0; }
+        .feat-icon svg { width: 15px; height: 15px; }
+        .feat-check svg { stroke: var(--green); }
+        .feat-x svg { stroke: #ccc; }
 
         .select-plan-btn {
             width: 100%;
-            padding: 1rem;
+            padding: 0.9rem;
             background: var(--navy);
             color: var(--white);
             border: none;
             border-radius: 50px;
-            font-weight: bold;
-            font-size: 1.1rem;
+            font-weight: 700;
+            font-size: 0.95rem;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.25s;
+            font-family: 'Inter', sans-serif;
         }
 
-        .select-plan-btn:hover {
+        .select-plan-btn:hover { background: var(--green); color: var(--navy); }
+
+        .featured .select-plan-btn {
             background: var(--green);
             color: var(--navy);
         }
 
-        /* Testimonials */
+        .featured .select-plan-btn:hover { background: #00c494; }
+
+        /* ── Testimonials ── */
         .testimonials {
-            background: var(--navy);
+            background: linear-gradient(150deg, #000e2e 0%, #001F54 100%);
             color: var(--white);
         }
 
         .testimonial-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
         }
 
         .testimonial {
-            background: rgba(255,255,255,0.1);
-            padding: 2rem;
-            border-radius: 10px;
-            border-left: 4px solid var(--green);
+            background: rgba(255,255,255,0.06);
+            padding: 1.8rem;
+            border-radius: 16px;
+            border-left: 3px solid var(--green);
+            transition: background 0.2s;
+        }
+
+        .testimonial:hover { background: rgba(255,255,255,0.1); }
+
+        .testimonial-stars {
+            color: #ffc300;
+            font-size: 1rem;
+            margin-bottom: 0.8rem;
+            letter-spacing: 0.1em;
         }
 
         .testimonial-text {
             font-style: italic;
-            margin-bottom: 1rem;
-            line-height: 1.8;
+            margin-bottom: 1.2rem;
+            line-height: 1.75;
+            color: rgba(255,255,255,0.85);
+            font-size: 0.95rem;
         }
 
-        .testimonial-author {
-            color: var(--green);
-            font-weight: bold;
+        .testimonial-footer { display: flex; align-items: center; gap: 0.8rem; }
+
+        .testimonial-avatar {
+            width: 38px; height: 38px;
+            border-radius: 50%;
+            background: var(--green);
+            color: var(--navy);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 0.85rem;
+            flex-shrink: 0;
         }
 
-        /* About Section */
-        .about {
-            background: var(--light-gray);
-        }
+        .testimonial-author { color: var(--green); font-weight: 700; font-size: 0.9rem; }
+
+        /* ── About ── */
+        .about { background: var(--light-gray); }
 
         .about-content {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 3rem;
+            gap: 4rem;
             align-items: center;
         }
 
         .about-text h3 {
-            font-size: 2rem;
+            font-size: 1.7rem;
+            font-weight: 800;
             color: var(--navy);
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.2rem;
+            letter-spacing: -0.02em;
         }
+
+        .about-text p { color: #555; margin-bottom: 1rem; font-size: 0.95rem; }
+
+        .about-creds {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-top: 1.2rem;
+        }
+
+        .about-cred {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--navy);
+        }
+
+        .about-cred svg { width: 16px; height: 16px; stroke: var(--green); flex-shrink: 0; }
 
         .about-image img {
             width: 100%;
-            height: 400px;
+            height: 420px;
             object-fit: cover;
-            border-radius: 15px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
         }
 
-        /* Footer */
+        /* ── Footer ── */
         footer {
             background: var(--navy);
             color: var(--white);
-            padding: 3rem 5%;
+            padding: 2.5rem 5%;
             text-align: center;
         }
 
-        .footer-content {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
+        .footer-content { max-width: 1200px; margin: 0 auto; }
 
-        .footer-logo-img {
-            height: 120px;
-            margin-bottom: 1.5rem;
-        }
+        .footer-logo-img { height: 72px; margin-bottom: 1.2rem; }
 
         .footer-links {
-            margin: 2rem 0;
+            margin: 1.5rem 0;
             display: flex;
             flex-direction: column;
-            gap: 0.8rem;
+            gap: 0.6rem;
             align-items: center;
         }
 
@@ -395,66 +538,27 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            font-size: 1.1rem;
+            font-size: 0.95rem;
         }
 
-        .footer-links .contact-label {
-            color: var(--white);
-            font-weight: bold;
-        }
+        .footer-links .contact-label { color: rgba(255,255,255,0.6); font-weight: 500; }
+        .footer-links a { color: var(--green); text-decoration: none; font-weight: 600; }
+        .footer-links a:hover { opacity: 0.75; }
 
-        .footer-links a {
-            color: var(--green);
-            text-decoration: none;
-            transition: opacity 0.3s;
-        }
+        .footer-copy { color: rgba(255,255,255,0.35); font-size: 0.8rem; margin-top: 1.5rem; }
 
-        .footer-links a:hover {
-            opacity: 0.7;
-        }
-
-        /* Responsive */
+        /* ── Responsive ── */
         @media (max-width: 768px) {
-            .hero {
-                padding: 160px 5% 80px;
-            }
-
-            .hero h1 {
-                font-size: 2.5rem;
-            }
-
-            .hero p {
-                font-size: 1.1rem;
-            }
-
-            h2 {
-                font-size: 2rem;
-            }
-
-            .about-content {
-                grid-template-columns: 1fr;
-            }
-
-            .pricing-card.featured {
-                transform: scale(1);
-            }
-
-            .nav-buttons {
-                flex-direction: column;
-                gap: 0.5rem;
-            }
-
-            .logo-img {
-                height: 80px;
-            }
-
-            .footer-logo-img {
-                height: 90px;
-            }
-
-            .header-content {
-                padding-right: 3%;
-            }
+            .hero { padding: 130px 5% 70px; }
+            .hero h1 { font-size: 2.2rem; }
+            .hero p { font-size: 1rem; }
+            h2 { font-size: 1.8rem; }
+            .about-content { grid-template-columns: 1fr; }
+            .pricing-card.featured { transform: scale(1); }
+            .logo-img { height: 58px; }
+            .footer-logo-img { height: 60px; }
+            .hero-stats { gap: 1.5rem; }
+            .nav-buttons button { padding: 0.45rem 0.9rem; font-size: 0.82rem; }
         }
     </style>
 </head>
@@ -17308,37 +17412,52 @@ gg==" alt="Effort Online">
             <div class="nav-buttons">
                 <button onclick="scrollToSection('pricing')">Ver Planes</button>
                 <button onclick="scrollToSection('contact')">Contacto</button>
-                <button onclick="window.location.href='./login.html'" style="background:var(--green);color:var(--navy);font-weight:700;">Acceder</button>
+                <button class="nav-cta" onclick="window.location.href='./login.html'">Acceder</button>
             </div>
         </div>
     </header>
 
     <!-- Hero Section -->
     <section class="hero">
-        <h1>Transforma tu cuerpo <br><span class="highlight">desde casa</span></h1>
-        <p>Entrenamientos personalizados diseñados por Efrén, tu entrenador personal. Sin equipamiento costoso, sin excusas. Solo tú, tu esfuerzo y resultados reales.</p>
+        <h1>Transforma tu cuerpo<br><span class="highlight">con el método Effort</span></h1>
+        <p>Entrenamiento personal online 100% adaptado a ti. Rutinas, vídeos, seguimiento y acompañamiento real — sin pisar un gimnasio.</p>
         <button class="cta-button" onclick="scrollToSection('pricing')">Empieza Ahora</button>
-        <a href="./login.html" style="display:inline-block;margin-top:1rem;color:rgba(255,255,255,0.8);font-size:0.95rem;text-decoration:underline;">¿Ya eres cliente? Accede aquí →</a>
+        <a href="./login.html" style="display:block;margin-top:1.2rem;color:rgba(255,255,255,0.55);font-size:0.88rem;text-decoration:none;">¿Ya eres cliente? <span style="color:var(--green);font-weight:600;">Accede aquí →</span></a>
+        <div class="hero-stats">
+            <div class="hero-stat">
+                <span class="hero-stat-val">50+</span>
+                <span class="hero-stat-lbl">Clientes activos</span>
+            </div>
+            <div class="hero-stat">
+                <span class="hero-stat-val">★ 4.9</span>
+                <span class="hero-stat-lbl">Valoración media</span>
+            </div>
+            <div class="hero-stat">
+                <span class="hero-stat-val">10+</span>
+                <span class="hero-stat-lbl">Años de experiencia</span>
+            </div>
+        </div>
     </section>
 
     <!-- Como Funciona -->
     <section>
         <h2>¿Cómo Funciona?</h2>
+        <p class="section-subtitle">Tres pasos para empezar a ver resultados reales</p>
         <div class="steps">
             <div class="step">
-                <div class="step-number">1</div>
+                <div class="step-icon"><i data-lucide="video"></i></div>
                 <h3>Evaluación Inicial</h3>
-                <p>Hacemos una videollamada donde evalúo tu estado físico, objetivos y disponibilidad. Conoceré tu situación para crear el plan perfecto.</p>
+                <p>Hacemos una videollamada donde evalúo tu estado físico, objetivos y disponibilidad para crear tu plan perfecto.</p>
             </div>
             <div class="step">
-                <div class="step-number">2</div>
+                <div class="step-icon"><i data-lucide="clipboard-list"></i></div>
                 <h3>Plan Personalizado</h3>
-                <p>Recibes tu rutina de entrenamiento adaptada 100% a ti, con vídeos demostrativos de cada ejercicio para que los hagas correctamente.</p>
+                <p>Recibes tu rutina adaptada al 100% con vídeos demostrativos de cada ejercicio para que los ejecutes correctamente.</p>
             </div>
             <div class="step">
-                <div class="step-number">3</div>
+                <div class="step-icon"><i data-lucide="repeat"></i></div>
                 <h3>Seguimiento Continuo</h3>
-                <p>Te acompaño durante todo el proceso ajustando tu plan según tus progresos. Tú entrenas, yo me encargo del resto.</p>
+                <p>Te acompaño ajustando tu plan según tus progresos. Tú entrenas, yo me encargo del resto.</p>
             </div>
         </div>
     </section>
@@ -17346,7 +17465,8 @@ gg==" alt="Effort Online">
     <!-- Pricing Section -->
     <section class="pricing-section" id="pricing">
         <h2>Elige Tu Plan</h2>
-        
+        <p class="section-subtitle">Sin permanencia · Cancela cuando quieras · Pago seguro con Stripe</p>
+
         <div class="period-selector">
             <button class="period-btn active" onclick="changePeriod('monthly', this)">Mensual</button>
             <button class="period-btn" onclick="changePeriod('quarterly', this)">Trimestral</button>
@@ -17354,38 +17474,57 @@ gg==" alt="Effort Online">
             <button class="period-btn" onclick="changePeriod('annual', this)">Anual</button>
         </div>
 
-        <div class="pricing-cards" id="pricing-cards">
-        </div>
+        <div class="pricing-cards" id="pricing-cards"></div>
     </section>
 
     <!-- Testimonials -->
-    <section class="testimonials">
-        <h2 style="color: white;">Lo Que Dicen Nuestros Clientes</h2>
-        <div class="testimonial-grid">
-            <div class="testimonial">
-                <p class="testimonial-text">"Gracias al método Effort he aprendido a coger rutina y ya el entrenar se me hace más llevadero, incluso los días que no me apetece tanto. Efrén siempre está ahí para resolver dudas."</p>
-                <p class="testimonial-author">— María, 34 años</p>
-            </div>
-            <div class="testimonial">
-                <p class="testimonial-text">"Trabajo desde casa y no tenía tiempo para ir al gym. Con Effort Online entreno 30 minutos al día y ya veo resultados. Totalmente recomendable."</p>
-                <p class="testimonial-author">— Carlos, 28 años</p>
-            </div>
-            <div class="testimonial">
-                <p class="testimonial-text">"Lo mejor es la personalización. No es una app genérica, es un entrenador real que se adapta a MI situación. Vale cada euro."</p>
-                <p class="testimonial-author">— Laura, 41 años</p>
+    <section class="testimonials section-full">
+        <div class="section-inner">
+            <h2 style="color:white;">Lo que dicen nuestros clientes</h2>
+            <p class="section-subtitle" style="color:rgba(255,255,255,0.5);margin-bottom:2.5rem;">Resultados reales de personas reales</p>
+            <div class="testimonial-grid">
+                <div class="testimonial">
+                    <div class="testimonial-stars">★★★★★</div>
+                    <p class="testimonial-text">"Gracias al método Effort he aprendido a coger rutina y ya el entrenar se me hace más llevadero, incluso los días que no me apetece tanto."</p>
+                    <div class="testimonial-footer">
+                        <div class="testimonial-avatar">MG</div>
+                        <span class="testimonial-author">María G. · 34 años</span>
+                    </div>
+                </div>
+                <div class="testimonial">
+                    <div class="testimonial-stars">★★★★★</div>
+                    <p class="testimonial-text">"Trabajo desde casa y no tenía tiempo para ir al gym. Con Effort Online entreno 30 minutos al día y ya veo resultados. Totalmente recomendable."</p>
+                    <div class="testimonial-footer">
+                        <div class="testimonial-avatar">CM</div>
+                        <span class="testimonial-author">Carlos M. · 28 años</span>
+                    </div>
+                </div>
+                <div class="testimonial">
+                    <div class="testimonial-stars">★★★★★</div>
+                    <p class="testimonial-text">"Lo mejor es la personalización. No es una app genérica, es un entrenador real que se adapta a MI situación. Vale cada euro."</p>
+                    <div class="testimonial-footer">
+                        <div class="testimonial-avatar">LR</div>
+                        <span class="testimonial-author">Laura R. · 41 años</span>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
 
     <!-- About -->
     <section class="about">
-        <h2>Sobre Efrén</h2>
+        <h2>El método Effort</h2>
         <div class="about-content">
             <div class="about-text">
-                <h3>Tu Entrenador Personal</h3>
-                <p>Llevo más de 10 años ayudando a personas a conseguir sus objetivos físicos. He entrenado a cientos de clientes en mi centro Effort, y ahora quiero llevar esa misma calidad de entrenamiento a tu casa.</p>
-                <p>Mi filosofía es simple: entrenamientos eficientes, personalizados y adaptados a tu vida real. Sin tonterías, sin promesas imposibles. Solo trabajo constante y resultados.</p>
-                <p>Con Effort Online tendrás acceso directo a mí, a mi experiencia y a un método probado que funciona.</p>
+                <h3>Entrenamiento personal de verdad</h3>
+                <p>Llevo más de 10 años ayudando a personas a conseguir sus objetivos físicos. He entrenado a cientos de clientes en mi centro Effort, y ahora traigo esa misma calidad a tu casa.</p>
+                <p>Mi filosofía es simple: entrenamientos eficientes, personalizados y adaptados a tu vida real. Sin promesas imposibles, solo trabajo constante y resultados.</p>
+                <div class="about-creds">
+                    <div class="about-cred"><i data-lucide="check-circle"></i>+10 años de experiencia como entrenador personal</div>
+                    <div class="about-cred"><i data-lucide="check-circle"></i>Más de 200 clientes transformados</div>
+                    <div class="about-cred"><i data-lucide="check-circle"></i>Método probado en centro físico y online</div>
+                    <div class="about-cred"><i data-lucide="check-circle"></i>Seguimiento real, no algoritmos genéricos</div>
+                </div>
             </div>
             <div class="about-image">
                 <img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAASABIAAD/4QCMRXhpZgAATU0AKgAAAAgABQESAAMAAAABAAEAAAEaAAUA
@@ -36839,64 +36978,69 @@ gg==" alt="Effort Online">
             updatePricingCards(period);
         }
 
+        const chk = `<span class="feat-icon feat-check"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>`;
+        const xmk = `<span class="feat-icon feat-x"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span>`;
+
+        function savingsBadge(d) {
+            return d.savings ? `<div class="savings">🎉 ${d.savings}</div>` : '';
+        }
+        function totalLine(d) {
+            return d.total ? `<div style="color:#999;font-size:0.8rem;margin-bottom:0.8rem;">${d.total}</div>` : '';
+        }
+
         function updatePricingCards(period) {
             const data = pricingData[period];
             const cardsContainer = document.getElementById('pricing-cards');
-            
+
             cardsContainer.innerHTML = `
                 <div class="pricing-card">
-                    <div class="plan-name">BÁSICO</div>
+                    <div class="plan-name">Básico</div>
                     <div class="price">${data.basico.price}</div>
                     <div class="price-period">${data.basico.period}</div>
-                    ${data.basico.savings ? `<div class="savings">💰 ${data.basico.savings}</div>` : ''}
-                    ${data.basico.total ? `<div style="color: #666; margin-bottom: 1rem; font-size: 0.9rem;">${data.basico.total}</div>` : ''}
+                    ${savingsBadge(data.basico)}${totalLine(data.basico)}
                     <ul class="features-list">
-                        <li>Rutina personalizada inicial</li>
-                        <li>Acceso completo a la app</li>
-                        <li>Entrenamientos + vídeos</li>
-                        <li>Seguimiento cada 30 días</li>
-                        <li>Ajustes mensuales de rutina</li>
-                        <li>Estructura para crear hábito</li>
-                        <li>❌ Sin acceso al chat</li>
+                        <li>${chk}Rutina personalizada</li>
+                        <li>${chk}Acceso completo a la app</li>
+                        <li>${chk}Entrenamientos + vídeos</li>
+                        <li>${chk}Seguimiento mensual</li>
+                        <li>${chk}Ajustes de rutina</li>
+                        <li>${xmk}Sin chat en la app</li>
                     </ul>
-                    <button class="select-plan-btn" onclick="selectPlan('basico', '${period}')">Seleccionar Plan</button>
+                    <button class="select-plan-btn" onclick="selectPlan('basico','${period}')">Empezar con Básico</button>
                 </div>
 
                 <div class="pricing-card featured">
-                    <div class="badge">MÁS POPULAR</div>
-                    <div class="plan-name">PREMIUM</div>
+                    <div class="badge">Más popular</div>
+                    <div class="plan-name">Premium</div>
                     <div class="price">${data.premium.price}</div>
                     <div class="price-period">${data.premium.period}</div>
-                    ${data.premium.savings ? `<div class="savings">💰 ${data.premium.savings}</div>` : ''}
-                    ${data.premium.total ? `<div style="color: #666; margin-bottom: 1rem; font-size: 0.9rem;">${data.premium.total}</div>` : ''}
+                    ${savingsBadge(data.premium)}${totalLine(data.premium)}
                     <ul class="features-list">
-                        <li>✅ Todo lo del Básico</li>
-                        <li>Seguimiento cada 15 días</li>
-                        <li>Ajustes más frecuentes</li>
-                        <li>💬 Chat directo en la app</li>
-                        <li>Revisión técnica vídeos</li>
-                        <li>❌ Sin WhatsApp directo</li>
+                        <li>${chk}Todo lo del Básico</li>
+                        <li>${chk}Seguimiento quincenal</li>
+                        <li>${chk}Ajustes más frecuentes</li>
+                        <li>${chk}Chat directo en la app</li>
+                        <li>${chk}Revisión técnica en vídeo</li>
+                        <li>${xmk}Sin WhatsApp directo</li>
                     </ul>
-                    <button class="select-plan-btn" onclick="selectPlan('premium', '${period}')">Seleccionar Plan</button>
+                    <button class="select-plan-btn" onclick="selectPlan('premium','${period}')">Empezar con Premium</button>
                 </div>
 
-                <div class="pricing-card featured">
-                    <div class="badge">MÁXIMO NIVEL</div>
-                    <div class="plan-name">ÉLITE</div>
+                <div class="pricing-card elite-card">
+                    <div class="badge">Máximo nivel</div>
+                    <div class="plan-name">Élite</div>
                     <div class="price">${data.elite.price}</div>
                     <div class="price-period">${data.elite.period}</div>
-                    ${data.elite.savings ? `<div class="savings">💰 ${data.elite.savings}</div>` : ''}
-                    ${data.elite.total ? `<div style="color: #666; margin-bottom: 1rem; font-size: 0.9rem;">${data.elite.total}</div>` : ''}
+                    ${savingsBadge(data.elite)}${totalLine(data.elite)}
                     <ul class="features-list">
-                        <li>✅ Todo lo del Premium</li>
-                        <li>Seguimiento semanal</li>
-                        <li>Feedback continuo</li>
-                        <li>Respuesta prioritaria (&lt;24h)</li>
-                        <li>💬 Chat en la app</li>
-                        <li>📱 WhatsApp directo</li>
-                        <li>Acompañamiento total</li>
+                        <li>${chk}Todo lo del Premium</li>
+                        <li>${chk}Seguimiento semanal</li>
+                        <li>${chk}Feedback continuo</li>
+                        <li>${chk}Respuesta prioritaria (&lt;24h)</li>
+                        <li>${chk}Chat en la app</li>
+                        <li>${chk}WhatsApp directo</li>
                     </ul>
-                    <button class="select-plan-btn" onclick="selectPlan('elite', '${period}')">Seleccionar Plan</button>
+                    <button class="select-plan-btn" onclick="selectPlan('elite','${period}')">Empezar con Élite</button>
                 </div>
             `;
         }
@@ -36910,9 +37054,9 @@ gg==" alt="Effort Online">
             window.location.href = './login.html';
         }
 
-        // Inicializar las tarjetas al cargar la página
         document.addEventListener('DOMContentLoaded', function() {
             updatePricingCards('monthly');
+            lucide.createIcons();
         });
 
         function scrollToSection(sectionId) {
