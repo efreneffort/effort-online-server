@@ -226,23 +226,24 @@
             overflow: hidden;
             border: 1.5px solid #e0e4e8;
             margin-bottom: 1rem;
-            font-size: 0.82rem;
+            font-size: 0.78rem;
+            table-layout: fixed;
         }
 
         .pricing-table th {
             background: var(--navy);
             color: white;
-            padding: 0.6rem 0.4rem;
+            padding: 0.55rem 0.3rem;
             text-align: center;
-            font-size: 0.78rem;
+            font-size: 0.72rem;
             font-weight: 700;
-            letter-spacing: 0.03em;
+            letter-spacing: 0.02em;
         }
 
         .pricing-table th:first-child {
             text-align: left;
-            padding-left: 0.8rem;
-            width: 28%;
+            padding-left: 0.6rem;
+            width: 22%;
         }
 
         /* Columna ÉLITE destacada */
@@ -278,7 +279,7 @@
         }
 
         .pricing-table td {
-            padding: 0.65rem 0.4rem;
+            padding: 0.55rem 0.3rem;
             text-align: center;
             border-top: 1px solid #eee;
             cursor: pointer;
@@ -289,7 +290,7 @@
 
         .pricing-table td:first-child {
             text-align: left;
-            padding-left: 0.8rem;
+            padding-left: 0.6rem;
             cursor: default;
             font-weight: 600;
             color: var(--navy);
@@ -17306,6 +17307,11 @@ gg==" alt="Effort Online">
                             <label for="registerPassword">Contraseña</label>
                             <input type="password" id="registerPassword" placeholder="Mínimo 8 caracteres" required minlength="8">
                         </div>
+                        <div class="form-group">
+                            <label for="registerPasswordConfirm">Confirmar contraseña</label>
+                            <input type="password" id="registerPasswordConfirm" placeholder="Repite tu contraseña" required>
+                        </div>
+                        <div id="step1Error" style="display:none;color:#e53e3e;font-size:0.82rem;margin:-0.5rem 0 0.8rem;padding:0.6rem 0.8rem;background:#fff5f5;border-radius:8px;border-left:3px solid #e53e3e;"></div>
                         <button type="submit" class="btn">Siguiente →</button>
                     </form>
                 </div>
@@ -17315,8 +17321,7 @@ gg==" alt="Effort Online">
                     <form onsubmit="handleRegister(event)">
                         <div class="form-group">
                             <label>Elige tu plan y periodicidad</label>
-                            <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:12px;">
-                            <table class="pricing-table" style="min-width:420px;margin-bottom:0;">
+                            <table class="pricing-table" style="margin-bottom:0;">
                                 <thead>
                                     <tr>
                                         <th></th>
@@ -17327,32 +17332,31 @@ gg==" alt="Effort Online">
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td>Mensual</td>
+                                        <td>Mes.</td>
                                         <td id="cell-basico-monthly"   onclick="selectCombo('basico','monthly')">149€</td>
                                         <td id="cell-premium-monthly"  onclick="selectCombo('premium','monthly')" class="selected-cell">199€</td>
                                         <td id="cell-elite-monthly"    onclick="selectCombo('elite','monthly')" class="elite-col">249€</td>
                                     </tr>
                                     <tr>
-                                        <td>Trimestral<span class="pt-save">−10%</span></td>
-                                        <td id="cell-basico-quarterly"  onclick="selectCombo('basico','quarterly')">133€/mes</td>
-                                        <td id="cell-premium-quarterly" onclick="selectCombo('premium','quarterly')">183€/mes</td>
-                                        <td id="cell-elite-quarterly"   onclick="selectCombo('elite','quarterly')" class="elite-col">233€/mes</td>
+                                        <td>Trim.</td>
+                                        <td id="cell-basico-quarterly"  onclick="selectCombo('basico','quarterly')">133€</td>
+                                        <td id="cell-premium-quarterly" onclick="selectCombo('premium','quarterly')">183€</td>
+                                        <td id="cell-elite-quarterly"   onclick="selectCombo('elite','quarterly')" class="elite-col">233€</td>
                                     </tr>
                                     <tr>
-                                        <td>Semestral<span class="pt-save">−14%</span></td>
-                                        <td id="cell-basico-biannual"  onclick="selectCombo('basico','biannual')">116€/mes</td>
-                                        <td id="cell-premium-biannual" onclick="selectCombo('premium','biannual')">166€/mes</td>
-                                        <td id="cell-elite-biannual"   onclick="selectCombo('elite','biannual')" class="elite-col">216€/mes</td>
+                                        <td>Sem.</td>
+                                        <td id="cell-basico-biannual"  onclick="selectCombo('basico','biannual')">116€</td>
+                                        <td id="cell-premium-biannual" onclick="selectCombo('premium','biannual')">166€</td>
+                                        <td id="cell-elite-biannual"   onclick="selectCombo('elite','biannual')" class="elite-col">216€</td>
                                     </tr>
                                     <tr>
-                                        <td>Anual<span class="pt-save">−20%</span></td>
-                                        <td id="cell-basico-annual"  onclick="selectCombo('basico','annual')">99€/mes</td>
-                                        <td id="cell-premium-annual" onclick="selectCombo('premium','annual')">129€/mes</td>
-                                        <td id="cell-elite-annual"   onclick="selectCombo('elite','annual')" class="elite-col">159€/mes</td>
+                                        <td>Anual</td>
+                                        <td id="cell-basico-annual"  onclick="selectCombo('basico','annual')">99€</td>
+                                        <td id="cell-premium-annual" onclick="selectCombo('premium','annual')">129€</td>
+                                        <td id="cell-elite-annual"   onclick="selectCombo('elite','annual')" class="elite-col">159€</td>
                                     </tr>
                                 </tbody>
                             </table>
-                            </div>
                         </div>
 
                         <div class="price-summary">
@@ -17360,7 +17364,8 @@ gg==" alt="Effort Online">
                                 <span>Total a pagar:</span>
                                 <span id="totalPrice">199€</span>
                             </div>
-                            <div style="font-size:0.78rem;color:#aaa;margin-top:0.4rem;" id="priceDetails">Pago mensual · Cancela cuando quieras</div>
+                            <div style="font-size:0.78rem;color:#888;margin-top:0.3rem;" id="priceDetails">Pago mensual · Cancela cuando quieras</div>
+                            <div id="savingsBadge" style="display:none;margin-top:0.5rem;background:var(--green);color:var(--navy);font-weight:800;font-size:0.8rem;padding:0.3rem 0.8rem;border-radius:50px;display:inline-block;"></div>
                         </div>
 
                         <!-- campos ocultos para mantener compatibilidad con el JS existente -->
@@ -17460,6 +17465,36 @@ gg==" alt="Effort Online">
 
         function goToStep2(e) {
             e.preventDefault();
+            const errEl = document.getElementById('step1Error');
+            errEl.style.display = 'none';
+
+            const name  = document.getElementById('registerName').value.trim();
+            const email = document.getElementById('registerEmail').value.trim();
+            const phone = document.getElementById('registerPhone').value.trim();
+            const pass  = document.getElementById('registerPassword').value;
+            const pass2 = document.getElementById('registerPasswordConfirm').value;
+
+            // Nombre: al menos dos palabras, solo letras y espacios
+            if (!/^[a-zA-ZáéíóúÁÉÍÓÚàèìòùñÑüÜ]+(\s+[a-zA-ZáéíóúÁÉÍÓÚàèìòùñÑüÜ]+)+$/.test(name)) {
+                errEl.textContent = 'Introduce tu nombre y apellido (solo letras, sin números).';
+                errEl.style.display = 'block'; return;
+            }
+            // Email: dominio válido con TLD
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
+                errEl.textContent = 'Introduce un email válido (ej: tu@gmail.com).';
+                errEl.style.display = 'block'; return;
+            }
+            // Teléfono: mínimo 9 dígitos
+            if (phone.replace(/\D/g,'').length < 9) {
+                errEl.textContent = 'El teléfono debe tener al menos 9 dígitos.';
+                errEl.style.display = 'block'; return;
+            }
+            // Contraseñas coinciden
+            if (pass !== pass2) {
+                errEl.textContent = 'Las contraseñas no coinciden.';
+                errEl.style.display = 'block'; return;
+            }
+
             document.getElementById('step1').style.display = 'none';
             document.getElementById('step2').style.display = 'block';
             document.getElementById('dot1').className = 'step-dot done';
@@ -17485,15 +17520,25 @@ gg==" alt="Effort Online">
         function selectCombo(plan, period) {
             selectedPlan   = plan;
             selectedPeriod = period;
-            // Quitar selección anterior
             document.querySelectorAll('.pricing-table td').forEach(td => td.classList.remove('selected-cell'));
-            // Marcar celda seleccionada
             const cell = document.getElementById('cell-' + plan + '-' + period);
             if (cell) cell.classList.add('selected-cell');
-            // Actualizar resumen
             const data = pricing[period][plan];
             document.getElementById('totalPrice').textContent = data.total + '€';
-            document.getElementById('priceDetails').textContent = data.details;
+
+            // Separar detalles del ahorro
+            const parts = data.details.split('•');
+            const mainDetail = parts[0].trim();
+            const savingsPart = parts.find(p => p.includes('Ahorra'));
+            document.getElementById('priceDetails').textContent = mainDetail;
+
+            const badge = document.getElementById('savingsBadge');
+            if (savingsPart && period !== 'monthly') {
+                badge.textContent = '🎉 ' + savingsPart.trim();
+                badge.style.display = 'inline-block';
+            } else {
+                badge.style.display = 'none';
+            }
         }
 
         // Mantener compatibilidad con código existente
