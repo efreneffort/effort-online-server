@@ -713,14 +713,210 @@
         }
 
         @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(-10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ── Body background ── */
+        body { background: #f0f2f5; }
+
+        /* ── Greeting hero ── */
+        .greeting-hero {
+            background: linear-gradient(135deg, var(--navy) 0%, #003875 100%);
+            border-radius: 16px;
+            padding: 1.8rem 2rem;
+            margin-bottom: 1.5rem;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+        .greeting-left h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.3rem;
+        }
+        .greeting-left p {
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.7);
+            margin: 0;
+        }
+        .greeting-right {
+            text-align: right;
+            flex-shrink: 0;
+        }
+        .greeting-plan {
+            background: var(--green);
+            color: var(--navy);
+            font-weight: 800;
+            font-size: 0.78rem;
+            padding: 0.3rem 0.9rem;
+            border-radius: 50px;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        /* ── Stat cards with icon ── */
+        .stat-card {
+            position: relative;
+            overflow: hidden;
+        }
+        .stat-icon {
+            margin-bottom: 0.6rem;
+            opacity: 0.6;
+        }
+        .stat-icon svg { width: 22px; height: 22px; stroke: var(--green); }
+
+        /* ── Weekly rings ── */
+        .week-rings {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #f0f0f0;
+        }
+        .week-ring {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        .week-ring-circle {
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            border: 2.5px solid #e0e4e8;
+            background: white;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.65rem; font-weight: 700; color: #bbb;
+            transition: all 0.2s;
+        }
+        .week-ring-circle.done {
+            background: var(--green);
+            border-color: var(--green);
+            color: var(--navy);
+        }
+        .week-ring-circle.today {
+            border-color: var(--navy);
+            color: var(--navy);
+            font-weight: 800;
+        }
+        .week-ring-circle.done.today {
+            box-shadow: 0 0 0 3px rgba(0,217,163,0.3);
+        }
+        .week-ring-label {
+            font-size: 0.6rem;
+            color: #aaa;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        /* ── Circular timer ── */
+        .timer-circle-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 1.5rem 0;
+        }
+        .timer-circle-svg {
+            transform: rotate(-90deg);
+        }
+        .timer-circle-track { fill: none; stroke: #e8eef3; stroke-width: 8; }
+        .timer-circle-fill  {
+            fill: none; stroke: var(--green); stroke-width: 8;
+            stroke-linecap: round;
+            stroke-dasharray: 339.29; /* 2π×54 */
+            stroke-dashoffset: 339.29;
+            transition: stroke-dashoffset 1s linear;
+        }
+        .timer-circle-text {
+            position: absolute;
+            font-size: 2.6rem;
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+            color: var(--navy);
+        }
+        .timer-circle-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* ── Progreso stat cards ── */
+        .prog-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .prog-stat-card {
+            background: linear-gradient(135deg, var(--navy) 0%, #003875 100%);
+            border-radius: 12px;
+            padding: 1.2rem 1rem;
+            text-align: center;
+            color: white;
+        }
+        .prog-stat-icon { margin-bottom: 0.4rem; opacity: 0.7; }
+        .prog-stat-icon svg { width: 20px; height: 20px; stroke: var(--green); }
+        .prog-stat-val {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--green);
+            line-height: 1;
+        }
+        .prog-stat-lbl { font-size: 0.72rem; color: rgba(255,255,255,0.65); margin-top: 0.3rem; }
+
+        /* ── Nav item active: green left border ── */
+        .nav-item.active {
+            background: var(--navy);
+            color: white;
+            border-left: 3px solid var(--green);
+        }
+
+        /* ── Bottom nav (mobile) ── */
+        .bottom-nav {
+            display: none;
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            background: white;
+            border-top: 1px solid #e8eef3;
+            padding: 0.5rem 0 calc(0.5rem + env(safe-area-inset-bottom));
+            z-index: 100;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+        }
+        .bottom-nav-items {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+        .bottom-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.2rem;
+            padding: 0.4rem 0.6rem;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: all 0.2s;
+            color: #aaa;
+            font-size: 0.6rem;
+            font-weight: 600;
+            min-width: 52px;
+            text-align: center;
+        }
+        .bottom-nav-item svg { width: 22px; height: 22px; stroke: currentColor; }
+        .bottom-nav-item.active { color: var(--navy); }
+        .bottom-nav-item.active svg { stroke: var(--green); }
+
+        @media (max-width: 768px) {
+            body { padding-bottom: 70px; }
+            .bottom-nav { display: block; }
+            .sidebar { display: none !important; }
+            .container { grid-template-columns: 1fr; }
+            .prog-stats { grid-template-columns: 1fr 1fr; }
+            .prog-stats .prog-stat-card:last-child { grid-column: span 2; }
         }
     </style>
 </head>
@@ -17616,29 +17812,45 @@ gg==" alt="Effort Online">
         <div class="main-content">
             <!-- Dashboard Section -->
             <div id="dashboard" class="section active">
-                <div class="card">
-                    <h2 class="card-title" id="welcomeTitle">¡Bienvenido! 👋</h2>
-                    <p style="color: #666; margin-bottom: 2rem;">Plan activo: <strong style="color: var(--green);" id="activePlan">—</strong></p>
 
+                <!-- Greeting hero -->
+                <div class="greeting-hero">
+                    <div class="greeting-left">
+                        <h2 id="greetingTitle">¡Hola! 👋</h2>
+                        <p id="greetingMsg">Cargando...</p>
+                    </div>
+                    <div class="greeting-right">
+                        <span class="greeting-plan" id="activePlan">—</span>
+                    </div>
+                </div>
+
+                <div class="card">
                     <!-- Stats Overview -->
                     <div class="stats-grid">
                         <div class="stat-card">
+                            <div class="stat-icon"><i data-lucide="calendar-check"></i></div>
                             <div class="stat-value" id="statDaysMonth">—</div>
                             <div class="stat-label">Días este mes</div>
                         </div>
                         <div class="stat-card">
+                            <div class="stat-icon"><i data-lucide="flame"></i></div>
                             <div class="stat-value" id="statStreak">—</div>
                             <div class="stat-label">Racha actual</div>
                         </div>
                         <div class="stat-card">
+                            <div class="stat-icon"><i data-lucide="clock"></i></div>
                             <div class="stat-value" id="statTotalHours">—</div>
                             <div class="stat-label">Total entrenadas</div>
                         </div>
                         <div class="stat-card">
+                            <div class="stat-icon"><i data-lucide="award"></i></div>
                             <div class="stat-value" id="statAchievements">—</div>
-                            <div class="stat-label">Logros desbloqueados</div>
+                            <div class="stat-label">Logros</div>
                         </div>
                     </div>
+
+                    <!-- Weekly rings -->
+                    <div class="week-rings" id="weekRings"></div>
                 </div>
 
                 <!-- Streak Display -->
@@ -17701,14 +17913,17 @@ gg==" alt="Effort Online">
                         </div>
 
                         <div class="timer-container">
-                            <h3 style="color: var(--navy); margin-bottom: 1rem;">Entrenando...</h3>
-                            <div class="timer-display" id="timerDisplayRunning">00:00</div>
-                            <div class="progress-bar">
-                                <div class="progress-fill" id="progressBar" style="width: 0%">
-                                    <span id="progressText">0%</span>
+                            <h3 style="color: var(--navy); margin-bottom: 1rem; text-align:center;">Entrenando...</h3>
+                            <div class="timer-circle-wrap">
+                                <div class="timer-circle-container">
+                                    <svg class="timer-circle-svg" width="130" height="130" viewBox="0 0 130 130">
+                                        <circle class="timer-circle-track" cx="65" cy="65" r="54"/>
+                                        <circle class="timer-circle-fill" id="timerCircleFill" cx="65" cy="65" r="54"/>
+                                    </svg>
+                                    <span class="timer-circle-text" id="timerDisplayRunning">00:00</span>
                                 </div>
                             </div>
-                            <div class="timer-buttons" style="margin-top: 2rem;">
+                            <div class="timer-buttons" style="margin-top: 1.5rem;">
                                 <button class="btn btn-secondary" onclick="pauseWorkout()"><i data-lucide="pause" style="width:16px;height:16px;vertical-align:middle;margin-right:6px;"></i>Pausar</button>
                                 <button class="btn btn-danger" onclick="cancelWorkout()"><i data-lucide="x" style="width:16px;height:16px;vertical-align:middle;margin-right:6px;"></i>Cancelar</button>
                                 <button class="btn btn-primary" id="finishBtn" onclick="finishWorkout()" disabled><i data-lucide="check" style="width:16px;height:16px;vertical-align:middle;margin-right:6px;"></i>Finalizar</button>
@@ -17731,22 +17946,26 @@ gg==" alt="Effort Online">
             <div id="progreso" class="section">
                 <div class="card">
                     <h2 class="card-title">Mi Progreso</h2>
-                    
-                    <div class="stats-section" style="margin-bottom: 2rem;">
-                        <h4>Estadísticas del mes</h4>
-                        <p><strong>Días entrenados:</strong> <span id="progDays">—</span></p>
-                        <p><strong>Tiempo total:</strong> <span id="progHours">—</span></p>
-                        <p><strong>Mejor racha:</strong> <span id="progStreak">—</span></p>
+
+                    <div class="prog-stats">
+                        <div class="prog-stat-card">
+                            <div class="prog-stat-icon"><i data-lucide="calendar-check"></i></div>
+                            <div class="prog-stat-val" id="progDays">—</div>
+                            <div class="prog-stat-lbl">Días entrenados</div>
+                        </div>
+                        <div class="prog-stat-card">
+                            <div class="prog-stat-icon"><i data-lucide="clock"></i></div>
+                            <div class="prog-stat-val" id="progHours">—</div>
+                            <div class="prog-stat-lbl">Tiempo total</div>
+                        </div>
+                        <div class="prog-stat-card">
+                            <div class="prog-stat-icon"><i data-lucide="flame"></i></div>
+                            <div class="prog-stat-val" id="progStreak">—</div>
+                            <div class="prog-stat-lbl">Mejor racha</div>
+                        </div>
                     </div>
 
-                    <div class="calendar-toggle" onclick="toggleCalendar()">
-                        <h3 style="color: var(--navy); display: flex; align-items: center; justify-content: space-between; cursor: pointer; padding: 1rem; background: #f8f9fa; border-radius: 10px;">
-                            <span><i data-lucide="calendar" style="width:16px;height:16px;vertical-align:middle;margin-right:6px;"></i>Calendario de Entrenamiento</span>
-                            <span id="calendarArrow" style="font-size: 1.5rem;">▼</span>
-                        </h3>
-                    </div>
-
-                    <div id="calendarContent" style="display: none; margin-top: 1.5rem;">
+                    <div id="calendarContent" style="margin-top: 0.5rem;">
                         <div class="calendar-wrapper">
                             <div id="calNotifBanner" style="display:none; background:#fff3cd; border:1px solid #ffc107; border-radius:8px; padding:0.7rem 1rem; margin-bottom:1rem; display:flex; align-items:center; justify-content:space-between; gap:1rem;">
                                 <span style="font-size:0.9rem;">🔔 Activa las notificaciones para recibir las alarmas de entrenamiento</span>
@@ -18172,6 +18391,7 @@ gg==" alt="Effort Online">
                 const progress = Math.min((seconds / (requiredMinutes * 60)) * 100, 100);
                 document.getElementById('progressBar').style.width = progress + '%';
                 document.getElementById('progressText').textContent = Math.floor(progress) + '%';
+                updateTimerCircle(seconds, requiredMinutes * 60);
                 
                 if (seconds >= requiredMinutes * 60) {
                     document.getElementById('finishBtn').disabled = false;
@@ -18246,6 +18466,8 @@ gg==" alt="Effort Online">
             document.getElementById('progressBar').style.width = '0%';
             document.getElementById('progressText').textContent = '0%';
             document.getElementById('finishBtn').disabled = true;
+            const circ = document.getElementById('timerCircleFill');
+            if (circ) circ.style.strokeDashoffset = '339.29';
             seconds = 0;
             isPaused = false;
         }
@@ -18658,9 +18880,11 @@ gg==" alt="Effort Online">
                 // Header
                 document.getElementById('userNameText').textContent = user.name;
 
-                // Tarjeta de bienvenida
+                // Saludo dinámico con nombre real
                 const firstName = user.name.split(' ')[0];
-                document.getElementById('welcomeTitle').textContent = `¡Bienvenido, ${firstName}! 👋`;
+                const hour = new Date().getHours();
+                const saludo = hour < 13 ? 'Buenos días' : hour < 20 ? 'Buenas tardes' : 'Buenas noches';
+                document.getElementById('greetingTitle').textContent = `${saludo}, ${firstName} 💪`;
                 const planDisplay = { basico: 'BÁSICO', premium: 'PREMIUM', elite: 'ÉLITE' };
                 document.getElementById('activePlan').textContent = planDisplay[user.plan] || user.plan.toUpperCase();
 
@@ -18685,9 +18909,9 @@ gg==" alt="Effort Online">
                         : 'Entrena hoy para empezar tu racha 💪';
 
                 // Sección progreso
-                document.getElementById('progDays').textContent = `${sessionsMonth} días`;
-                document.getElementById('progHours').textContent = `${hours} horas`;
-                document.getElementById('progStreak').textContent = `${streak} días consecutivos`;
+                document.getElementById('progDays').textContent = sessionsMonth;
+                document.getElementById('progHours').textContent = hours + 'h';
+                document.getElementById('progStreak').textContent = streak;
 
                 // Chat según plan real
                 initializeChat();
@@ -18724,8 +18948,93 @@ gg==" alt="Effort Online">
 
             // Cargar datos reales del usuario (llama a initializeChat internamente)
             loadUserData();
+            renderGreeting();
+            renderWeekRings();
             lucide.createIcons();
         });
+
+        /* ── Saludo dinámico ── */
+        function renderGreeting() {
+            const hour = new Date().getHours();
+            let saludo = hour < 13 ? 'Buenos días' : hour < 20 ? 'Buenas tardes' : 'Buenas noches';
+            const frases = [
+                'Cada sesión te acerca a tu mejor versión.',
+                'La constancia es tu superpoder.',
+                'Hoy es un buen día para superarte.',
+                'El esfuerzo de hoy es el resultado de mañana.',
+                'No pares, sigue adelante.'
+            ];
+            const frase = frases[new Date().getDay() % frases.length];
+            const nameEl = document.getElementById('userNameText');
+            const name = nameEl ? nameEl.textContent.trim() : '';
+            document.getElementById('greetingTitle').textContent = saludo + (name ? ', ' + name : '') + ' 💪';
+            document.getElementById('greetingMsg').textContent = frase;
+        }
+
+        /* ── Anillos semanales ── */
+        function renderWeekRings() {
+            const container = document.getElementById('weekRings');
+            if (!container) return;
+            const days = ['L','M','X','J','V','S','D'];
+            const today = new Date();
+            const todayDow = (today.getDay() + 6) % 7; // 0=Lunes
+            container.innerHTML = '';
+            days.forEach((d, i) => {
+                const dateOffset = i - todayDow;
+                const date = new Date(today);
+                date.setDate(today.getDate() + dateOffset);
+                const key = `session_${date.getFullYear()}_${date.getMonth()}_${date.getDate()}`;
+                const done = !!localStorage.getItem(key);
+                const isToday = i === todayDow;
+                const isFuture = dateOffset > 0;
+                let cls = 'week-ring-circle';
+                if (done) cls += ' done';
+                if (isToday) cls += ' today';
+                container.innerHTML += `
+                    <div class="week-ring">
+                        <div class="${cls}">${done ? '✓' : (isFuture ? '' : d)}</div>
+                        <span class="week-ring-label">${d}</span>
+                    </div>`;
+            });
+        }
+
+        /* ── Círculo del timer ── */
+        function updateTimerCircle(elapsed, total) {
+            const circle = document.getElementById('timerCircleFill');
+            if (!circle) return;
+            const circumference = 2 * Math.PI * 54; // 339.29
+            const progress = Math.min(elapsed / total, 1);
+            circle.style.strokeDashoffset = circumference * (1 - progress);
+        }
+    </script>
+
+    <!-- Bottom nav (visible en móvil) -->
+    <nav class="bottom-nav">
+        <div class="bottom-nav-items">
+            <div class="bottom-nav-item active" id="bnav-dashboard" onclick="showSection('dashboard'); setBottomNav('dashboard')">
+                <i data-lucide="home"></i>Inicio
+            </div>
+            <div class="bottom-nav-item" id="bnav-entrenar" onclick="showSection('entrenar'); setBottomNav('entrenar')">
+                <i data-lucide="play-circle"></i>Entrenar
+            </div>
+            <div class="bottom-nav-item" id="bnav-progreso" onclick="showSection('progreso'); setBottomNav('progreso')">
+                <i data-lucide="bar-chart-2"></i>Progreso
+            </div>
+            <div class="bottom-nav-item" id="bnav-rutina" onclick="showSection('rutina'); setBottomNav('rutina')">
+                <i data-lucide="clipboard-list"></i>Rutina
+            </div>
+            <div class="bottom-nav-item" id="bnav-chat" onclick="showSection('chat'); setBottomNav('chat')">
+                <i data-lucide="message-circle"></i>Chat
+            </div>
+        </div>
+    </nav>
+    <script>
+        function setBottomNav(id) {
+            document.querySelectorAll('.bottom-nav-item').forEach(el => el.classList.remove('active'));
+            const el = document.getElementById('bnav-' + id);
+            if (el) el.classList.add('active');
+            lucide.createIcons();
+        }
     </script>
 </body>
 </html>
