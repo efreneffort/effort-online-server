@@ -797,7 +797,7 @@ async function checkAndUnlockAchievements(userId) {
     const sessionsLast7 = sessions.filter(s => new Date(s.completedAt) >= since7).length;
     if (sessionsLast7 >= 3) await unlock('weekly_active');
 
-    // ── Constante: al menos 1 sesión por semana, 4 semanas seguidas ──
+    // ── Constante: mínimo 2 sesiones por semana durante 4 semanas seguidas ──
     const committed = (() => {
         for (let w = 0; w < 4; w++) {
             // Lunes de la semana w (0 = semana actual)
@@ -805,8 +805,8 @@ async function checkAndUnlockAchievements(userId) {
             mon.setDate(now.getDate() - ((now.getDay() + 6) % 7) - w * 7);
             mon.setHours(0, 0, 0, 0);
             const sun = new Date(mon); sun.setDate(mon.getDate() + 7);
-            if (!sessions.some(s => { const d = new Date(s.completedAt); return d >= mon && d < sun; }))
-                return false;
+            const count = sessions.filter(s => { const d = new Date(s.completedAt); return d >= mon && d < sun; }).length;
+            if (count < 2) return false;
         }
         return true;
     })();
