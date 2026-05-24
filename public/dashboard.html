@@ -18377,7 +18377,7 @@ gg==" alt="Effort Online">
                     let successHtml = `<div class="alert alert-success"><i data-lucide="check-circle" style="width:16px;height:16px;vertical-align:middle;margin-right:4px;"></i> ¡Sesión registrada! Has entrenado <strong>${mins} minutos</strong>. ¡Buen trabajo!</div>`;
 
                     if (newBadges.length > 0) {
-                        const badgeLabels = { first_step:'First Step', weekly_streak:'Racha Semanal', perfect_week:'Semana Perfecta', consistency:'Constancia', timer_1:'Timer ×1', timer_5:'Timer ×5', timer_10:'Timer ×10', timer_25:'Timer ×25', timer_50:'Timer ×50' };
+                        const badgeLabels = { first_step:'Primer Paso', weekly_active:'Semana Activa', committed:'Constante', monthly_active:'Mes de Hierro', warrior:'Guerrero', ironman:'Ironman', centurion:'Centurión', timer_1:'Ignición', timer_5:'En Marcha', timer_10:'Disciplinado', timer_25:'Atleta', timer_50:'Máquina' };
                         const names = newBadges.map(b => badgeLabels[b] || b).join(', ');
                         successHtml += `<div class="alert" style="background:linear-gradient(135deg,#e8f8f5,#d1f2eb);border-left:4px solid #00D9A3;margin-top:0.75rem;"><i data-lucide="award" style="width:16px;height:16px;vertical-align:middle;margin-right:4px;"></i> <strong>Logro desbloqueado:</strong> ${names}</div>`;
                     }
@@ -18460,19 +18460,20 @@ gg==" alt="Effort Online">
 
         // ─── Logros ───────────────────────────────────────────────────
         const ALL_BADGES = [
-            { type: 'first_step',    icon: 'star',         name: 'First Step',     desc: 'Primera sesión completada' },
-            { type: 'weekly_streak', icon: 'flame',        name: 'Racha Semanal',  desc: '5 días seguidos' },
-            { type: 'perfect_week',  icon: 'gem',          name: 'Semana Perfecta',desc: '7 días consecutivos' },
-            { type: 'consistency',   icon: 'zap',          name: 'Constancia',     desc: '20 días en un mes' },
-            { type: 'veteran',       icon: 'trophy',       name: 'Veterano',       desc: '3 meses consecutivos' },
-            { type: 'ironman',       icon: 'dumbbell',     name: 'Ironman',        desc: '50 horas totales' },
-            { type: 'champion',      icon: 'crown',        name: 'Campeón',        desc: '6 meses sin fallar' },
-            // Timer
-            { type: 'timer_1',       icon: 'timer',        name: 'Timer ×1',       desc: '1er entrenamiento con timer',  group: 'timer' },
-            { type: 'timer_5',       icon: 'timer',        name: 'Timer ×5',       desc: '5 entrenamientos con timer',   group: 'timer' },
-            { type: 'timer_10',      icon: 'timer',        name: 'Timer ×10',      desc: '10 entrenamientos con timer',  group: 'timer' },
-            { type: 'timer_25',      icon: 'timer',        name: 'Timer ×25',      desc: '25 entrenamientos con timer',  group: 'timer' },
-            { type: 'timer_50',      icon: 'timer',        name: 'Timer ×50',      desc: '50 entrenamientos con timer',  group: 'timer' },
+            // ── Generales ────────────────────────────────────────────
+            { type: 'first_step',     icon: 'star',           name: 'Primer Paso',   desc: 'Primera sesión completada' },
+            { type: 'weekly_active',  icon: 'calendar-check', name: 'Semana Activa', desc: '3 sesiones en 7 días' },
+            { type: 'committed',      icon: 'shield-check',   name: 'Constante',     desc: '1 sesión/semana durante 4 semanas' },
+            { type: 'monthly_active', icon: 'flame',          name: 'Mes de Hierro', desc: '12 sesiones en un mes' },
+            { type: 'warrior',        icon: 'target',         name: 'Guerrero',      desc: 'Una sesión de 60 min o más' },
+            { type: 'ironman',        icon: 'dumbbell',       name: 'Ironman',       desc: '50 horas totales entrenadas' },
+            { type: 'centurion',      icon: 'crown',          name: 'Centurión',     desc: '100 sesiones completadas' },
+            // ── Timer ────────────────────────────────────────────────
+            { type: 'timer_1',        icon: 'zap',            name: 'Ignición',      desc: '1er entrenamiento con timer',  group: 'timer' },
+            { type: 'timer_5',        icon: 'play-circle',    name: 'En Marcha',     desc: '5 entrenamientos con timer',   group: 'timer' },
+            { type: 'timer_10',       icon: 'timer',          name: 'Disciplinado',  desc: '10 entrenamientos con timer',  group: 'timer' },
+            { type: 'timer_25',       icon: 'activity',       name: 'Atleta',        desc: '25 entrenamientos con timer',  group: 'timer' },
+            { type: 'timer_50',       icon: 'cpu',            name: 'Máquina',       desc: '50 entrenamientos con timer',  group: 'timer' },
         ];
 
         async function loadAchievements() {

@@ -786,29 +786,53 @@ async function checkAndUnlockAchievements(userId) {
         }
     }
 
-    // First Step
-    if (sessions.length >= 1) await unlock('first_step');
+    const total = sessions.length;
+    const now   = new Date();
 
-    // Racha Semanal / Semana Perfecta
-    const streak = await calculateStreak(userId);
-    if (streak >= 5) await unlock('weekly_streak');
-    if (streak >= 7) await unlock('perfect_week');
+    // ── Primer Paso ───────────────────────────────────────────
+    if (total >= 1) await unlock('first_step');
 
-    // Constancia (20 días en un mes)
-    const now = new Date();
+    // ── Semana Activa: 3 sesiones en los últimos 7 días ───────
+    const since7 = new Date(now - 7 * 24 * 3600 * 1000);
+    const sessionsLast7 = sessions.filter(s => new Date(s.completedAt) >= since7).length;
+    if (sessionsLast7 >= 3) await unlock('weekly_active');
+
+    // ── Constante: al menos 1 sesión por semana, 4 semanas seguidas ──
+    const committed = (() => {
+        for (let w = 0; w < 4; w++) {
+            // Lunes de la semana w (0 = semana actual)
+            const mon = new Date(now);
+            mon.setDate(now.getDate() - ((now.getDay() + 6) % 7) - w * 7);
+            mon.setHours(0, 0, 0, 0);
+            const sun = new Date(mon); sun.setDate(mon.getDate() + 7);
+            if (!sessions.some(s => { const d = new Date(s.completedAt); return d >= mon && d < sun; }))
+                return false;
+        }
+        return true;
+    })();
+    if (committed) await unlock('committed');
+
+    // ── Mes de Hierro: 12 sesiones en el mes actual ───────────
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const sessionsThisMonth = await WorkoutSession.countDocuments({
-        userId, completedAt: { $gte: startOfMonth }
-    });
-    if (sessionsThisMonth >= 20) await unlock('consistency');
+    const sessionsThisMonth = sessions.filter(s => new Date(s.completedAt) >= startOfMonth).length;
+    if (sessionsThisMonth >= 12) await unlock('monthly_active');
 
-    // ── Logros de Timer ──────────────────────────────────────
-    const totalSessions = sessions.length;
-    if (totalSessions >= 1)  await unlock('timer_1');
-    if (totalSessions >= 5)  await unlock('timer_5');
-    if (totalSessions >= 10) await unlock('timer_10');
-    if (totalSessions >= 25) await unlock('timer_25');
-    if (totalSessions >= 50) await unlock('timer_50');
+    // ── Guerrero: una sesión de 60 min o más ─────────────────
+    if (sessions.some(s => s.duration >= 60)) await unlock('warrior');
+
+    // ── Ironman: 50 horas totales (3000 min) ─────────────────
+    const totalMinutes = sessions.reduce((sum, s) => sum + (s.duration || 0), 0);
+    if (totalMinutes >= 3000) await unlock('ironman');
+
+    // ── Centurión: 100 sesiones totales ──────────────────────
+    if (total >= 100) await unlock('centurion');
+
+    // ── Logros de Timer ───────────────────────────────────────
+    if (total >= 1)  await unlock('timer_1');
+    if (total >= 5)  await unlock('timer_5');
+    if (total >= 10) await unlock('timer_10');
+    if (total >= 25) await unlock('timer_25');
+    if (total >= 50) await unlock('timer_50');
 
     return newBadges;
 }
@@ -819,15 +843,18 @@ async function checkAndUnlockAchievements(userId) {
 
 // ── Notificación a Efrén cuando un cliente termina el timer ──
 const BADGE_NAME = {
-    first_step:    'First Step',
-    weekly_streak: 'Racha Semanal',
-    perfect_week:  'Semana Perfecta',
-    consistency:   'Constancia',
-    timer_1:       'Timer x1',
-    timer_5:       'Timer x5',
-    timer_10:      'Timer x10',
-    timer_25:      'Timer x25',
-    timer_50:      'Timer x50',
+    first_step:     'Primer Paso',
+    weekly_active:  'Semana Activa',
+    committed:      'Constante',
+    monthly_active: 'Mes de Hierro',
+    warrior:        'Guerrero',
+    ironman:        'Ironman',
+    centurion:      'Centurión',
+    timer_1:        'Ignición',
+    timer_5:        'En Marcha',
+    timer_10:       'Disciplinado',
+    timer_25:       'Atleta',
+    timer_50:       'Máquina',
 };
 
 async function sendWorkoutNotificationToTrainer(user, duration, newBadges = []) {
