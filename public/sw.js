@@ -1,6 +1,6 @@
 // Effort Online — Service Worker
 // Versión: cambia este número al desplegar para forzar actualización
-const CACHE_VERSION = 'effort-v2';
+const CACHE_VERSION = 'effort-v3';
 
 const PAGES_TO_CACHE = [
     '/login.html',
@@ -9,9 +9,10 @@ const PAGES_TO_CACHE = [
     '/reset-password.html',
     '/success.html',
     '/cancel.html',
-    '/index.html',
     '/manifest.json',
-    '/icon.svg',
+    '/icon-180.png',
+    '/icon-192.png',
+    '/icon-512.png',
 ];
 
 // ── Instalación: precaché de páginas ────────────────────────────
