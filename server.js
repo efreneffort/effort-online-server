@@ -686,6 +686,17 @@ app.get('/api/admin/videocalls', authenticateToken, isAdmin, async (req, res) =>
     }
 });
 
+// Videollamadas del usuario autenticado
+app.get('/api/user/videocalls', authenticateToken, async (req, res) => {
+    try {
+        const calls = await VideoCall.find({ userId: req.user.userId })
+            .sort({ scheduledFor: 1 });
+        res.json(calls);
+    } catch (error) {
+        res.status(500).json({ error: 'Error al obtener videollamadas' });
+    }
+});
+
 // Estadísticas generales del negocio
 app.get('/api/admin/stats', authenticateToken, isAdmin, async (req, res) => {
     try {

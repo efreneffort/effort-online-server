@@ -17864,15 +17864,7 @@ gg==" alt="Effort Online">
                 <!-- Next Videocall -->
                 <div class="card">
                     <h3 class="card-title">Próxima Videollamada</h3>
-                    <div class="call-card">
-                        <div class="call-info">
-                            <h4>Seguimiento Quincenal</h4>
-                            <p class="call-date"><i data-lucide="calendar" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;"></i>Viernes, 7 de Febrero - 18:00h</p>
-                        </div>
-                        <button class="whatsapp-btn" onclick="openWhatsApp()">
-                            <i data-lucide="message-circle" style="width:16px;height:16px;vertical-align:middle;margin-right:6px;"></i>WhatsApp
-                        </button>
-                    </div>
+                    <div id="nextCallCard"><p style="color:#999;font-size:0.9rem;">Cargando...</p></div>
                 </div>
             </div>
 
@@ -18078,27 +18070,7 @@ gg==" alt="Effort Online">
             <div id="videollamadas" class="section">
                 <div class="card">
                     <h2 class="card-title">Mis Videollamadas</h2>
-
-                    <h3 style="color: var(--navy); margin-bottom: 1rem;">Próximas citas</h3>
-                    <div class="call-card">
-                        <div class="call-info">
-                            <h4>Seguimiento Quincenal</h4>
-                            <p class="call-date"><i data-lucide="calendar" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;"></i>Viernes, 7 de Febrero - 18:00h</p>
-                            <p style="color: #666; margin-top: 0.5rem;">Duración: 15 minutos</p>
-                        </div>
-                        <button class="whatsapp-btn" onclick="openWhatsApp()">
-                            <i data-lucide="message-circle" style="width:16px;height:16px;vertical-align:middle;margin-right:6px;"></i>WhatsApp
-                        </button>
-                    </div>
-
-                    <h3 style="color: var(--navy); margin: 2rem 0 1rem;">Historial</h3>
-                    <div class="call-card" style="opacity: 0.7;">
-                        <div class="call-info">
-                            <h4>Evaluación Inicial</h4>
-                            <p class="call-date"><i data-lucide="calendar" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;"></i>Lunes, 15 de Enero - 19:00h</p>
-                            <p style="color: var(--green); margin-top: 0.5rem;"><i data-lucide="check" style="width:14px;height:14px;vertical-align:middle;"></i> Completada</p>
-                        </div>
-                    </div>
+                    <div id="callsContent"><p style="color:#999">Cargando llamadas...</p></div>
                 </div>
             </div>
 
@@ -18364,6 +18336,8 @@ gg==" alt="Effort Online">
             document.getElementById(sectionId).classList.add('active');
 
             event.currentTarget.classList.add('active');
+
+            if (sectionId === 'videollamadas') loadUserCalls();
         }
 
         function startWorkout() {
@@ -18514,6 +18488,123 @@ gg==" alt="Effort Online">
         function openWhatsApp() {
             const name = encodeURIComponent(currentUser ? currentUser.name : '');
             window.open(`https://wa.me/34609539485?text=Hola%20Efrén,%20soy%20${name}`, '_blank');
+        }
+
+        // ─── Videollamadas del usuario ────────────────────────────────
+        let _callsCache = null;
+
+        async function fetchUserCalls() {
+            if (_callsCache) return _callsCache;
+            const res = await fetch('/api/user/videocalls', {
+                headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` }
+            });
+            if (!res.ok) throw new Error('Error al cargar llamadas');
+            _callsCache = await res.json();
+            return _callsCache;
+        }
+
+        const TYPE_LABEL = {
+            seguimiento: 'Seguimiento',
+            evaluacion:  'Evaluación Inicial',
+            revision:    'Revisión de Rutina'
+        };
+
+        function fmtCallDate(d) {
+            return new Date(d).toLocaleString('es-ES', {
+                weekday: 'long', day: 'numeric', month: 'long',
+                hour: '2-digit', minute: '2-digit'
+            });
+        }
+
+        // Tarjeta del dashboard principal (próxima llamada)
+        async function renderNextCallCard() {
+            const card = document.getElementById('nextCallCard');
+            if (!card) return;
+            try {
+                const calls = await fetchUserCalls();
+                const now = new Date();
+                const next = calls
+                    .filter(c => !c.completed && new Date(c.scheduledFor) >= now)
+                    .sort((a, b) => new Date(a.scheduledFor) - new Date(b.scheduledFor))[0];
+
+                if (!next) {
+                    card.innerHTML = `<p style="color:#999;font-size:0.9rem;">Sin llamadas programadas de momento.</p>`;
+                } else {
+                    card.innerHTML = `
+                    <div class="call-card">
+                        <div class="call-info">
+                            <h4>${TYPE_LABEL[next.type] || next.type || 'Videollamada'}</h4>
+                            <p class="call-date"><i data-lucide="calendar" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;"></i>${fmtCallDate(next.scheduledFor)}</p>
+                            ${next.duration ? `<p style="color:#666;margin-top:0.3rem;font-size:0.85rem;">Duración: ${next.duration} min</p>` : ''}
+                        </div>
+                        <button class="whatsapp-btn" onclick="openWhatsApp()">
+                            <i data-lucide="message-circle" style="width:16px;height:16px;vertical-align:middle;margin-right:6px;"></i>WhatsApp
+                        </button>
+                    </div>`;
+                    lucide.createIcons();
+                }
+            } catch (e) {
+                card.innerHTML = `<p style="color:#999;font-size:0.9rem;">Sin llamadas programadas de momento.</p>`;
+            }
+        }
+
+        // Sección completa de Llamadas
+        async function loadUserCalls() {
+            const container = document.getElementById('callsContent');
+            if (!container) return;
+            container.innerHTML = '<p style="color:#999">Cargando llamadas...</p>';
+            try {
+                const calls = await fetchUserCalls();
+                const now = new Date();
+                const upcoming = calls
+                    .filter(c => !c.completed && new Date(c.scheduledFor) >= now)
+                    .sort((a, b) => new Date(a.scheduledFor) - new Date(b.scheduledFor));
+                const past = calls
+                    .filter(c =>  c.completed || new Date(c.scheduledFor)  < now)
+                    .sort((a, b) => new Date(b.scheduledFor) - new Date(a.scheduledFor));
+
+                let html = '';
+
+                html += `<h3 style="color:var(--navy);margin-bottom:1rem;">Próximas citas</h3>`;
+                if (!upcoming.length) {
+                    html += `<p style="color:#999;margin-bottom:2rem;">No tienes llamadas programadas. Efrén te avisará cuando agende una.</p>`;
+                } else {
+                    upcoming.forEach(c => {
+                        html += `
+                        <div class="call-card">
+                            <div class="call-info">
+                                <h4>${TYPE_LABEL[c.type] || c.type || 'Videollamada'}</h4>
+                                <p class="call-date"><i data-lucide="calendar" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;"></i>${fmtCallDate(c.scheduledFor)}</p>
+                                ${c.duration ? `<p style="color:#666;margin-top:0.5rem;">Duración: ${c.duration} minutos</p>` : ''}
+                                ${c.notes    ? `<p style="color:#888;margin-top:0.3rem;font-size:0.85rem;">${c.notes}</p>` : ''}
+                            </div>
+                            <button class="whatsapp-btn" onclick="openWhatsApp()">
+                                <i data-lucide="message-circle" style="width:16px;height:16px;vertical-align:middle;margin-right:6px;"></i>WhatsApp
+                            </button>
+                        </div>`;
+                    });
+                }
+
+                if (past.length) {
+                    html += `<h3 style="color:var(--navy);margin:2rem 0 1rem;">Historial</h3>`;
+                    past.forEach(c => {
+                        html += `
+                        <div class="call-card" style="opacity:0.7;">
+                            <div class="call-info">
+                                <h4>${TYPE_LABEL[c.type] || c.type || 'Videollamada'}</h4>
+                                <p class="call-date"><i data-lucide="calendar" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;"></i>${fmtCallDate(c.scheduledFor)}</p>
+                                <p style="color:var(--green);margin-top:0.5rem;"><i data-lucide="check" style="width:14px;height:14px;vertical-align:middle;"></i> Completada</p>
+                            </div>
+                        </div>`;
+                    });
+                }
+
+                container.innerHTML = html;
+                lucide.createIcons();
+            } catch (e) {
+                document.getElementById('callsContent').innerHTML =
+                    '<p style="color:#999">No se pudieron cargar las llamadas.</p>';
+            }
         }
 
         function toggleCalendar() {
@@ -18872,6 +18963,7 @@ gg==" alt="Effort Online">
 
             loadRoutine(token);
             loadSessionHistory(token);
+            renderNextCallCard();
 
             try {
                 const [userRes, statsRes] = await Promise.all([
