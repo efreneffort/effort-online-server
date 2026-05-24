@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Fondo navy con esquinas redondeadas -->
+  <rect width="512" height="512" fill="#001F54" rx="90"/>
+  <!-- Letra "e" en blanco -->
+  <text
+    x="92" y="385"
+    font-family="'Segoe UI', -apple-system, Arial, sans-serif"
+    font-size="340"
+    font-weight="800"
+    fill="white"
+    letter-spacing="-8"
+  >e</text>
+  <!-- Punto verde (#00D9A3) -->
+  <circle cx="390" cy="368" r="44" fill="#00D9A3"/>
+</svg>
