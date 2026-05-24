@@ -17816,7 +17816,7 @@ gg==" alt="Effort Online">
                 <!-- Greeting hero -->
                 <div class="greeting-hero">
                     <div class="greeting-left">
-                        <h2 id="greetingTitle">¡Hola! 👋</h2>
+                        <h2 id="greetingTitle">¡Hola!</h2>
                         <p id="greetingMsg">Cargando...</p>
                     </div>
                     <div class="greeting-right">
@@ -17937,7 +17937,7 @@ gg==" alt="Effort Online">
                 <div class="card" style="margin-top: 1.5rem;">
                     <h2 class="card-title">Mis Últimas Sesiones</h2>
                     <div id="sessionHistoryContent">
-                        <div style="text-align:center; padding: 1.5rem; color: #999;">⏳ Cargando...</div>
+                        <div style="text-align:center; padding: 1.5rem; color: #999;"><i data-lucide="loader" style="width:16px;height:16px;vertical-align:middle;animation:spin 1s linear infinite;"></i> Cargando...</div>
                     </div>
                 </div>
             </div>
@@ -17968,7 +17968,7 @@ gg==" alt="Effort Online">
                     <div id="calendarContent" style="margin-top: 0.5rem;">
                         <div class="calendar-wrapper">
                             <div id="calNotifBanner" style="display:none; background:#fff3cd; border:1px solid #ffc107; border-radius:8px; padding:0.7rem 1rem; margin-bottom:1rem; display:flex; align-items:center; justify-content:space-between; gap:1rem;">
-                                <span style="font-size:0.9rem;">🔔 Activa las notificaciones para recibir las alarmas de entrenamiento</span>
+                                <span style="font-size:0.9rem;"><i data-lucide="bell" style="width:16px;height:16px;vertical-align:middle;"></i> Activa las notificaciones para recibir las alarmas de entrenamiento</span>
                                 <button onclick="requestCalNotif()" class="btn btn-primary" style="white-space:nowrap; padding:0.4rem 0.9rem; font-size:0.85rem;">Activar</button>
                             </div>
                             <div class="calendar-nav">
@@ -18005,7 +18005,7 @@ gg==" alt="Effort Online">
             <!-- Logros Section -->
             <div id="logros" class="section">
                 <div class="card">
-                    <h2 class="card-title">Mis Logros 🏆</h2>
+                    <h2 class="card-title"><i data-lucide="trophy" style="width:20px;height:20px;vertical-align:middle;margin-right:6px;"></i>Mis Logros</h2>
                     <p style="color: #666; margin-bottom: 2rem;">Has desbloqueado 4 de 8 logros disponibles</p>
 
                     <div class="badges-grid">
@@ -18067,7 +18067,7 @@ gg==" alt="Effort Online">
                     <p id="routineSubtitle" style="color: #666; margin-bottom: 2rem;">Cargando rutina...</p>
                     <div id="routineContent">
                         <div style="text-align:center; padding: 2rem; color: #999;">
-                            <div style="font-size: 2rem; margin-bottom: 0.5rem;">⏳</div>
+                            <div style="margin-bottom: 0.5rem;"><i data-lucide="loader" style="width:32px;height:32px;vertical-align:middle;animation:spin 1s linear infinite;"></i></div>
                             Cargando...
                         </div>
                     </div>
@@ -18096,7 +18096,7 @@ gg==" alt="Effort Online">
                         <div class="call-info">
                             <h4>Evaluación Inicial</h4>
                             <p class="call-date"><i data-lucide="calendar" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;"></i>Lunes, 15 de Enero - 19:00h</p>
-                            <p style="color: var(--green); margin-top: 0.5rem;">✓ Completada</p>
+                            <p style="color: var(--green); margin-top: 0.5rem;"><i data-lucide="check" style="width:14px;height:14px;vertical-align:middle;"></i> Completada</p>
                         </div>
                     </div>
                 </div>
@@ -18105,12 +18105,12 @@ gg==" alt="Effort Online">
             <!-- Chat Section -->
             <div id="chat" class="section">
                 <div class="card">
-                    <h2 class="card-title">💬 Chat con Efrén</h2>
+                    <h2 class="card-title"><i data-lucide="message-circle" style="width:20px;height:20px;vertical-align:middle;margin-right:6px;"></i>Chat con Efrén</h2>
                     
                     <!-- Chat bloqueado para plan básico -->
                     <div id="chatBlocked" class="chat-blocked" style="display: none;">
                         <div style="text-align: center; padding: 3rem;">
-                            <div style="font-size: 4rem; margin-bottom: 1rem;">🔒</div>
+                            <div style="margin-bottom: 1rem;"><i data-lucide="lock" style="width:56px;height:56px;color:#ccc;"></i></div>
                             <h3 style="color: var(--navy); margin-bottom: 1rem;">Chat no disponible en tu plan</h3>
                             <p style="color: #666; margin-bottom: 2rem;">
                                 Actualiza a <strong>PREMIUM</strong> o <strong>ÉLITE</strong> para acceder al chat directo con Efrén
@@ -18126,7 +18126,7 @@ gg==" alt="Effort Online">
                         <!-- Info del plan élite con WhatsApp -->
                         <div id="eliteWhatsAppInfo" class="elite-info" style="display: none;">
                             <div style="background: linear-gradient(135deg, #00D9A3 0%, #00b389 100%); color: white; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; display: flex; align-items: center; gap: 1rem;">
-                                <span style="font-size: 2rem;">👑</span>
+                                <i data-lucide="crown" style="width:32px;height:32px;vertical-align:middle;"></i>
                                 <div>
                                     <strong>Plan ÉLITE</strong>
                                     <p style="margin: 0.25rem 0 0; font-size: 0.9rem;">También puedes escribirme directamente por WhatsApp</p>
@@ -18343,6 +18343,7 @@ gg==" alt="Effort Online">
                 max-width: 85%;
             }
         }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 
     <script>
@@ -18441,20 +18442,23 @@ gg==" alt="Effort Online">
 
                 if (res.ok) {
                     feedback.style.display = 'block';
-                    feedback.innerHTML = `<div class="alert alert-success">🎉 ¡Sesión registrada! Has entrenado <strong>${mins} minutos</strong>. ¡Buen trabajo!</div>`;
+                    feedback.innerHTML = `<div class="alert alert-success"><i data-lucide="check-circle" style="width:16px;height:16px;vertical-align:middle;margin-right:4px;"></i> ¡Sesión registrada! Has entrenado <strong>${mins} minutos</strong>. ¡Buen trabajo!</div>`;
+                    lucide.createIcons();
                     resetTimer();
                     loadUserData();
                 } else {
                     feedback.style.display = 'block';
-                    feedback.innerHTML = `<div class="alert alert-warning">⚠️ La sesión terminó pero no se pudo guardar. Inténtalo de nuevo.</div>`;
+                    feedback.innerHTML = `<div class="alert alert-warning"><i data-lucide="alert-triangle" style="width:16px;height:16px;vertical-align:middle;margin-right:4px;"></i> La sesión terminó pero no se pudo guardar. Inténtalo de nuevo.</div>`;
                     finishBtn.disabled = false;
-                    finishBtn.innerHTML = '<i data-lucide="check" style="width:16px;height:16px;vertical-align:middle;margin-right:6px;"></i>Finalizar'; lucide.createIcons();
+                    finishBtn.innerHTML = '<i data-lucide="check" style="width:16px;height:16px;vertical-align:middle;margin-right:6px;"></i>Finalizar';
+                    lucide.createIcons();
                 }
             } catch (err) {
                 feedback.style.display = 'block';
-                feedback.innerHTML = `<div class="alert alert-warning">⚠️ Error de conexión. La sesión no se guardó.</div>`;
+                feedback.innerHTML = `<div class="alert alert-warning"><i data-lucide="alert-triangle" style="width:16px;height:16px;vertical-align:middle;margin-right:4px;"></i> Error de conexión. La sesión no se guardó.</div>`;
                 finishBtn.disabled = false;
-                finishBtn.textContent = '✔️ Finalizar';
+                finishBtn.innerHTML = '<i data-lucide="check" style="width:16px;height:16px;vertical-align:middle;margin-right:6px;"></i>Finalizar';
+                lucide.createIcons();
             }
         }
 
@@ -18608,11 +18612,12 @@ gg==" alt="Effort Online">
             if (!list.length) { el.innerHTML = ''; return; }
             el.innerHTML = list.map((ev, i) =>
                 `<div class="event-item">
-                    <span>⏰ ${ev.time} — ${ev.note || 'Entrenamiento'}</span>
+                    <span><i data-lucide="clock" style="width:14px;height:14px;vertical-align:middle;"></i> ${ev.time} — ${ev.note || 'Entrenamiento'}</span>
                     <button onclick="deleteCalEvent('${key}',${i})"
                             style="background:none;border:none;cursor:pointer;color:#e74c3c;font-size:1rem;">✕</button>
                 </div>`
             ).join('');
+            lucide.createIcons();
         }
 
         function saveCalEvent() {
@@ -18781,7 +18786,7 @@ gg==" alt="Effort Online">
                 const res = await fetch('/api/user/sessions', { headers: { 'Authorization': `Bearer ${token}` } });
                 const sessions = res.ok ? await res.json() : [];
                 if (!sessions.length) {
-                    container.innerHTML = `<p style="color:#999; text-align:center; padding:1rem;">Aún no has registrado ninguna sesión. ¡A entrenar! 💪</p>`;
+                    container.innerHTML = `<p style="color:#999; text-align:center; padding:1rem;">Aún no has registrado ninguna sesión. ¡A entrenar!</p>`;
                     return;
                 }
                 container.innerHTML = `<ul style="list-style:none; padding:0; margin:0;">` +
@@ -18789,11 +18794,12 @@ gg==" alt="Effort Online">
                         const fecha = new Date(s.completedAt).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' });
                         const hora  = new Date(s.completedAt).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
                         return `<li style="display:flex; justify-content:space-between; align-items:center; padding:0.75rem 0; border-bottom:1px solid #f0f0f0;">
-                            <span>💪 <strong>${s.duration} min</strong></span>
+                            <span><i data-lucide="dumbbell" style="width:14px;height:14px;vertical-align:middle;"></i> <strong>${s.duration} min</strong></span>
                             <span style="color:#888; font-size:0.9rem;">${fecha} · ${hora}</span>
                         </li>`;
                     }).join('') +
                     `</ul>`;
+                lucide.createIcons();
             } catch (err) {
                 container.innerHTML = `<p style="color:#999; text-align:center; padding:1rem;">No se pudo cargar el historial.</p>`;
             }
@@ -18811,31 +18817,36 @@ gg==" alt="Effort Online">
                     subtitle.textContent = 'Aún no tienes una rutina asignada';
                     content.innerHTML = `
                         <div style="text-align:center; padding: 2rem; color: #999;">
-                            <div style="font-size: 3rem; margin-bottom: 1rem;">📋</div>
+                            <div style="margin-bottom: 1rem;"><i data-lucide="clipboard-list" style="width:48px;height:48px;color:#ccc;"></i></div>
                             <p>Efrén todavía no te ha asignado una rutina.</p>
                             <p style="margin-top:0.5rem; font-size:0.9rem;">Escríbele por el chat cuando quieras empezar.</p>
                         </div>`;
+                    lucide.createIcons();
                     return;
                 }
 
                 const date = new Date(routine.updatedAt).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
                 subtitle.textContent = `Rutina personalizada · Actualizada el ${date}`;
 
-                const equipmentIcon = { sin_material: '🤸', bandas: '🟡', pesas: '🏋️' };
+                const equipmentIcon = {
+                    sin_material: '<i data-lucide="person-standing" style="width:16px;height:16px;vertical-align:middle;"></i>',
+                    bandas:       '<i data-lucide="zap" style="width:16px;height:16px;vertical-align:middle;"></i>',
+                    pesas:        '<i data-lucide="dumbbell" style="width:16px;height:16px;vertical-align:middle;"></i>'
+                };
 
                 const items = routine.exercises.map(ex => {
                     const e = ex.exerciseId;
                     if (!e) return '';
-                    const icon = equipmentIcon[e.equipment] || '💪';
+                    const icon = equipmentIcon[e.equipment] || '<i data-lucide="activity" style="width:16px;height:16px;vertical-align:middle;"></i>';
                     const details = [
                         ex.sets ? `${ex.sets} series` : null,
                         ex.reps ? `${ex.reps} reps` : null,
                         ex.rest ? `Descanso: ${ex.rest}s` : null
                     ].filter(Boolean).join(' · ');
                     const videoBtn = e.videoUrl
-                        ? `<a href="${e.videoUrl}" target="_blank" rel="noopener" class="btn btn-primary" style="margin-top:0.75rem; display:inline-block;">▶️ Ver Vídeo</a>`
+                        ? `<a href="${e.videoUrl}" target="_blank" rel="noopener" class="btn btn-primary" style="margin-top:0.75rem; display:inline-block;"><i data-lucide="play-circle" style="width:16px;height:16px;vertical-align:middle;margin-right:4px;"></i> Ver Vídeo</a>`
                         : '';
-                    const notes = ex.notes ? `<p style="color:#888; font-size:0.85rem; margin-top:0.5rem;">📝 ${ex.notes}</p>` : '';
+                    const notes = ex.notes ? `<p style="color:#888; font-size:0.85rem; margin-top:0.5rem;"><i data-lucide="file-text" style="width:13px;height:13px;vertical-align:middle;margin-right:3px;"></i>${ex.notes}</p>` : '';
                     return `
                         <li class="workout-item">
                             <div class="workout-name">${icon} ${e.name}</div>
@@ -18846,6 +18857,7 @@ gg==" alt="Effort Online">
                 }).join('');
 
                 content.innerHTML = `<ul class="workout-list">${items}</ul>`;
+                lucide.createIcons();
             } catch (err) {
                 console.error('Error cargando rutina:', err);
             }
