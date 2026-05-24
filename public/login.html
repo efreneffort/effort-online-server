@@ -17666,27 +17666,30 @@ gg==" alt="Effort Online">
                 return;
             }
 
+            const btn = event.target.querySelector('button[type="submit"]') || event.submitter;
+            if (btn) { btn.disabled = true; btn.textContent = 'Enviando...'; }
+
             try {
-                // Llamar al API del backend
                 const response = await fetch('/api/auth/forgot-password', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email })
                 });
 
+                const data = await response.json();
+
                 if (response.ok) {
-                    // Mostrar mensaje de éxito
                     document.getElementById('forgotPasswordForm').style.display = 'none';
                     document.getElementById('forgotPasswordSuccess').style.display = 'block';
                     document.getElementById('successEmail').textContent = email;
                 } else {
-                    alert('Error al procesar la solicitud. Inténtalo de nuevo.');
+                    alert(data.error || 'Error al enviar el email. Inténtalo de nuevo o contacta con soporte.');
+                    if (btn) { btn.disabled = false; btn.textContent = 'Enviar enlace'; }
                 }
             } catch (error) {
-                // Si no hay backend aún, mostrar éxito igualmente
-                document.getElementById('forgotPasswordForm').style.display = 'none';
-                document.getElementById('forgotPasswordSuccess').style.display = 'block';
-                document.getElementById('successEmail').textContent = email;
+                console.error('Error en forgot-password:', error);
+                alert('Error de conexión. Comprueba tu internet e inténtalo de nuevo.');
+                if (btn) { btn.disabled = false; btn.textContent = 'Enviar enlace'; }
             }
         }
 

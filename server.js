@@ -1155,10 +1155,15 @@ app.post('/api/auth/forgot-password', async (req, res) => {
         );
 
         // Enviar email
-        await sendPasswordResetEmail(email, resetToken);
+        const emailSent = await sendPasswordResetEmail(email, resetToken);
 
-        res.json({ 
-            message: 'Si el email existe, recibirás un enlace de recuperación' 
+        if (!emailSent) {
+            console.error('❌ Falló el envío del email de recuperación a:', email);
+            return res.status(500).json({ error: 'No se pudo enviar el email. Contacta con soporte.' });
+        }
+
+        res.json({
+            message: 'Si el email existe, recibirás un enlace de recuperación'
         });
     } catch (error) {
         console.error('Error en forgot-password:', error);
