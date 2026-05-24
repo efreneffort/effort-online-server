@@ -17998,55 +17998,10 @@ gg==" alt="Effort Online">
             <div id="logros" class="section">
                 <div class="card">
                     <h2 class="card-title"><i data-lucide="trophy" style="width:20px;height:20px;vertical-align:middle;margin-right:6px;"></i>Mis Logros</h2>
-                    <p style="color: #666; margin-bottom: 2rem;">Has desbloqueado 4 de 8 logros disponibles</p>
-
-                    <div class="badges-grid">
-                        <div class="badge-item unlocked">
-                            <div class="badge-icon"><i data-lucide="star"></i></div>
-                            <div class="badge-name">First Step</div>
-                            <div class="badge-desc">Primera sesión completada</div>
-                        </div>
-
-                        <div class="badge-item unlocked">
-                            <div class="badge-icon"><i data-lucide="flame"></i></div>
-                            <div class="badge-name">Racha Semanal</div>
-                            <div class="badge-desc">5 días seguidos L-V</div>
-                        </div>
-
-                        <div class="badge-item locked">
-                            <div class="badge-icon"><i data-lucide="gem"></i></div>
-                            <div class="badge-name">Semana Perfecta</div>
-                            <div class="badge-desc">7 días consecutivos</div>
-                        </div>
-
-                        <div class="badge-item unlocked">
-                            <div class="badge-icon"><i data-lucide="zap"></i></div>
-                            <div class="badge-name">Constancia</div>
-                            <div class="badge-desc">20 días en un mes</div>
-                        </div>
-
-                        <div class="badge-item locked">
-                            <div class="badge-icon"><i data-lucide="trophy"></i></div>
-                            <div class="badge-name">Veterano</div>
-                            <div class="badge-desc">3 meses consecutivos</div>
-                        </div>
-
-                        <div class="badge-item unlocked">
-                            <div class="badge-icon"><i data-lucide="target"></i></div>
-                            <div class="badge-name">Madrugador</div>
-                            <div class="badge-desc">10 sesiones antes de 8am</div>
-                        </div>
-
-                        <div class="badge-item locked">
-                            <div class="badge-icon"><i data-lucide="dumbbell"></i></div>
-                            <div class="badge-name">Ironman</div>
-                            <div class="badge-desc">50 horas totales</div>
-                        </div>
-
-                        <div class="badge-item locked">
-                            <div class="badge-icon"><i data-lucide="crown"></i></div>
-                            <div class="badge-name">Campeón</div>
-                            <div class="badge-desc">6 meses sin fallar</div>
+                    <p id="badgesSubtitle" style="color: #666; margin-bottom: 2rem;">Cargando logros...</p>
+                    <div class="badges-grid" id="badgesGrid">
+                        <div style="color:#999;font-size:0.9rem;grid-column:1/-1;text-align:center;padding:2rem;">
+                            <i data-lucide="loader" style="width:28px;height:28px;animation:spin 1s linear infinite;vertical-align:middle;"></i>
                         </div>
                     </div>
                 </div>
@@ -18338,6 +18293,7 @@ gg==" alt="Effort Online">
             event.currentTarget.classList.add('active');
 
             if (sectionId === 'videollamadas') loadUserCalls();
+            if (sectionId === 'logros') loadAchievements();
         }
 
         function startWorkout() {
@@ -18415,10 +18371,22 @@ gg==" alt="Effort Online">
                 });
 
                 if (res.ok) {
+                    const data = await res.json();
+                    const newBadges = data.newBadges || [];
+
+                    let successHtml = `<div class="alert alert-success"><i data-lucide="check-circle" style="width:16px;height:16px;vertical-align:middle;margin-right:4px;"></i> ¡Sesión registrada! Has entrenado <strong>${mins} minutos</strong>. ¡Buen trabajo!</div>`;
+
+                    if (newBadges.length > 0) {
+                        const badgeLabels = { first_step:'First Step', weekly_streak:'Racha Semanal', perfect_week:'Semana Perfecta', consistency:'Constancia', timer_1:'Timer ×1', timer_5:'Timer ×5', timer_10:'Timer ×10', timer_25:'Timer ×25', timer_50:'Timer ×50' };
+                        const names = newBadges.map(b => badgeLabels[b] || b).join(', ');
+                        successHtml += `<div class="alert" style="background:linear-gradient(135deg,#e8f8f5,#d1f2eb);border-left:4px solid #00D9A3;margin-top:0.75rem;"><i data-lucide="award" style="width:16px;height:16px;vertical-align:middle;margin-right:4px;"></i> <strong>Logro desbloqueado:</strong> ${names}</div>`;
+                    }
+
                     feedback.style.display = 'block';
-                    feedback.innerHTML = `<div class="alert alert-success"><i data-lucide="check-circle" style="width:16px;height:16px;vertical-align:middle;margin-right:4px;"></i> ¡Sesión registrada! Has entrenado <strong>${mins} minutos</strong>. ¡Buen trabajo!</div>`;
+                    feedback.innerHTML = successHtml;
                     lucide.createIcons();
                     resetTimer();
+                    loadAchievements();
                     loadUserData();
                 } else {
                     feedback.style.display = 'block';
@@ -18488,6 +18456,58 @@ gg==" alt="Effort Online">
         function openWhatsApp() {
             const name = encodeURIComponent(currentUser ? currentUser.name : '');
             window.open(`https://wa.me/34609539485?text=Hola%20Efrén,%20soy%20${name}`, '_blank');
+        }
+
+        // ─── Logros ───────────────────────────────────────────────────
+        const ALL_BADGES = [
+            { type: 'first_step',    icon: 'star',         name: 'First Step',     desc: 'Primera sesión completada' },
+            { type: 'weekly_streak', icon: 'flame',        name: 'Racha Semanal',  desc: '5 días seguidos' },
+            { type: 'perfect_week',  icon: 'gem',          name: 'Semana Perfecta',desc: '7 días consecutivos' },
+            { type: 'consistency',   icon: 'zap',          name: 'Constancia',     desc: '20 días en un mes' },
+            { type: 'veteran',       icon: 'trophy',       name: 'Veterano',       desc: '3 meses consecutivos' },
+            { type: 'ironman',       icon: 'dumbbell',     name: 'Ironman',        desc: '50 horas totales' },
+            { type: 'champion',      icon: 'crown',        name: 'Campeón',        desc: '6 meses sin fallar' },
+            // Timer
+            { type: 'timer_1',       icon: 'timer',        name: 'Timer ×1',       desc: '1er entrenamiento con timer',  group: 'timer' },
+            { type: 'timer_5',       icon: 'timer',        name: 'Timer ×5',       desc: '5 entrenamientos con timer',   group: 'timer' },
+            { type: 'timer_10',      icon: 'timer',        name: 'Timer ×10',      desc: '10 entrenamientos con timer',  group: 'timer' },
+            { type: 'timer_25',      icon: 'timer',        name: 'Timer ×25',      desc: '25 entrenamientos con timer',  group: 'timer' },
+            { type: 'timer_50',      icon: 'timer',        name: 'Timer ×50',      desc: '50 entrenamientos con timer',  group: 'timer' },
+        ];
+
+        async function loadAchievements() {
+            const grid = document.getElementById('badgesGrid');
+            const subtitle = document.getElementById('badgesSubtitle');
+            if (!grid) return;
+            try {
+                const res = await fetch('/api/user/achievements', {
+                    headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` }
+                });
+                const data = res.ok ? await res.json() : [];
+                const unlockedSet = new Set(data.map(a => a.badgeType));
+                const unlockedCount = unlockedSet.size;
+
+                subtitle.textContent = `Has desbloqueado ${unlockedCount} de ${ALL_BADGES.length} logros disponibles`;
+
+                grid.innerHTML = ALL_BADGES.map(b => {
+                    const unlocked = unlockedSet.has(b.type);
+                    const borderColor = b.group === 'timer' ? (unlocked ? '#00D9A3' : '#e0e0e0') : (unlocked ? '#00D9A3' : '#e0e0e0');
+                    const timerBadge = b.group === 'timer'
+                        ? `<div style="font-size:0.7rem;font-weight:700;color:${unlocked ? '#001F54' : '#bbb'};background:${unlocked ? 'rgba(0,217,163,0.15)' : '#f0f0f0'};border-radius:10px;padding:0.15rem 0.5rem;display:inline-block;margin-bottom:0.4rem;letter-spacing:0.04em;">TIMER</div><br>`
+                        : '';
+                    return `
+                    <div class="badge-item ${unlocked ? 'unlocked' : 'locked'}">
+                        <div class="badge-icon"><i data-lucide="${b.icon}"></i></div>
+                        ${timerBadge}
+                        <div class="badge-name">${b.name}</div>
+                        <div class="badge-desc">${b.desc}</div>
+                    </div>`;
+                }).join('');
+
+                lucide.createIcons();
+            } catch (e) {
+                grid.innerHTML = '<p style="color:#999;grid-column:1/-1;text-align:center;">No se pudieron cargar los logros.</p>';
+            }
         }
 
         // ─── Videollamadas del usuario ────────────────────────────────
@@ -18964,6 +18984,7 @@ gg==" alt="Effort Online">
             loadRoutine(token);
             loadSessionHistory(token);
             renderNextCallCard();
+            loadAchievements();
 
             try {
                 const [userRes, statsRes] = await Promise.all([

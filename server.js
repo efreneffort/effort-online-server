@@ -520,11 +520,16 @@ app.post('/api/user/workout-session', authenticateToken, async (req, res) => {
         await session.save();
 
         // Verificar si desbloquea algún logro
-        await checkAndUnlockAchievements(req.user.userId);
+        const newBadges = await checkAndUnlockAchievements(req.user.userId);
+
+        // Notificar a Efrén (sin bloquear la respuesta)
+        const user = await User.findById(req.user.userId).select('name email plan');
+        if (user) sendWorkoutNotificationToTrainer(user, duration, newBadges).catch(() => {});
 
         res.status(201).json({
             message: 'Sesión registrada exitosamente',
-            session
+            session,
+            newBadges
         });
     } catch (error) {
         res.status(500).json({ error: 'Error al registrar sesión' });
@@ -767,44 +772,117 @@ async function calculateStreak(userId) {
     return streak;
 }
 
-// Verificar y desbloquear logros
+// Verificar y desbloquear logros — devuelve array con los nuevos desbloqueados
 async function checkAndUnlockAchievements(userId) {
     const sessions = await WorkoutSession.find({ userId });
     const achievements = await Achievement.find({ userId });
     const unlockedTypes = achievements.map(a => a.badgeType);
+    const newBadges = [];
+
+    async function unlock(type) {
+        if (!unlockedTypes.includes(type)) {
+            await new Achievement({ userId, badgeType: type }).save();
+            newBadges.push(type);
+        }
+    }
 
     // First Step
-    if (sessions.length >= 1 && !unlockedTypes.includes('first_step')) {
-        await new Achievement({ userId, badgeType: 'first_step' }).save();
-    }
+    if (sessions.length >= 1) await unlock('first_step');
 
-    // Racha Semanal
+    // Racha Semanal / Semana Perfecta
     const streak = await calculateStreak(userId);
-    if (streak >= 5 && !unlockedTypes.includes('weekly_streak')) {
-        await new Achievement({ userId, badgeType: 'weekly_streak' }).save();
-    }
-
-    // Semana Perfecta
-    if (streak >= 7 && !unlockedTypes.includes('perfect_week')) {
-        await new Achievement({ userId, badgeType: 'perfect_week' }).save();
-    }
+    if (streak >= 5) await unlock('weekly_streak');
+    if (streak >= 7) await unlock('perfect_week');
 
     // Constancia (20 días en un mes)
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const sessionsThisMonth = await WorkoutSession.countDocuments({
-        userId,
-        completedAt: { $gte: startOfMonth }
+        userId, completedAt: { $gte: startOfMonth }
     });
+    if (sessionsThisMonth >= 20) await unlock('consistency');
 
-    if (sessionsThisMonth >= 20 && !unlockedTypes.includes('consistency')) {
-        await new Achievement({ userId, badgeType: 'consistency' }).save();
-    }
+    // ── Logros de Timer ──────────────────────────────────────
+    const totalSessions = sessions.length;
+    if (totalSessions >= 1)  await unlock('timer_1');
+    if (totalSessions >= 5)  await unlock('timer_5');
+    if (totalSessions >= 10) await unlock('timer_10');
+    if (totalSessions >= 25) await unlock('timer_25');
+    if (totalSessions >= 50) await unlock('timer_50');
+
+    return newBadges;
 }
 
 // ============================================
 // FUNCIONES DE ENVÍO DE EMAILS (RESEND)
 // ============================================
+
+// ── Notificación a Efrén cuando un cliente termina el timer ──
+const BADGE_NAME = {
+    first_step:    'First Step',
+    weekly_streak: 'Racha Semanal',
+    perfect_week:  'Semana Perfecta',
+    consistency:   'Constancia',
+    timer_1:       'Timer x1',
+    timer_5:       'Timer x5',
+    timer_10:      'Timer x10',
+    timer_25:      'Timer x25',
+    timer_50:      'Timer x50',
+};
+
+async function sendWorkoutNotificationToTrainer(user, duration, newBadges = []) {
+    try {
+        const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'hola@effortpozuelo.com';
+        const planNames   = { basico: 'Básico', premium: 'Premium', elite: 'Élite' };
+        const planLabel   = planNames[user.plan] || user.plan;
+        const mins        = Number(duration);
+        const hora        = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+        const fecha       = new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
+
+        const badgeRows = newBadges.length
+            ? `<p style="margin:1rem 0 0.3rem;font-weight:600;color:#001F54;">Logros desbloqueados:</p>
+               <ul style="margin:0;padding-left:1.2rem;color:#444;">
+                 ${newBadges.map(b => `<li>${BADGE_NAME[b] || b}</li>`).join('')}
+               </ul>`
+            : '';
+
+        await resend.emails.send({
+            from:    FROM_EMAIL,
+            to:      ADMIN_EMAIL,
+            replyTo: user.email,
+            subject: `Entreno completado — ${user.name} (${mins} min)`,
+            html: `
+            <!DOCTYPE html><html><head><meta charset="utf-8"></head>
+            <body style="font-family:'Segoe UI',Arial,sans-serif;background:#f5f5f5;margin:0;padding:16px;">
+              <div style="max-width:520px;margin:0 auto;background:white;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.08);">
+                <div style="background:#001F54;padding:1.5rem 2rem;text-align:center;">
+                  <p style="color:#00D9A3;font-size:1.4rem;font-weight:800;margin:0;letter-spacing:-0.02em;">effort<span style="color:white;">.</span></p>
+                </div>
+                <div style="padding:2rem;">
+                  <div style="background:#e8f8f5;border-left:4px solid #00D9A3;border-radius:6px;padding:1rem 1.2rem;margin-bottom:1.5rem;">
+                    <p style="margin:0;color:#001F54;font-weight:700;font-size:1.05rem;">Entreno completado</p>
+                    <p style="margin:0.3rem 0 0;color:#555;font-size:0.9rem;">${fecha} a las ${hora}</p>
+                  </div>
+                  <table style="width:100%;border-collapse:collapse;font-size:0.92rem;">
+                    <tr><td style="padding:0.4rem 0;color:#888;width:110px;">Cliente</td><td style="padding:0.4rem 0;font-weight:600;color:#001F54;">${user.name}</td></tr>
+                    <tr><td style="padding:0.4rem 0;color:#888;">Email</td><td style="padding:0.4rem 0;color:#333;">${user.email}</td></tr>
+                    <tr><td style="padding:0.4rem 0;color:#888;">Plan</td><td style="padding:0.4rem 0;color:#333;">${planLabel}</td></tr>
+                    <tr><td style="padding:0.4rem 0;color:#888;">Duración</td><td style="padding:0.4rem 0;font-weight:600;color:#00D9A3;font-size:1.1rem;">${mins} minutos</td></tr>
+                  </table>
+                  ${badgeRows}
+                </div>
+                <div style="background:#f8f9fb;padding:0.8rem 2rem;text-align:center;font-size:0.8rem;color:#999;">
+                  Effort Online · Notificación automática
+                </div>
+              </div>
+            </body></html>`
+        });
+
+        console.log(`📬 Notificación entreno enviada: ${user.name} (${mins} min)`);
+    } catch (err) {
+        console.error('❌ Error notificación entreno:', err.message);
+    }
+}
 
 // Email de bienvenida al registrarse
 async function sendWelcomeEmail(user) {
