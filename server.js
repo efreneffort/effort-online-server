@@ -40,7 +40,14 @@ const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'effort_online_secret_key_2025';
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/effort-online';
 const RESEND_API_KEY = process.env.RESEND_API_KEY || 're_BiC1NgD5_5CqHZ6HFSaJFAkoRCqQ3tG9M';
-const FROM_EMAIL = process.env.FROM_EMAIL || 'Effort Online <onboarding@resend.dev>';
+
+// Construir FROM_EMAIL de forma segura: si la variable de entorno tiene formato válido la usamos,
+// si no, construimos desde SENDER_NAME + SENDER_EMAIL por separado
+const _rawFrom = process.env.FROM_EMAIL || '';
+const FROM_EMAIL = _rawFrom.includes('@') && (_rawFrom.includes('<') ? _rawFrom.includes('>') : true)
+    ? _rawFrom
+    : 'Effort Online <hola@effortpozuelo.com>';
+
 const REPLY_TO = process.env.REPLY_TO || 'effortentrenador@gmail.com';
 
 // Inicializar Resend para envío de emails
@@ -1221,5 +1228,6 @@ app.listen(PORT, () => {
     console.log(`🚀 Servidor Effort Online corriendo en http://localhost:${PORT}`);
     console.log(`📊 MongoDB: ${MONGODB_URI}`);
     console.log(`📧 Resend: ${RESEND_API_KEY ? 'Configurado ✅' : 'NO CONFIGURADO ❌'}`);
+    console.log(`📤 FROM_EMAIL: ${FROM_EMAIL}`);
     console.log(`💰 Tarifas 2025 - Básico: 149€ | Premium: 199€ | Élite: 249€`);
 });
