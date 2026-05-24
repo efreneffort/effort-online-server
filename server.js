@@ -1139,12 +1139,9 @@ app.post('/api/auth/forgot-password', async (req, res) => {
 
         // Buscar usuario
         const user = await User.findOne({ email });
-        
-        // Por seguridad, siempre respondemos igual (exista o no el usuario)
+
         if (!user) {
-            return res.json({ 
-                message: 'Si el email existe, recibirás un enlace de recuperación' 
-            });
+            return res.status(404).json({ error: 'Este email no está registrado. ¿Quizás usaste otro al registrarte?' });
         }
 
         // Generar token temporal (1 hora)
@@ -1163,7 +1160,7 @@ app.post('/api/auth/forgot-password', async (req, res) => {
         }
 
         res.json({
-            message: 'Si el email existe, recibirás un enlace de recuperación'
+            message: 'Email enviado correctamente'
         });
     } catch (error) {
         console.error('Error en forgot-password:', error);
