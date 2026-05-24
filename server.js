@@ -41,10 +41,10 @@ const JWT_SECRET = process.env.JWT_SECRET || 'effort_online_secret_key_2025';
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/effort-online';
 const RESEND_API_KEY = process.env.RESEND_API_KEY || 're_BiC1NgD5_5CqHZ6HFSaJFAkoRCqQ3tG9M';
 
-// Construir FROM_EMAIL de forma segura: si la variable de entorno tiene formato válido la usamos,
-// si no, construimos desde SENDER_NAME + SENDER_EMAIL por separado
+// FROM_EMAIL: validar que el dominio tenga TLD (al menos un punto después del @)
 const _rawFrom = process.env.FROM_EMAIL || '';
-const FROM_EMAIL = _rawFrom.includes('@') && (_rawFrom.includes('<') ? _rawFrom.includes('>') : true)
+const _emailMatch = _rawFrom.match(/[\w.+-]+@[\w-]+\.[a-z]{2,}/i);
+const FROM_EMAIL = _emailMatch
     ? _rawFrom
     : 'Effort Online <hola@effortpozuelo.com>';
 
