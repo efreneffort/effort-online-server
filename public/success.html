@@ -6,42 +6,49 @@
     <title>Pago Completado — Effort Online</title>
     <style>
         :root {
-            --green: #00e676;
-            --green-dark: #00c853;
-            --bg: #0a0a0a;
-            --card: #141414;
-            --border: #222;
-            --text: #f0f0f0;
-            --muted: #888;
+            --navy: #001F54;
+            --green: #00D9A3;
+            --green-dark: #00c493;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'Segoe UI', system-ui, sans-serif;
-            background: var(--bg);
-            color: var(--text);
+            background: #001030;
+            color: #333;
             min-height: 100vh;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             padding: 2rem;
         }
 
+        .logo {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: white;
+            letter-spacing: -0.03em;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        .logo span { color: var(--green); }
+
         .card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 3rem 2.5rem;
-            max-width: 480px;
+            background: white;
+            border-radius: 18px;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.55);
+            padding: 2.5rem 2rem;
+            max-width: 460px;
             width: 100%;
             text-align: center;
         }
 
         .icon {
-            width: 80px;
-            height: 80px;
-            background: rgba(0, 230, 118, 0.12);
+            width: 72px;
+            height: 72px;
+            background: rgba(0, 217, 163, 0.12);
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -49,42 +56,42 @@
             margin: 0 auto 1.5rem;
         }
 
-        .icon svg { width: 40px; height: 40px; }
+        .icon svg { width: 36px; height: 36px; }
 
         h1 {
-            font-size: 1.75rem;
+            font-size: 1.6rem;
             font-weight: 700;
-            margin-bottom: 0.75rem;
-            color: var(--green);
+            margin-bottom: 0.6rem;
+            color: var(--navy);
         }
 
         .subtitle {
-            color: var(--muted);
-            font-size: 1rem;
+            color: #666;
+            font-size: 0.95rem;
             line-height: 1.6;
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
         }
 
         .plan-badge {
             display: inline-block;
-            background: rgba(0, 230, 118, 0.1);
-            border: 1px solid rgba(0, 230, 118, 0.3);
-            color: var(--green);
-            font-weight: 600;
-            font-size: 0.9rem;
-            padding: 0.4rem 1rem;
+            background: rgba(0, 217, 163, 0.12);
+            border: 1px solid rgba(0, 217, 163, 0.35);
+            color: var(--navy);
+            font-weight: 700;
+            font-size: 0.85rem;
+            padding: 0.4rem 1.1rem;
             border-radius: 20px;
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
             text-transform: uppercase;
             letter-spacing: 0.05em;
         }
 
         .steps {
-            background: #1a1a1a;
+            background: #f8f9fb;
             border-radius: 10px;
-            padding: 1.25rem 1.5rem;
+            padding: 1.2rem 1.5rem;
             text-align: left;
-            margin-bottom: 2rem;
+            margin-bottom: 1.8rem;
         }
 
         .step {
@@ -92,17 +99,17 @@
             align-items: flex-start;
             gap: 0.75rem;
             padding: 0.5rem 0;
-            font-size: 0.9rem;
-            color: var(--muted);
+            font-size: 0.88rem;
+            color: #555;
         }
 
-        .step + .step { border-top: 1px solid var(--border); }
+        .step + .step { border-top: 1px solid #eee; }
 
         .step-num {
             background: var(--green);
-            color: #000;
+            color: var(--navy);
             font-weight: 700;
-            font-size: 0.75rem;
+            font-size: 0.72rem;
             min-width: 20px;
             height: 20px;
             border-radius: 50%;
@@ -110,47 +117,41 @@
             align-items: center;
             justify-content: center;
             margin-top: 1px;
+            flex-shrink: 0;
         }
 
         .btn {
             display: block;
             background: var(--green);
-            color: #000;
+            color: var(--navy);
             font-weight: 700;
             font-size: 1rem;
             padding: 0.9rem 1.5rem;
-            border-radius: 8px;
+            border-radius: 10px;
             text-decoration: none;
-            transition: background 0.2s;
+            transition: opacity 0.2s;
             margin-bottom: 0.75rem;
         }
 
-        .btn:hover { background: var(--green-dark); }
+        .btn:hover { opacity: 0.88; }
 
         .btn-secondary {
             display: block;
-            color: var(--muted);
-            font-size: 0.9rem;
+            color: #999;
+            font-size: 0.87rem;
             text-decoration: none;
             padding: 0.5rem;
         }
 
-        .btn-secondary:hover { color: var(--text); }
-
-        .logo {
-            font-size: 1.2rem;
-            font-weight: 800;
-            letter-spacing: 0.08em;
-            margin-bottom: 2rem;
-        }
+        .btn-secondary:hover { color: var(--navy); }
     </style>
 </head>
 <body>
-    <div class="card">
-        <div class="logo"><span style="color:#00D9A3;">e</span><span style="color:#fff;">ff</span><span style="color:#00D9A3;">ort</span> <span style="color:#888;font-weight:400;font-size:0.75em;letter-spacing:0.1em;">ONLINE</span></div>
+    <div class="logo">effort<span>.</span></div>
 
+    <div class="card">
         <div class="icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#00e676" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#00D9A3" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="20 6 9 17 4 12"></polyline>
             </svg>
         </div>
