@@ -18896,7 +18896,7 @@ gg==" alt="Effort Online">
                 const firstName = user.name.split(' ')[0];
                 const hour = new Date().getHours();
                 const saludo = hour < 13 ? 'Buenos días' : hour < 20 ? 'Buenas tardes' : 'Buenas noches';
-                document.getElementById('greetingTitle').textContent = `${saludo}, ${firstName} 💪`;
+                document.getElementById('greetingTitle').textContent = `${saludo}, ${firstName}`;
                 const planDisplay = { basico: 'BÁSICO', premium: 'PREMIUM', elite: 'ÉLITE' };
                 document.getElementById('activePlan').textContent = planDisplay[user.plan] || user.plan.toUpperCase();
 
@@ -18918,7 +18918,7 @@ gg==" alt="Effort Online">
                     ? '🏆 ¡Racha semanal conseguida!'
                     : streak > 0
                         ? `¡Solo ${daysLeft} día${daysLeft !== 1 ? 's' : ''} más para tu Racha Semanal!`
-                        : 'Entrena hoy para empezar tu racha 💪';
+                        : 'Entrena hoy para empezar tu racha';
 
                 // Sección progreso
                 document.getElementById('progDays').textContent = sessionsMonth;
@@ -18979,7 +18979,7 @@ gg==" alt="Effort Online">
             const frase = frases[new Date().getDay() % frases.length];
             const nameEl = document.getElementById('userNameText');
             const name = nameEl ? nameEl.textContent.trim() : '';
-            document.getElementById('greetingTitle').textContent = saludo + (name ? ', ' + name : '') + ' 💪';
+            document.getElementById('greetingTitle').textContent = saludo + (name ? ', ' + name : '');
             document.getElementById('greetingMsg').textContent = frase;
         }
 
