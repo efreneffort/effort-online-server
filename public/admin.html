@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel Admin - Effort Online</title>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -113,8 +114,17 @@
         }
 
         .nav-icon {
-            font-size: 1.3rem;
             flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+        }
+
+        .nav-icon svg {
+            width: 18px;
+            height: 18px;
         }
 
         /* Main Content */
@@ -17378,7 +17388,7 @@ pD8ejNjwqq7m5YyxrWj6CbKRcFY335AXdpNYreGk66f9ye16ky1Ue+XHHLXxnuTDx0bT04TjYbIn
 PLl+F9SJeGpJHFivHwYI+2aIBFcd5mHUYf+N7OuM6eGsw/Hw7z9YfTzYmwQ6PQAAAABJRU5ErkJg
 gg==" alt="Effort Online">
             <div class="admin-menu">
-                <span class="admin-name">👤 Efrén - Admin</span>
+                <span class="admin-name">Efrén — Admin</span>
                 <button class="logout-btn">Cerrar Sesión</button>
             </div>
         </div>
@@ -17389,23 +17399,23 @@ gg==" alt="Effort Online">
         <!-- Sidebar -->
         <div class="sidebar">
             <div class="nav-item active" onclick="showSection('dashboard')">
-                <span class="nav-icon">📊</span>
+                <span class="nav-icon"><i data-lucide="layout-dashboard"></i></span>
                 <span>Dashboard</span>
             </div>
             <div class="nav-item" onclick="showSection('clientes')">
-                <span class="nav-icon">👥</span>
+                <span class="nav-icon"><i data-lucide="users"></i></span>
                 <span>Clientes</span>
             </div>
             <div class="nav-item" onclick="showSection('ejercicios')">
-                <span class="nav-icon">💪</span>
+                <span class="nav-icon"><i data-lucide="dumbbell"></i></span>
                 <span>Ejercicios</span>
             </div>
             <div class="nav-item" onclick="showSection('videollamadas')">
-                <span class="nav-icon">📞</span>
+                <span class="nav-icon"><i data-lucide="video"></i></span>
                 <span>Llamadas</span>
             </div>
             <div class="nav-item" onclick="showSection('ingresos')">
-                <span class="nav-icon">💰</span>
+                <span class="nav-icon"><i data-lucide="trending-up"></i></span>
                 <span>Ingresos</span>
             </div>
         </div>
@@ -17448,9 +17458,9 @@ gg==" alt="Effort Online">
                 <div class="card">
                     <h3 class="card-title">Acciones Rápidas</h3>
                     <div class="quick-actions">
-                        <button class="btn btn-primary" onclick="showSection('clientes')">➕ Añadir Cliente</button>
-                        <button class="btn btn-primary" onclick="showSection('ejercicios')">💪 Crear Ejercicio</button>
-                        <button class="btn btn-secondary" onclick="showSection('videollamadas')">📅 Agendar Llamada</button>
+                        <button class="btn btn-primary" onclick="showSection('clientes')">+ Añadir Cliente</button>
+                        <button class="btn btn-primary" onclick="showSection('ejercicios')">Crear Ejercicio</button>
+                        <button class="btn btn-secondary" onclick="showSection('videollamadas')">Agendar Llamada</button>
                     </div>
                 </div>
             </div>
@@ -17459,9 +17469,9 @@ gg==" alt="Effort Online">
             <div id="clientes" class="section">
                 <div class="card">
                     <h2 class="card-title">Gestión de Clientes</h2>
-                    <button class="btn btn-primary" onclick="openModal('newClient')" style="margin-bottom: 1.5rem;">➕ Añadir Nuevo Cliente</button>
+                    <button class="btn btn-primary" onclick="openModal('newClient')" style="margin-bottom: 1.5rem;">+ Añadir Nuevo Cliente</button>
 
-                    <input type="text" class="search-bar" placeholder="🔍 Buscar cliente por nombre..." id="searchInput" oninput="filterClients()">
+                    <input type="text" class="search-bar" placeholder="Buscar cliente por nombre..." id="searchInput" oninput="filterClients()">
 
                     <div class="client-list" id="clientList">
                         <p style="color:#999">Cargando clientes...</p>
@@ -17473,7 +17483,7 @@ gg==" alt="Effort Online">
             <div id="ejercicios" class="section">
                 <div class="card">
                     <h2 class="card-title">Biblioteca de Ejercicios</h2>
-                    <button class="btn btn-primary" onclick="openModal('newExercise')" style="margin-bottom: 1.5rem;">➕ Crear Nuevo Ejercicio</button>
+                    <button class="btn btn-primary" onclick="openModal('newExercise')" style="margin-bottom: 1.5rem;">+ Crear Nuevo Ejercicio</button>
 
                     <div class="exercise-list" id="exerciseList">
                         <p style="color:#999">Cargando ejercicios...</p>
@@ -17485,7 +17495,7 @@ gg==" alt="Effort Online">
             <div id="videollamadas" class="section">
                 <div class="card">
                     <h2 class="card-title">Gestión de Videollamadas</h2>
-                    <button class="btn btn-primary" onclick="openModal('newCall')" style="margin-bottom: 1.5rem;">📅 Agendar Nueva Llamada</button>
+                    <button class="btn btn-primary" onclick="openModal('newCall')" style="margin-bottom: 1.5rem;">Agendar Nueva Llamada</button>
 
                     <h3 style="color: var(--navy); margin-bottom: 1rem;">Próximas Llamadas</h3>
                     <div id="callsList"><p style="color:#999">Cargando videollamadas...</p></div>
@@ -17550,27 +17560,7 @@ gg==" alt="Effort Online">
             <div class="form-group">
                 <label>Ejercicios Actuales</label>
                 <div class="exercise-list" id="currentExercises">
-                    <div class="exercise-item">
-                        <div>
-                            <div class="exercise-name">🏋️ Sentadillas</div>
-                            <div class="exercise-details">4 series x 12 repeticiones | Descanso: 60seg</div>
-                        </div>
-                        <button class="btn-remove">❌</button>
-                    </div>
-                    <div class="exercise-item">
-                        <div>
-                            <div class="exercise-name">💪 Flexiones</div>
-                            <div class="exercise-details">3 series x 15 repeticiones | Descanso: 45seg</div>
-                        </div>
-                        <button class="btn-remove">❌</button>
-                    </div>
-                    <div class="exercise-item">
-                        <div>
-                            <div class="exercise-name">🦵 Zancadas</div>
-                            <div class="exercise-details">3 series x 10 rep. cada pierna | Descanso: 60seg</div>
-                        </div>
-                        <button class="btn-remove">❌</button>
-                    </div>
+                    <p style="color:#999">Sin ejercicios aún. Añade uno abajo.</p>
                 </div>
             </div>
 
@@ -17581,10 +17571,10 @@ gg==" alt="Effort Online">
             <input type="hidden" id="routineClientId">
 
             <div style="display:flex; gap:0.5rem; margin-bottom:1rem; flex-wrap:wrap;">
-                <button type="button" class="equipment-filter active" data-eq="todos"         onclick="filterEquipment('todos')">🏅 Todos</button>
-                <button type="button" class="equipment-filter"        data-eq="sin_material"  onclick="filterEquipment('sin_material')">🤸 Sin material</button>
-                <button type="button" class="equipment-filter"        data-eq="bandas"        onclick="filterEquipment('bandas')">🟡 Bandas</button>
-                <button type="button" class="equipment-filter"        data-eq="pesas"         onclick="filterEquipment('pesas')">🏋️ Pesas</button>
+                <button type="button" class="equipment-filter active" data-eq="todos"         onclick="filterEquipment('todos')">Todos</button>
+                <button type="button" class="equipment-filter"        data-eq="sin_material"  onclick="filterEquipment('sin_material')">Sin material</button>
+                <button type="button" class="equipment-filter"        data-eq="bandas"        onclick="filterEquipment('bandas')">Bandas</button>
+                <button type="button" class="equipment-filter"        data-eq="pesas"         onclick="filterEquipment('pesas')">Pesas</button>
             </div>
 
             <div class="form-group">
@@ -17615,10 +17605,10 @@ gg==" alt="Effort Online">
                 <textarea id="routineNotes" placeholder="Indicaciones especiales para el cliente..."></textarea>
             </div>
 
-            <button class="btn-add" onclick="addExerciseToRoutine()">➕ Añadir Ejercicio a la Rutina</button>
+            <button class="btn-add" onclick="addExerciseToRoutine()">+ Añadir Ejercicio a la Rutina</button>
 
             <div style="display: flex; gap: 1rem; margin-top: 2rem;">
-                <button class="btn btn-primary" onclick="saveRoutine()">💾 Guardar Rutina</button>
+                <button class="btn btn-primary" onclick="saveRoutine()">Guardar Rutina</button>
                 <button class="btn btn-secondary" onclick="closeModal('routineModal')">Cancelar</button>
             </div>
         </div>
@@ -17680,7 +17670,7 @@ gg==" alt="Effort Online">
             </div>
 
             <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
-                <button class="btn btn-primary" onclick="saveNewClient()">💾 Guardar Cliente</button>
+                <button class="btn btn-primary" onclick="saveNewClient()">Guardar Cliente</button>
                 <button class="btn btn-secondary" onclick="closeModal('newClientModal')">Cancelar</button>
             </div>
         </div>
@@ -17733,7 +17723,7 @@ gg==" alt="Effort Online">
             </div>
 
             <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
-                <button class="btn btn-primary" onclick="saveNewExercise()">💾 Guardar Ejercicio</button>
+                <button class="btn btn-primary" onclick="saveNewExercise()">Guardar Ejercicio</button>
                 <button class="btn btn-secondary" onclick="closeModal('newExerciseModal')">Cancelar</button>
             </div>
         </div>
@@ -17790,7 +17780,7 @@ gg==" alt="Effort Online">
             </div>
 
             <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
-                <button class="btn btn-primary" onclick="saveNewCall()">📅 Agendar Llamada</button>
+                <button class="btn btn-primary" onclick="saveNewCall()">Agendar Llamada</button>
                 <button class="btn btn-secondary" onclick="closeModal('newCallModal')">Cancelar</button>
             </div>
         </div>
@@ -17897,13 +17887,14 @@ gg==" alt="Effort Online">
                 <div class="client-card">
                     <div class="client-info">
                         <div class="client-name">${c.name}</div>
-                        <div class="client-details">📧 ${c.email} ${c.phone ? '| 📱 ' + c.phone : ''}</div>
-                        <div class="client-details">📅 Alta: ${new Date(c.createdAt).toLocaleDateString('es-ES')}</div>
+                        <div class="client-details">${c.email} ${c.phone ? '| ' + c.phone : ''}</div>
+                        <div class="client-details">Alta: ${new Date(c.createdAt).toLocaleDateString('es-ES')}</div>
                     </div>
                     <span class="client-plan ${planClass[c.plan] || ''}">${(c.plan || '').toUpperCase()}</span>
-                    <button class="btn btn-edit" onclick="openRoutineModal('${c._id}', '${c.name.replace(/'/g,"\\'")}')">✏️ Editar Rutina</button>
+                    <button class="btn btn-edit" onclick="openRoutineModal('${c._id}', '${c.name.replace(/'/g,"\\'")}')">Editar Rutina</button>
                 </div>
             `).join('');
+            lucide.createIcons();
         }
 
         // ─── Ejercicios ──────────────────────────────────────────────
@@ -17911,9 +17902,9 @@ gg==" alt="Effort Online">
         let currentEquipmentFilter = 'todos';
 
         const EQUIPMENT_LABEL = {
-            sin_material: '🤸 Sin material',
-            bandas: '🟡 Bandas',
-            pesas: '🏋️ Pesas'
+            sin_material: 'Sin material',
+            bandas: 'Bandas',
+            pesas: 'Pesas'
         };
 
         function renderExercises(exercises) {
@@ -18034,9 +18025,10 @@ gg==" alt="Effort Online">
                         <div class="exercise-details">${ex.sets} series x ${ex.reps} | Descanso: ${ex.rest}seg</div>
                         ${ex.notes ? `<div class="exercise-details" style="font-style:italic">${ex.notes}</div>` : ''}
                     </div>
-                    <button class="btn-remove" onclick="removeExerciseFromRoutine(${i})">❌</button>
+                    <button class="btn-remove" onclick="removeExerciseFromRoutine(${i})">×</button>
                 </div>
             `).join('');
+            lucide.createIcons();
         }
 
         function addExerciseToRoutine() {
@@ -18075,7 +18067,7 @@ gg==" alt="Effort Online">
                     body: JSON.stringify({ exercises: currentRoutineExercises })
                 });
                 if (!res.ok) throw new Error((await res.json()).error || 'Error al guardar');
-                alert('✅ Rutina guardada. El cliente verá los cambios en su dashboard.');
+                alert('Rutina guardada. El cliente verá los cambios en su dashboard.');
                 closeModal('routineModal');
             } catch(e) {
                 alert('Error: ' + e.message);
@@ -18103,7 +18095,7 @@ gg==" alt="Effort Online">
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.error || 'Error al crear cliente');
 
-                alert(`✅ Cliente ${name} creado correctamente.`);
+                alert(`Cliente ${name} creado correctamente.`);
                 closeModal('newClientModal');
                 const clientsRes = await fetch('/api/admin/clients', { headers: authHeaders() });
                 if (clientsRes.ok) renderClients(await clientsRes.json());
@@ -18131,7 +18123,7 @@ gg==" alt="Effort Online">
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.error || 'Error al crear ejercicio');
 
-                alert(`✅ Ejercicio "${name}" creado correctamente.`);
+                alert(`Ejercicio "${name}" creado correctamente.`);
                 closeModal('newExerciseModal');
                 const exRes = await fetch('/api/admin/exercises', { headers: authHeaders() });
                 if (exRes.ok) renderExercises(await exRes.json());
@@ -18162,7 +18154,7 @@ gg==" alt="Effort Online">
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.error || 'Error al agendar');
 
-                alert('✅ Videollamada agendada correctamente.');
+                alert('Videollamada agendada correctamente.');
                 closeModal('newCallModal');
                 const callsRes = await fetch('/api/admin/videocalls', { headers: authHeaders() });
                 if (callsRes.ok) renderCalls(await callsRes.json());
@@ -18171,7 +18163,7 @@ gg==" alt="Effort Online">
             }
         }
 
-        document.addEventListener('DOMContentLoaded', init);
+        document.addEventListener('DOMContentLoaded', () => { init(); lucide.createIcons(); });
     </script>
 </body>
 </html>

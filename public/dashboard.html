@@ -17909,7 +17909,7 @@ gg==" alt="Effort Online">
 
                     <div id="timerRunning" style="display: none;">
                         <div class="alert alert-success">
-                            ✅ ¡Sesión en curso! Completa <span id="requiredTime"></span> minutos para validar tu entrenamiento.
+                            ¡Sesión en curso! Completa <span id="requiredTime"></span> minutos para validar tu entrenamiento.
                         </div>
 
                         <div class="timer-container">
@@ -18131,8 +18131,8 @@ gg==" alt="Effort Online">
                                     <strong>Plan ÉLITE</strong>
                                     <p style="margin: 0.25rem 0 0; font-size: 0.9rem;">También puedes escribirme directamente por WhatsApp</p>
                                 </div>
-                                <button onclick="openWhatsApp()" style="background: white; color: #00D9A3; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; font-weight: bold; cursor: pointer; margin-left: auto;">
-                                    💬 Abrir WhatsApp
+                                <button onclick="openWhatsApp()" style="background: white; color: #00D9A3; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; font-weight: bold; cursor: pointer; margin-left: auto; display:flex; align-items:center; gap:6px;">
+                                    <i data-lucide="message-circle" style="width:16px;height:16px;"></i> Abrir WhatsApp
                                 </button>
                             </div>
                         </div>
@@ -18594,7 +18594,7 @@ gg==" alt="Effort Online">
             const key    = dayKey(calYear, calMonth, day);
             const events = calEvents();
             document.getElementById('calModalTitle').textContent =
-                `📅 ${day} de ${MONTH_NAMES[calMonth]} ${calYear}`;
+                `${day} de ${MONTH_NAMES[calMonth]} ${calYear}`;
             document.getElementById('calEventNote').value = '';
             document.getElementById('calEventTime').value = '08:00';
             document.getElementById('calAlarm').checked = true;
@@ -18684,7 +18684,7 @@ gg==" alt="Effort Online">
             Notification.requestPermission().then(perm => {
                 updateCalNotifBanner();
                 if (perm === 'granted') {
-                    new Notification('✅ Alarmas activadas', { body: 'Recibirás avisos cuando llegue la hora de entrenar.' });
+                    new Notification('Alarmas activadas', { body: 'Recibirás avisos cuando llegue la hora de entrenar.' });
                 }
             });
         }
@@ -18768,7 +18768,7 @@ gg==" alt="Effort Online">
                             <span class="message-time">Hoy, ${time}</span>
                         </div>
                         <div class="message-text">
-                            ✅ Mensaje recibido. Te responderé en menos de 24 horas.
+                            Mensaje recibido. Te responderé en menos de 24 horas.
                         </div>
                     </div>
                 `;
