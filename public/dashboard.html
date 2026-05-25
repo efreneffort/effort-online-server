@@ -18995,8 +18995,15 @@ gg==" alt="Effort Online">
                 ]);
 
                 if (!userRes.ok) {
+                    const errData = await userRes.json().catch(() => ({}));
                     localStorage.removeItem('authToken');
-                    window.location.href = '/login.html';
+                    if (errData.code === 'SUBSCRIPTION_EXPIRED') {
+                        window.location.href = '/login.html?msg=expired';
+                    } else if (errData.code === 'ACCOUNT_DISABLED') {
+                        window.location.href = '/login.html?msg=disabled';
+                    } else {
+                        window.location.href = '/login.html';
+                    }
                     return;
                 }
 

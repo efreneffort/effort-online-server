@@ -127,6 +127,7 @@ const UserSchema = new mongoose.Schema({
     stripeCustomerId: String,
     stripeSubscriptionId: String,
     isActive: { type: Boolean, default: true },
+    subscriptionEnd: { type: Date, default: null },
     role: { type: String, enum: ['client', 'admin'], default: 'client' },
     createdAt: { type: Date, default: Date.now }
 });
@@ -204,10 +205,26 @@ function authenticateToken(req, res, next) {
         return res.status(401).json({ error: 'Token no proporcionado' });
     }
 
-    jwt.verify(token, JWT_SECRET, (err, user) => {
+    jwt.verify(token, JWT_SECRET, async (err, user) => {
         if (err) {
             return res.status(403).json({ error: 'Token inválido' });
         }
+
+        // Verificar estado del usuario en DB (isActive + subscriptionEnd)
+        try {
+            if (isMongoConnected()) {
+                const dbUser = await User.findById(user.userId).select('isActive subscriptionEnd role');
+                if (!dbUser) return res.status(401).json({ error: 'Usuario no encontrado' });
+                if (!dbUser.isActive) return res.status(403).json({ error: 'Cuenta desactivada. Contacta con tu entrenador.', code: 'ACCOUNT_DISABLED' });
+                if (dbUser.role === 'client' && dbUser.subscriptionEnd && new Date() > new Date(dbUser.subscriptionEnd)) {
+                    return res.status(403).json({ error: 'Tu suscripción ha expirado. Contacta con tu entrenador.', code: 'SUBSCRIPTION_EXPIRED' });
+                }
+            }
+        } catch (dbErr) {
+            console.error('Error verificando usuario en DB:', dbErr);
+            // En caso de error de DB, dejamos pasar (no bloqueamos por error técnico)
+        }
+
         req.user = user;
         next();
     });
@@ -603,6 +620,57 @@ app.get('/api/admin/clients', authenticateToken, isAdmin, async (req, res) => {
         res.json(clients);
     } catch (error) {
         res.status(500).json({ error: 'Error al obtener clientes' });
+    }
+});
+
+// Activar / Desactivar cliente
+app.put('/api/admin/clients/:clientId/toggle-active', authenticateToken, isAdmin, async (req, res) => {
+    try {
+        const client = await User.findById(req.params.clientId);
+        if (!client) return res.status(404).json({ error: 'Cliente no encontrado' });
+        client.isActive = !client.isActive;
+        await client.save();
+        res.json({ isActive: client.isActive });
+    } catch (error) {
+        res.status(500).json({ error: 'Error al actualizar estado' });
+    }
+});
+
+// Actualizar fecha de fin de suscripción
+app.put('/api/admin/clients/:clientId/subscription-end', authenticateToken, isAdmin, async (req, res) => {
+    try {
+        const { subscriptionEnd } = req.body;
+        const client = await User.findByIdAndUpdate(
+            req.params.clientId,
+            { subscriptionEnd: subscriptionEnd ? new Date(subscriptionEnd) : null },
+            { new: true }
+        ).select('-password');
+        if (!client) return res.status(404).json({ error: 'Cliente no encontrado' });
+        res.json({ subscriptionEnd: client.subscriptionEnd });
+    } catch (error) {
+        res.status(500).json({ error: 'Error al actualizar suscripción' });
+    }
+});
+
+// Eliminar cliente y todos sus datos
+app.delete('/api/admin/clients/:clientId', authenticateToken, isAdmin, async (req, res) => {
+    try {
+        const { clientId } = req.params;
+        const client = await User.findById(clientId);
+        if (!client) return res.status(404).json({ error: 'Cliente no encontrado' });
+
+        // Borrar todos los datos asociados
+        await Promise.all([
+            Achievement.deleteMany({ userId: clientId }),
+            WorkoutSession.deleteMany({ userId: clientId }),
+            VideoCall.deleteMany({ userId: clientId }),
+            Routine.deleteOne({ userId: clientId }),
+            User.findByIdAndDelete(clientId)
+        ]);
+
+        res.json({ message: `Cliente ${client.name} eliminado correctamente` });
+    } catch (error) {
+        res.status(500).json({ error: 'Error al eliminar cliente' });
     }
 });
 

@@ -292,6 +292,42 @@
             color: white;
         }
 
+        .btn-danger {
+            background: #fff0f0;
+            color: #c53030;
+            padding: 0.6rem 1.2rem;
+            border: 2px solid #fc8181;
+        }
+        .btn-danger:hover { background: #c53030; color: white; border-color: #c53030; }
+
+        .btn-toggle-active {
+            background: #fff8e1;
+            color: #b7791f;
+            padding: 0.6rem 1.2rem;
+            border: 2px solid #f6e05e;
+        }
+        .btn-toggle-active:hover { background: #b7791f; color: white; border-color: #b7791f; }
+        .btn-toggle-active.is-inactive {
+            background: #f0fff4;
+            color: #276749;
+            border-color: #9ae6b4;
+        }
+        .btn-toggle-active.is-inactive:hover { background: #276749; color: white; border-color: #276749; }
+
+        .client-status {
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 0.2rem 0.55rem;
+            border-radius: 20px;
+            display: inline-block;
+            margin-top: 0.3rem;
+        }
+        .status-active   { background: #d4edda; color: #155724; }
+        .status-inactive { background: #f8d7da; color: #721c24; }
+        .status-expired  { background: #fff3cd; color: #856404; }
+
+        .client-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; margin-top: 0.5rem; }
+
         /* Modal */
         .modal {
             display: none;
@@ -17827,6 +17863,24 @@ gg==" alt="Effort Online">
     </div>
 
     <!-- Modal Detalle de Llamada -->
+    <!-- Modal confirmar borrado de cliente -->
+    <div id="deleteClientModal" class="modal" style="display:none">
+        <div class="modal-content" style="max-width:400px;">
+            <div class="modal-header">
+                <h3 class="modal-title">Eliminar cliente</h3>
+                <button class="close-btn" onclick="closeDeleteModal()">&times;</button>
+            </div>
+            <p style="margin:1rem 0;color:#444">
+                ¿Seguro que quieres eliminar a <strong id="deleteClientName"></strong>?<br>
+                <span style="color:#c53030;font-size:0.88rem">Se borrarán todos sus datos: sesiones, logros, videollamadas y rutina. Esta acción no se puede deshacer.</span>
+            </p>
+            <div style="display:flex;gap:0.8rem;justify-content:flex-end;margin-top:1.5rem">
+                <button class="btn btn-secondary" onclick="closeDeleteModal()">Cancelar</button>
+                <button class="btn btn-danger" onclick="executeDeleteClient()">Sí, eliminar</button>
+            </div>
+        </div>
+    </div>
+
     <div id="callDetailModal" class="modal">
         <div class="modal-content" style="max-width:480px;">
             <div class="modal-header">
@@ -17929,6 +17983,17 @@ gg==" alt="Effort Online">
         // ─── Clientes ────────────────────────────────────────────────
         let clientsCache = [];
 
+        function clientStatusBadge(c) {
+            if (!c.isActive) return '<span class="client-status status-inactive">Desactivado</span>';
+            if (c.subscriptionEnd && new Date() > new Date(c.subscriptionEnd))
+                return '<span class="client-status status-expired">Suscripción expirada</span>';
+            if (c.subscriptionEnd) {
+                const daysLeft = Math.ceil((new Date(c.subscriptionEnd) - new Date()) / 86400000);
+                return `<span class="client-status status-active">Activo · vence en ${daysLeft}d</span>`;
+            }
+            return '<span class="client-status status-active">Activo</span>';
+        }
+
         function renderClients(clients) {
             clientsCache = clients;
             const list = document.getElementById('clientList');
@@ -17937,18 +18002,97 @@ gg==" alt="Effort Online">
                 return;
             }
             const planClass = { basico: 'plan-basico', premium: 'plan-premium', elite: 'plan-elite' };
-            list.innerHTML = clients.map(c => `
-                <div class="client-card">
-                    <div class="client-info">
+            list.innerHTML = clients.map(c => {
+                const isInactive = !c.isActive;
+                const subEndVal = c.subscriptionEnd ? c.subscriptionEnd.slice(0,10) : '';
+                return `
+                <div class="client-card" style="${isInactive ? 'opacity:0.6' : ''}">
+                    <div class="client-info" style="flex:1">
                         <div class="client-name">${c.name}</div>
                         <div class="client-details">${c.email} ${c.phone ? '| ' + c.phone : ''}</div>
                         <div class="client-details">Alta: ${new Date(c.createdAt).toLocaleDateString('es-ES')}</div>
+                        ${clientStatusBadge(c)}
+                        <div style="margin-top:0.4rem;display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap">
+                            <label style="font-size:0.78rem;color:#666">Fin suscripción:</label>
+                            <input type="date" value="${subEndVal}" style="font-size:0.78rem;border:1px solid #ddd;border-radius:6px;padding:0.2rem 0.4rem"
+                                onchange="updateSubscriptionEnd('${c._id}', this.value, this)">
+                        </div>
                     </div>
-                    <span class="client-plan ${planClass[c.plan] || ''}">${(c.plan || '').toUpperCase()}</span>
-                    <button class="btn btn-edit" onclick="openRoutineModal('${c._id}', '${c.name.replace(/'/g,"\\'")}')">Editar Rutina</button>
-                </div>
-            `).join('');
+                    <div style="display:flex;flex-direction:column;gap:0.4rem;align-items:flex-end">
+                        <span class="client-plan ${planClass[c.plan] || ''}">${(c.plan || '').toUpperCase()}</span>
+                        <button class="btn btn-edit" onclick="openRoutineModal('${c._id}', '${c.name.replace(/'/g,"\\'")}')">Editar Rutina</button>
+                        <button class="btn btn-toggle-active ${isInactive ? 'is-inactive' : ''}"
+                            onclick="toggleClientActive('${c._id}', this)">
+                            ${isInactive ? 'Activar' : 'Desactivar'}
+                        </button>
+                        <button class="btn btn-danger" onclick="confirmDeleteClient('${c._id}', '${c.name.replace(/'/g,"\\'")}')">Eliminar</button>
+                    </div>
+                </div>`;
+            }).join('');
             lucide.createIcons();
+        }
+
+        async function toggleClientActive(clientId, btn) {
+            const token = localStorage.getItem('authToken');
+            try {
+                const res = await fetch(`/api/admin/clients/${clientId}/toggle-active`, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!res.ok) throw new Error();
+                const data = await res.json();
+                // Recargar lista
+                const clientsRes = await fetch('/api/admin/clients', { headers: { 'Authorization': `Bearer ${token}` } });
+                if (clientsRes.ok) renderClients(await clientsRes.json());
+            } catch {
+                alert('Error al cambiar estado del cliente.');
+            }
+        }
+
+        async function updateSubscriptionEnd(clientId, dateValue, input) {
+            const token = localStorage.getItem('authToken');
+            try {
+                const res = await fetch(`/api/admin/clients/${clientId}/subscription-end`, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ subscriptionEnd: dateValue || null })
+                });
+                if (!res.ok) throw new Error();
+                input.style.borderColor = '#00D9A3';
+                setTimeout(() => input.style.borderColor = '', 1500);
+                // Refrescar badges de estado
+                const clientsRes = await fetch('/api/admin/clients', { headers: { 'Authorization': `Bearer ${token}` } });
+                if (clientsRes.ok) renderClients(await clientsRes.json());
+            } catch {
+                alert('Error al actualizar fecha de suscripción.');
+            }
+        }
+
+        let deleteTargetId = null;
+        function confirmDeleteClient(clientId, name) {
+            deleteTargetId = clientId;
+            document.getElementById('deleteClientName').textContent = name;
+            document.getElementById('deleteClientModal').style.display = 'flex';
+        }
+        function closeDeleteModal() {
+            deleteTargetId = null;
+            document.getElementById('deleteClientModal').style.display = 'none';
+        }
+        async function executeDeleteClient() {
+            if (!deleteTargetId) return;
+            const token = localStorage.getItem('authToken');
+            try {
+                const res = await fetch(`/api/admin/clients/${deleteTargetId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!res.ok) throw new Error();
+                closeDeleteModal();
+                const clientsRes = await fetch('/api/admin/clients', { headers: { 'Authorization': `Bearer ${token}` } });
+                if (clientsRes.ok) renderClients(await clientsRes.json());
+            } catch {
+                alert('Error al eliminar cliente.');
+            }
         }
 
         // ─── Ejercicios ──────────────────────────────────────────────

@@ -17633,6 +17633,24 @@ gg==" alt="Effort Online">
             }
         }
 
+        // Mostrar mensaje si viene redirigido por suscripción expirada o cuenta desactivada
+        (function() {
+            const msg = new URLSearchParams(window.location.search).get('msg');
+            if (msg === 'expired') {
+                const div = document.createElement('div');
+                div.style.cssText = 'background:#fff3cd;border-left:4px solid #ffc107;border-radius:8px;padding:1rem 1.2rem;margin-bottom:1rem;font-size:0.9rem;color:#856404;max-width:420px;margin-left:auto;margin-right:auto';
+                div.innerHTML = '⏳ <strong>Tu suscripción ha expirado.</strong> Contacta con tu entrenador para renovarla.';
+                const card = document.querySelector('.card');
+                if (card) card.prepend(div);
+            } else if (msg === 'disabled') {
+                const div = document.createElement('div');
+                div.style.cssText = 'background:#fee;border-left:4px solid #e53e3e;border-radius:8px;padding:1rem 1.2rem;margin-bottom:1rem;font-size:0.9rem;color:#c53030;max-width:420px;margin-left:auto;margin-right:auto';
+                div.innerHTML = '🚫 <strong>Tu cuenta está desactivada.</strong> Contacta con tu entrenador.';
+                const card = document.querySelector('.card');
+                if (card) card.prepend(div);
+            }
+        })();
+
         // Initialize pricing on load
         updatePricing();
         lucide.createIcons();
