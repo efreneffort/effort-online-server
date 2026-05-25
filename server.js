@@ -128,6 +128,7 @@ const UserSchema = new mongoose.Schema({
     stripeSubscriptionId: String,
     isActive: { type: Boolean, default: true },
     subscriptionEnd: { type: Date, default: null },
+    subscriptionReminderSent: { type: Boolean, default: false },
     role: { type: String, enum: ['client', 'admin'], default: 'client' },
     createdAt: { type: Date, default: Date.now }
 });
@@ -642,7 +643,7 @@ app.put('/api/admin/clients/:clientId/subscription-end', authenticateToken, isAd
         const { subscriptionEnd } = req.body;
         const client = await User.findByIdAndUpdate(
             req.params.clientId,
-            { subscriptionEnd: subscriptionEnd ? new Date(subscriptionEnd) : null },
+            { subscriptionEnd: subscriptionEnd ? new Date(subscriptionEnd) : null, subscriptionReminderSent: false },
             { new: true }
         ).select('-password');
         if (!client) return res.status(404).json({ error: 'Cliente no encontrado' });
@@ -1403,6 +1404,85 @@ app.get('/api/health', (req, res) => {
         usersInMemory: mongoOk ? null : memDB.users.length
     });
 });
+
+// ============================================
+// JOB DIARIO: RECORDATORIO DE SUSCRIPCIÓN
+// ============================================
+
+async function checkSubscriptionReminders() {
+    if (!isMongoConnected()) return;
+    try {
+        const now = new Date();
+        // Ventana: entre 13 y 16 días desde hoy (cubre reinicios del servidor)
+        const from = new Date(now); from.setDate(now.getDate() + 13);
+        const to   = new Date(now); to.setDate(now.getDate() + 16);
+
+        const clients = await User.find({
+            role: 'client',
+            isActive: true,
+            subscriptionReminderSent: false,
+            subscriptionEnd: { $gte: from, $lte: to }
+        });
+
+        for (const client of clients) {
+            const daysLeft = Math.ceil((new Date(client.subscriptionEnd) - now) / 86400000);
+            const endFormatted = new Date(client.subscriptionEnd).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+
+            await resend.emails.send({
+                from: FROM_EMAIL,
+                to: client.email,
+                replyTo: REPLY_TO,
+                subject: `⏳ Tu suscripción Effort vence en ${daysLeft} días`,
+                html: `
+                    <div style="font-family:'Segoe UI',sans-serif;max-width:560px;margin:0 auto;background:#001030;border-radius:16px;overflow:hidden">
+                        <div style="padding:2rem;text-align:center;background:#001F54">
+                            <div style="font-size:1.8rem;font-weight:800;color:white;letter-spacing:-0.03em">
+                                effort<span style="color:#00D9A3">.</span>
+                            </div>
+                        </div>
+                        <div style="padding:2rem;background:white;border-radius:0 0 16px 16px">
+                            <p style="color:#001F54;font-size:1.1rem;font-weight:700;margin-bottom:0.5rem">
+                                Hola ${client.name.split(' ')[0]} 👋
+                            </p>
+                            <p style="color:#444;line-height:1.6;margin-bottom:1rem">
+                                Te escribimos para recordarte que tu suscripción a <strong>Effort Online</strong>
+                                vence el <strong>${endFormatted}</strong> — quedan <strong>${daysLeft} días</strong>.
+                            </p>
+                            <div style="background:#f0fff4;border-left:4px solid #00D9A3;border-radius:8px;padding:1rem 1.2rem;margin-bottom:1.5rem">
+                                <p style="margin:0;color:#276749;font-size:0.95rem">
+                                    Para renovar tu plan y no perder el acceso, contacta con Efrén.
+                                </p>
+                            </div>
+                            <a href="https://wa.me/34${REPLY_TO.replace(/\D/g,'')}"
+                               style="display:inline-block;background:#00D9A3;color:#001F54;font-weight:700;padding:0.85rem 2rem;border-radius:10px;text-decoration:none;font-size:1rem">
+                                Contactar con Efrén
+                            </a>
+                            <p style="color:#999;font-size:0.82rem;margin-top:2rem">
+                                Effort Online · Tu entrenador personal online
+                            </p>
+                        </div>
+                    </div>
+                `
+            });
+
+            client.subscriptionReminderSent = true;
+            await client.save();
+            console.log(`📧 Recordatorio enviado a ${client.email} (vence ${endFormatted})`);
+        }
+
+        if (clients.length === 0) {
+            console.log('📅 Recordatorios: ningún cliente vence en ~15 días');
+        }
+    } catch (err) {
+        console.error('Error en checkSubscriptionReminders:', err.message);
+    }
+}
+
+// Ejecutar al arrancar y luego cada 24h
+setTimeout(() => {
+    checkSubscriptionReminders();
+    setInterval(checkSubscriptionReminders, 24 * 60 * 60 * 1000);
+}, 10000); // espera 10s a que MongoDB esté listo
 
 // ============================================
 // INICIAR SERVIDOR
