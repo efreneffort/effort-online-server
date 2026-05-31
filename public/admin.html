@@ -17905,7 +17905,7 @@ gg==" alt="Effort Online">
     </div>
 
     <!-- Modal editar llamada -->
-    <div id="editCallModal" class="modal" style="display:none">
+    <div id="editCallModal" class="modal">
         <div class="modal-content" style="max-width:440px">
             <div class="modal-header">
                 <h3 class="modal-title">Editar llamada</h3>
@@ -17953,7 +17953,7 @@ gg==" alt="Effort Online">
     </div>
 
     <!-- Modal editar nombre ejercicio -->
-    <div id="editExerciseModal" class="modal" style="display:none">
+    <div id="editExerciseModal" class="modal">
         <div class="modal-content" style="max-width:400px">
             <div class="modal-header">
                 <h3 class="modal-title">Editar ejercicio</h3>
@@ -17973,7 +17973,7 @@ gg==" alt="Effort Online">
     </div>
 
     <!-- Modal confirmar borrado de cliente -->
-    <div id="deleteClientModal" class="modal" style="display:none">
+    <div id="deleteClientModal" class="modal">
         <div class="modal-content" style="max-width:400px;">
             <div class="modal-header">
                 <h3 class="modal-title">Eliminar cliente</h3>
@@ -18181,11 +18181,11 @@ gg==" alt="Effort Online">
         function confirmDeleteClient(clientId, name) {
             deleteTargetId = clientId;
             document.getElementById('deleteClientName').textContent = name;
-            document.getElementById('deleteClientModal').style.display = 'flex';
+            document.getElementById('deleteClientModal').classList.add('active');
         }
         function closeDeleteModal() {
             deleteTargetId = null;
-            document.getElementById('deleteClientModal').style.display = 'none';
+            document.getElementById('deleteClientModal').classList.remove('active');
         }
         async function executeDeleteClient() {
             if (!deleteTargetId) return;
@@ -18281,7 +18281,7 @@ gg==" alt="Effort Online">
         function openEditExercise() {
             closeExerciseMenu();
             document.getElementById('editExerciseNameInput').value = ctxExerciseName;
-            document.getElementById('editExerciseModal').style.display = 'flex';
+            document.getElementById('editExerciseModal').classList.add('active');
             setTimeout(() => document.getElementById('editExerciseNameInput').focus(), 100);
         }
 
@@ -18503,7 +18503,7 @@ gg==" alt="Effort Online">
             document.getElementById('editCallType').value     = c.type || 'seguimiento';
             document.getElementById('editCallDuration').value = c.duration || 30;
             document.getElementById('editCallNotes').value    = c.notes || '';
-            document.getElementById('editCallModal').style.display = 'flex';
+            document.getElementById('editCallModal').classList.add('active');
         }
 
         async function saveEditCall() {
