@@ -181,7 +181,8 @@ const VideoCallSchema = new mongoose.Schema({
     duration: Number,
     type: String,
     notes: String,
-    completed: { type: Boolean, default: false }
+    completed: { type: Boolean, default: false },
+    reminderSent: { type: Boolean, default: false }
 });
 
 const VideoCall = mongoose.model('VideoCall', VideoCallSchema);
@@ -407,7 +408,7 @@ app.post('/api/payments/create-checkout-session', authenticateToken, async (req,
         const periodNames = { monthly: 'Mensual', quarterly: 'Trimestral', biannual: 'Semestral', annual: 'Anual' };
 
         const amount  = prices[plan][period];
-        const APP_URL = process.env.APP_URL || 'http://localhost:3000';
+        const APP_URL = appBase();
 
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],
@@ -927,6 +928,26 @@ const BADGE_NAME = {
     timer_50:       'Máquina',
 };
 
+// ── Helper: pie de email con links clicables ─────────────────────────────────
+function emailFooter() {
+    const phone = ADMIN_PHONE ? ADMIN_PHONE.replace(/^34/, '0').replace(/(\d{3})(\d{3})(\d{3})/, '$1 $2 $3') : '609 539 485';
+    const waHref = ADMIN_PHONE ? `https://wa.me/${ADMIN_PHONE}` : `tel:${phone}`;
+    return `
+        <div style="background:#f8f9fa;padding:1.2rem;text-align:center;color:#999;font-size:0.82rem">
+            <p style="margin:0">
+                <a href="mailto:${REPLY_TO}" style="color:#999;text-decoration:none">${REPLY_TO}</a>
+                &nbsp;|&nbsp;
+                <a href="${waHref}" style="color:#999;text-decoration:none">📱 ${phone}</a>
+            </p>
+            <p style="margin:0.4rem 0 0;color:#bbb;font-size:0.78rem">Effort Online · Tu entrenador personal online</p>
+        </div>`;
+}
+
+// ── Helper: base URL de la app ────────────────────────────────────────────────
+function appBase() {
+    return (process.env.APP_URL || 'https://app.effortpozuelo.com').replace(/\/$/, '');
+}
+
 async function sendWorkoutNotificationToTrainer(user, duration, newBadges = []) {
     try {
         const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'hola@effortpozuelo.com';
@@ -990,8 +1011,6 @@ async function sendWelcomeEmail(user) {
             elite: 'ÉLITE'
         };
 
-        const APP_URL = process.env.APP_URL || 'http://localhost:3000';
-
         const { data, error } = await resend.emails.send({
             from: FROM_EMAIL,
             to: user.email,
@@ -1034,7 +1053,7 @@ async function sendWelcomeEmail(user) {
                             </ol>
 
                             <div style="text-align: center; margin: 2rem 0;">
-                                <a href="${APP_URL}/login.html" style="display: inline-block; background: #00D9A3; color: #001F54; padding: 1rem 2rem; text-decoration: none; border-radius: 8px; font-weight: bold; max-width: 100%; box-sizing: border-box;">
+                                <a href="${appBase()}/login.html" style="display: inline-block; background: #00D9A3; color: #001F54; padding: 1rem 2rem; text-decoration: none; border-radius: 8px; font-weight: bold; max-width: 100%; box-sizing: border-box;">
                                     Acceder a mi cuenta
                                 </a>
                             </div>
@@ -1050,14 +1069,7 @@ async function sendWelcomeEmail(user) {
                         </div>
                         
                         <!-- Footer -->
-                        <div style="background: #f8f9fa; padding: 1.5rem; text-align: center; color: #999; font-size: 0.85rem;">
-                            <p style="margin: 0 0 0.5rem;">
-                                <strong>Effort Online</strong> - Entrenamiento personal
-                            </p>
-                            <p style="margin: 0;">
-                                📧 effortentrenador@gmail.com | 📱 609 539 485
-                            </p>
-                        </div>
+                        ${emailFooter()}
                     </div>
                 </body>
                 </html>
@@ -1129,12 +1141,7 @@ async function sendPasswordResetEmail(email, resetToken) {
                             </p>
                         </div>
 
-                        <div style="background: #f8f9fa; padding: 1.5rem; text-align: center; color: #999; font-size: 0.85rem;">
-                            <p style="margin: 0;">
-                                <a href="mailto:effortentrenador@gmail.com" style="color: #999; text-decoration: none;">effortentrenador@gmail.com</a>
-                                &nbsp;|&nbsp; 609 539 485
-                            </p>
-                        </div>
+                        ${emailFooter()}
                     </div>
                 </body>
                 </html>
@@ -1169,8 +1176,6 @@ async function sendPaymentConfirmationEmail(user, amount, plan, period) {
             biannual: 'Semestral',
             annual: 'Anual'
         };
-
-        const APP_URL = process.env.APP_URL || 'http://localhost:3000';
 
         const { data, error } = await resend.emails.send({
             from: FROM_EMAIL,
@@ -1217,7 +1222,7 @@ async function sendPaymentConfirmationEmail(user, amount, plan, period) {
                             </p>
                             
                             <div style="text-align: center; margin: 2rem 0;">
-                                <a href="${APP_URL}/dashboard.html" style="display: inline-block; background: #00D9A3; color: #001F54; padding: 1rem 2rem; text-decoration: none; border-radius: 8px; font-weight: bold; max-width: 100%; box-sizing: border-box;">
+                                <a href="${appBase()}/dashboard.html" style="display: inline-block; background: #00D9A3; color: #001F54; padding: 1rem 2rem; text-decoration: none; border-radius: 8px; font-weight: bold; max-width: 100%; box-sizing: border-box;">
                                     Acceder a mi dashboard
                                 </a>
                             </div>
@@ -1228,9 +1233,7 @@ async function sendPaymentConfirmationEmail(user, amount, plan, period) {
                             </p>
                         </div>
                         
-                        <div style="background: #f8f9fa; padding: 1.5rem; text-align: center; color: #999; font-size: 0.85rem;">
-                            <p style="margin: 0;">📧 effortentrenador@gmail.com | 📱 609 539 485</p>
-                        </div>
+                        ${emailFooter()}
                     </div>
                 </body>
                 </html>
@@ -1299,9 +1302,7 @@ async function sendVideoCallReminderEmail(user, callDate, callType) {
                             </p>
                         </div>
                         
-                        <div style="background: #f8f9fa; padding: 1.5rem; text-align: center; color: #999; font-size: 0.85rem;">
-                            <p style="margin: 0;">📧 effortentrenador@gmail.com | 📱 609 539 485</p>
-                        </div>
+                        ${emailFooter()}
                     </div>
                 </body>
                 </html>
@@ -1326,7 +1327,7 @@ async function sendVideoCallReminderEmail(user, callDate, callType) {
 // ============================================
 
 // Endpoint: Solicitar recuperación de contraseña
-app.post('/api/auth/forgot-password', async (req, res) => {
+app.post('/api/auth/forgot-password', authLimiter, async (req, res) => {
     try {
         const { email } = req.body;
 
@@ -1476,7 +1477,29 @@ async function checkSubscriptionReminders() {
         }
 
         if (clients.length === 0) {
-            console.log('📅 Recordatorios: ningún cliente vence en ~15 días');
+            console.log('📅 Recordatorios suscripción: ningún cliente vence en ~15 días');
+        }
+
+        // ── Recordatorios de videollamadas (mañana) ──────────────────────────
+        const tomorrowStart = new Date(now); tomorrowStart.setDate(now.getDate() + 1); tomorrowStart.setHours(0, 0, 0, 0);
+        const tomorrowEnd   = new Date(tomorrowStart); tomorrowEnd.setHours(23, 59, 59, 999);
+
+        const calls = await VideoCall.find({
+            scheduledFor: { $gte: tomorrowStart, $lte: tomorrowEnd },
+            completed: false,
+            reminderSent: false
+        }).populate('userId', 'name email plan isActive');
+
+        for (const call of calls) {
+            if (!call.userId || !call.userId.isActive) continue;
+            const typeLabel = { seguimiento: 'Seguimiento', evaluacion: 'Evaluación Inicial', revision: 'Revisión de Rutina' }[call.type] || call.type;
+            await sendVideoCallReminderEmail(call.userId, call.scheduledFor, typeLabel);
+            call.reminderSent = true;
+            await call.save();
+        }
+
+        if (calls.length > 0) {
+            console.log(`📅 Recordatorios videollamada enviados: ${calls.length}`);
         }
     } catch (err) {
         console.error('Error en checkSubscriptionReminders:', err.message);
