@@ -17896,7 +17896,7 @@ gg==" alt="Effort Online">
 
     <!-- Modal Detalle de Llamada -->
     <!-- Menú contextual llamada (long-press) -->
-    <div id="callContextMenu" style="display:none;position:fixed;background:white;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,0.18);overflow:hidden;z-index:9999;min-width:200px;">
+    <div id="callContextMenu" onpointerdown="event.stopPropagation()" style="display:none;position:fixed;background:white;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,0.18);overflow:hidden;z-index:9999;min-width:200px;">
         <div style="padding:0.6rem 1.2rem 0.4rem;font-size:0.78rem;color:#999;font-weight:600;text-transform:uppercase;letter-spacing:0.05em" id="ctxCallLabel"></div>
         <hr class="ctx-divider">
         <button class="ctx-item" onclick="openEditCall()">✏️ Editar llamada</button>
@@ -17944,7 +17944,7 @@ gg==" alt="Effort Online">
     </div>
 
     <!-- Menú contextual ejercicio (long-press) -->
-    <div id="exerciseContextMenu">
+    <div id="exerciseContextMenu" onpointerdown="event.stopPropagation()">
         <div style="padding:0.6rem 1.2rem 0.4rem;font-size:0.78rem;color:#999;font-weight:600;text-transform:uppercase;letter-spacing:0.05em" id="ctxExerciseName"></div>
         <hr class="ctx-divider">
         <button class="ctx-item" onclick="openEditExercise()">✏️ Editar nombre</button>
