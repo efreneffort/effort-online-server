@@ -17728,11 +17728,16 @@ gg==" alt="Effort Online">
             emailInput.style.borderColor = '#e0e0e0';
 
             try {
+                const controller = new AbortController();
+                const timeout = setTimeout(() => controller.abort(), 15000);
+
                 const response = await fetch('/api/auth/forgot-password', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email })
+                    body: JSON.stringify({ email }),
+                    signal: controller.signal
                 });
+                clearTimeout(timeout);
 
                 const data = await response.json();
 
