@@ -18234,10 +18234,13 @@ gg==" alt="Effort Online">
             // Long-press en cada ejercicio
             list.querySelectorAll('.exercise-item').forEach(el => {
                 let timer;
+                let longPressed = false;
                 el.addEventListener('pointerdown', e => {
-                    timer = setTimeout(() => showExerciseMenu(el, e), 600);
+                    longPressed = false;
+                    timer = setTimeout(() => { longPressed = true; showExerciseMenu(el, e); }, 600);
                 });
-                el.addEventListener('pointerup',   () => clearTimeout(timer));
+                el.addEventListener('pointerup',    () => { clearTimeout(timer); longPressed = false; });
+                el.addEventListener('pointermove',  () => clearTimeout(timer));
                 el.addEventListener('pointerleave', () => clearTimeout(timer));
                 el.addEventListener('contextmenu',  e => { e.preventDefault(); showExerciseMenu(el, e); });
             });
@@ -18349,20 +18352,30 @@ gg==" alt="Effort Online">
                 const name  = c.userId?.name || '—';
                 const type  = CALL_TYPE_LABEL[c.type] || c.type || 'Seguimiento';
                 const time  = showDate ? `${fecha} — ${hora}` : hora;
-                return `<div class="appointment" data-idx="${idx}" data-id="${c._id}" onclick="openCallDetail(${idx})" title="Toca para ver · Mantén para editar">
+                return `<div class="appointment" data-idx="${idx}" data-id="${c._id}" title="Toca para ver · Mantén para editar/borrar">
                     <div class="appointment-time">${time} | ${name}</div>
                     <div class="appointment-client">${type} · ${c.duration || 30} min${c.notes ? ' · <em>tiene notas</em>' : ''}</div>
                 </div>`;
             }
 
-            // Long-press en llamadas (después de renderizar)
+            // Long-press: tap corto → detalle, tap largo → menú editar/borrar
             setTimeout(() => {
                 document.querySelectorAll('.appointment[data-id]').forEach(el => {
                     let timer;
+                    let longPressed = false;
+
                     el.addEventListener('pointerdown', e => {
-                        timer = setTimeout(() => { e.preventDefault(); showCallMenu(el, e); }, 600);
+                        longPressed = false;
+                        timer = setTimeout(() => {
+                            longPressed = true;
+                            showCallMenu(el, e);
+                        }, 600);
                     });
-                    el.addEventListener('pointerup',    () => clearTimeout(timer));
+                    el.addEventListener('pointerup', () => {
+                        clearTimeout(timer);
+                        if (!longPressed) openCallDetail(parseInt(el.dataset.idx));
+                        longPressed = false;
+                    });
                     el.addEventListener('pointermove',  () => clearTimeout(timer));
                     el.addEventListener('contextmenu',  e => { e.preventDefault(); showCallMenu(el, e); });
                 });
