@@ -798,6 +798,15 @@ app.post('/api/admin/videocalls', authenticateToken, isAdmin, async (req, res) =
     try {
         const videoCall = new VideoCall(req.body);
         await videoCall.save();
+
+        // Enviar confirmación inmediata al cliente
+        const client = await User.findById(videoCall.userId).select('name email isActive');
+        if (client && client.isActive) {
+            const typeLabel = { seguimiento: 'Seguimiento', evaluacion: 'Evaluación Inicial', revision: 'Revisión de Rutina' }[videoCall.type] || videoCall.type;
+            sendVideoCallConfirmationEmail(client, videoCall.scheduledFor, typeLabel, videoCall.duration || 30)
+                .catch(err => console.error('Error enviando confirmación videollamada:', err));
+        }
+
         res.status(201).json(videoCall);
     } catch (error) {
         res.status(500).json({ error: 'Error al agendar videollamada' });
@@ -1309,6 +1318,54 @@ async function sendPaymentConfirmationEmail(user, amount, plan, period) {
 }
 
 // Email de recordatorio de videollamada
+// Email de CONFIRMACIÓN inmediata al agendar videollamada
+async function sendVideoCallConfirmationEmail(user, callDate, callType, duration) {
+    try {
+        const dt = new Date(callDate);
+        const fecha = dt.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Madrid' });
+        const hora  = dt.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Madrid' });
+
+        const { data, error } = await resend.emails.send({
+            from: FROM_EMAIL,
+            to: user.email,
+            replyTo: REPLY_TO,
+            subject: `📅 Videollamada confirmada — ${fecha}`,
+            html: `
+                <!DOCTYPE html><html>
+                <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>
+                <body style="font-family:'Segoe UI',Arial,sans-serif;margin:0;padding:0 16px;background:#f5f5f5;box-sizing:border-box">
+                    <div style="max-width:560px;width:100%;margin:0 auto;background:white;border-radius:16px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,0.1)">
+                        <div style="background:linear-gradient(135deg,#001F54 0%,#003580 100%);padding:2rem;text-align:center">
+                            <div style="font-size:1.8rem;font-weight:800;color:white;letter-spacing:-0.03em">effort<span style="color:#00D9A3">.</span></div>
+                            <p style="color:#00D9A3;margin:0.3rem 0 0;font-size:0.9rem">VIDEOLLAMADA CONFIRMADA</p>
+                        </div>
+                        <div style="padding:2rem">
+                            <p style="color:#001F54;font-size:1.05rem;font-weight:700;margin-bottom:0.5rem">Hola ${user.name.split(' ')[0]} 👋</p>
+                            <p style="color:#444;line-height:1.6;margin-bottom:1.5rem">Tu videollamada con Efrén ha quedado confirmada:</p>
+                            <div style="background:#f0fff4;border-left:4px solid #00D9A3;border-radius:8px;padding:1.2rem 1.5rem;margin-bottom:1.5rem">
+                                <p style="margin:0 0 0.4rem;color:#001F54;font-weight:700">📞 ${callType}</p>
+                                <p style="margin:0 0 0.2rem;color:#444">📅 ${fecha}</p>
+                                <p style="margin:0 0 0.2rem;color:#444">🕐 ${hora}</p>
+                                <p style="margin:0;color:#444">⏱ ${duration} minutos</p>
+                            </div>
+                            <p style="color:#555;line-height:1.6;font-size:0.92rem">Te enviaré el enlace de la videollamada por WhatsApp <strong>15 minutos antes</strong> de la hora.</p>
+                            <p style="color:#001F54;margin-top:2rem">¡Nos vemos pronto! 💪<br><span style="color:#00D9A3">Efrén</span></p>
+                        </div>
+                        ${emailFooter()}
+                    </div>
+                </body></html>
+            `
+        });
+        if (error) { console.error('Error enviando confirmación llamada:', error); return false; }
+        console.log(`✅ Confirmación videollamada enviada a ${user.email}`);
+        return true;
+    } catch (err) {
+        console.error('Error en sendVideoCallConfirmationEmail:', err);
+        return false;
+    }
+}
+
+// Email de RECORDATORIO el día anterior
 async function sendVideoCallReminderEmail(user, callDate, callType) {
     try {
         const formattedDate = new Date(callDate).toLocaleString('es-ES', {
@@ -1543,7 +1600,7 @@ async function checkSubscriptionReminders() {
         const calls = await VideoCall.find({
             scheduledFor: { $gte: tomorrowStart, $lte: tomorrowEnd },
             completed: false,
-            reminderSent: false
+            reminderSent: { $ne: true }   // cubre false, null y undefined (campos pre-existentes)
         }).populate('userId', 'name email plan isActive');
 
         for (const call of calls) {
