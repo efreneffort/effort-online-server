@@ -767,6 +767,32 @@ app.delete('/api/admin/exercises/:id', authenticateToken, isAdmin, async (req, r
     }
 });
 
+// Editar videollamada
+app.put('/api/admin/videocalls/:id', authenticateToken, isAdmin, async (req, res) => {
+    try {
+        const call = await VideoCall.findByIdAndUpdate(
+            req.params.id,
+            { ...req.body, reminderSent: false },
+            { new: true }
+        );
+        if (!call) return res.status(404).json({ error: 'Llamada no encontrada' });
+        res.json(call);
+    } catch (error) {
+        res.status(500).json({ error: 'Error al actualizar llamada' });
+    }
+});
+
+// Eliminar videollamada
+app.delete('/api/admin/videocalls/:id', authenticateToken, isAdmin, async (req, res) => {
+    try {
+        const call = await VideoCall.findByIdAndDelete(req.params.id);
+        if (!call) return res.status(404).json({ error: 'Llamada no encontrada' });
+        res.json({ message: 'Llamada eliminada' });
+    } catch (error) {
+        res.status(500).json({ error: 'Error al eliminar llamada' });
+    }
+});
+
 // Agendar videollamada
 app.post('/api/admin/videocalls', authenticateToken, isAdmin, async (req, res) => {
     try {

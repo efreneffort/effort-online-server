@@ -17895,6 +17895,54 @@ gg==" alt="Effort Online">
     </div>
 
     <!-- Modal Detalle de Llamada -->
+    <!-- Menú contextual llamada (long-press) -->
+    <div id="callContextMenu" style="display:none;position:fixed;background:white;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,0.18);overflow:hidden;z-index:9999;min-width:200px;">
+        <div style="padding:0.6rem 1.2rem 0.4rem;font-size:0.78rem;color:#999;font-weight:600;text-transform:uppercase;letter-spacing:0.05em" id="ctxCallLabel"></div>
+        <hr class="ctx-divider">
+        <button class="ctx-item" onclick="openEditCall()">✏️ Editar llamada</button>
+        <hr class="ctx-divider">
+        <button class="ctx-item danger" onclick="confirmDeleteCall()">🗑️ Eliminar</button>
+    </div>
+
+    <!-- Modal editar llamada -->
+    <div id="editCallModal" class="modal" style="display:none">
+        <div class="modal-content" style="max-width:440px">
+            <div class="modal-header">
+                <h3 class="modal-title">Editar llamada</h3>
+                <button class="close-btn" onclick="closeModal('editCallModal')">&times;</button>
+            </div>
+            <div style="margin-top:1rem;display:flex;flex-direction:column;gap:1rem">
+                <div class="form-group" style="margin:0">
+                    <label>Fecha y hora</label>
+                    <input type="datetime-local" id="editCallDate"
+                        style="width:100%;padding:0.8rem;border:1.5px solid #dde0e4;border-radius:10px;font-size:0.95rem">
+                </div>
+                <div class="form-group" style="margin:0">
+                    <label>Tipo</label>
+                    <select id="editCallType" style="width:100%;padding:0.8rem;border:1.5px solid #dde0e4;border-radius:10px;font-size:0.95rem">
+                        <option value="seguimiento">Seguimiento</option>
+                        <option value="evaluacion">Evaluación Inicial</option>
+                        <option value="revision">Revisión de Rutina</option>
+                    </select>
+                </div>
+                <div class="form-group" style="margin:0">
+                    <label>Duración (minutos)</label>
+                    <input type="number" id="editCallDuration" min="15" max="120" step="15"
+                        style="width:100%;padding:0.8rem;border:1.5px solid #dde0e4;border-radius:10px;font-size:0.95rem">
+                </div>
+                <div class="form-group" style="margin:0">
+                    <label>Notas</label>
+                    <textarea id="editCallNotes" rows="3"
+                        style="width:100%;padding:0.8rem;border:1.5px solid #dde0e4;border-radius:10px;font-size:0.95rem;resize:vertical;font-family:inherit"></textarea>
+                </div>
+            </div>
+            <div style="display:flex;gap:0.8rem;justify-content:flex-end;margin-top:1.5rem">
+                <button class="btn btn-secondary" onclick="closeModal('editCallModal')">Cancelar</button>
+                <button class="btn" onclick="saveEditCall()">Guardar</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Menú contextual ejercicio (long-press) -->
     <div id="exerciseContextMenu">
         <div style="padding:0.6rem 1.2rem 0.4rem;font-size:0.78rem;color:#999;font-weight:600;text-transform:uppercase;letter-spacing:0.05em" id="ctxExerciseName"></div>
@@ -18301,11 +18349,24 @@ gg==" alt="Effort Online">
                 const name  = c.userId?.name || '—';
                 const type  = CALL_TYPE_LABEL[c.type] || c.type || 'Seguimiento';
                 const time  = showDate ? `${fecha} — ${hora}` : hora;
-                return `<div class="appointment" onclick="openCallDetail(${idx})" title="Ver detalles">
+                return `<div class="appointment" data-idx="${idx}" data-id="${c._id}" onclick="openCallDetail(${idx})" title="Toca para ver · Mantén para editar">
                     <div class="appointment-time">${time} | ${name}</div>
                     <div class="appointment-client">${type} · ${c.duration || 30} min${c.notes ? ' · <em>tiene notas</em>' : ''}</div>
                 </div>`;
             }
+
+            // Long-press en llamadas (después de renderizar)
+            setTimeout(() => {
+                document.querySelectorAll('.appointment[data-id]').forEach(el => {
+                    let timer;
+                    el.addEventListener('pointerdown', e => {
+                        timer = setTimeout(() => { e.preventDefault(); showCallMenu(el, e); }, 600);
+                    });
+                    el.addEventListener('pointerup',    () => clearTimeout(timer));
+                    el.addEventListener('pointermove',  () => clearTimeout(timer));
+                    el.addEventListener('contextmenu',  e => { e.preventDefault(); showCallMenu(el, e); });
+                });
+            }, 50);
 
             // Lista completa en sección videollamadas
             const list = document.getElementById('callsList');
@@ -18373,6 +18434,86 @@ gg==" alt="Effort Online">
                 }`;
 
             document.getElementById('callDetailModal').classList.add('active');
+        }
+
+        // ─── Long-press llamadas ──────────────────────────────────────
+        let ctxCallId  = null;
+        let ctxCallIdx = null;
+
+        function showCallMenu(el, e) {
+            ctxCallId  = el.dataset.id;
+            ctxCallIdx = parseInt(el.dataset.idx);
+            const c    = callsDataCache[ctxCallIdx];
+            const dt   = new Date(c.scheduledFor);
+            const label = `${c.userId?.name || '—'} · ${dt.toLocaleDateString('es-ES',{day:'numeric',month:'short'})} ${dt.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'})}`;
+            document.getElementById('ctxCallLabel').textContent = label;
+
+            const menu = document.getElementById('callContextMenu');
+            menu.style.display = 'block';
+            const x = Math.min(e.clientX, window.innerWidth  - menu.offsetWidth  - 12);
+            const y = Math.min(e.clientY, window.innerHeight - menu.offsetHeight - 12);
+            menu.style.left = x + 'px';
+            menu.style.top  = y + 'px';
+            setTimeout(() => document.addEventListener('pointerdown', closeCallMenu, { once: true }), 50);
+        }
+
+        function closeCallMenu() {
+            document.getElementById('callContextMenu').style.display = 'none';
+        }
+
+        function openEditCall() {
+            closeCallMenu();
+            const c  = callsDataCache[ctxCallIdx];
+            const dt = new Date(c.scheduledFor);
+            // Formato datetime-local: YYYY-MM-DDTHH:MM
+            const local = new Date(dt.getTime() - dt.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+            document.getElementById('editCallDate').value     = local;
+            document.getElementById('editCallType').value     = c.type || 'seguimiento';
+            document.getElementById('editCallDuration').value = c.duration || 30;
+            document.getElementById('editCallNotes').value    = c.notes || '';
+            document.getElementById('editCallModal').style.display = 'flex';
+        }
+
+        async function saveEditCall() {
+            const token = localStorage.getItem('authToken');
+            const body = {
+                scheduledFor: new Date(document.getElementById('editCallDate').value).toISOString(),
+                type:         document.getElementById('editCallType').value,
+                duration:     parseInt(document.getElementById('editCallDuration').value),
+                notes:        document.getElementById('editCallNotes').value.trim()
+            };
+            try {
+                const res = await fetch(`/api/admin/videocalls/${ctxCallId}`, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                if (!res.ok) throw new Error();
+                closeModal('editCallModal');
+                const callsRes = await fetch('/api/admin/videocalls', { headers: { 'Authorization': `Bearer ${token}` } });
+                if (callsRes.ok) renderCalls(await callsRes.json());
+            } catch {
+                alert('Error al guardar la llamada.');
+            }
+        }
+
+        async function confirmDeleteCall() {
+            closeCallMenu();
+            const c = callsDataCache[ctxCallIdx];
+            const name = c.userId?.name || 'esta llamada';
+            if (!confirm(`¿Eliminar la llamada con ${name}? No se puede deshacer.`)) return;
+            const token = localStorage.getItem('authToken');
+            try {
+                const res = await fetch(`/api/admin/videocalls/${ctxCallId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!res.ok) throw new Error();
+                const callsRes = await fetch('/api/admin/videocalls', { headers: { 'Authorization': `Bearer ${token}` } });
+                if (callsRes.ok) renderCalls(await callsRes.json());
+            } catch {
+                alert('Error al eliminar la llamada.');
+            }
         }
 
         function populateCallClientSelect() {
