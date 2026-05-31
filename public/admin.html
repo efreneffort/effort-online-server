@@ -18235,14 +18235,21 @@ gg==" alt="Effort Online">
             list.querySelectorAll('.exercise-item').forEach(el => {
                 let timer;
                 let longPressed = false;
-                el.addEventListener('pointerdown', e => {
+                let startX, startY;
+
+                el.addEventListener('touchstart', e => {
                     longPressed = false;
-                    timer = setTimeout(() => { longPressed = true; showExerciseMenu(el, e); }, 600);
-                });
-                el.addEventListener('pointerup',    () => { clearTimeout(timer); longPressed = false; });
-                el.addEventListener('pointermove',  () => clearTimeout(timer));
-                el.addEventListener('pointerleave', () => clearTimeout(timer));
-                el.addEventListener('contextmenu',  e => { e.preventDefault(); showExerciseMenu(el, e); });
+                    startX = e.touches[0].clientX;
+                    startY = e.touches[0].clientY;
+                    timer = setTimeout(() => {
+                        longPressed = true;
+                        showExerciseMenu(el, { clientX: startX, clientY: startY });
+                    }, 600);
+                }, { passive: true });
+
+                el.addEventListener('touchend', () => { clearTimeout(timer); longPressed = false; });
+                el.addEventListener('touchmove', () => clearTimeout(timer), { passive: true });
+                el.addEventListener('contextmenu', e => { e.preventDefault(); showExerciseMenu(el, e); });
             });
         }
 
@@ -18257,14 +18264,14 @@ gg==" alt="Effort Online">
             document.getElementById('ctxExerciseName').textContent = ctxExerciseName;
             menu.style.display = 'block';
 
-            // Posicionar cerca del toque sin salirse de pantalla
-            const x = Math.min(e.clientX, window.innerWidth  - menu.offsetWidth  - 12);
-            const y = Math.min(e.clientY, window.innerHeight - menu.offsetHeight - 12);
+            const mw = menu.offsetWidth  || 220;
+            const mh = menu.offsetHeight || 130;
+            const x = Math.min(Math.max(e.clientX - mw/2, 8), window.innerWidth  - mw - 8);
+            const y = Math.min(Math.max(e.clientY - mh/2, 8), window.innerHeight - mh - 8);
             menu.style.left = x + 'px';
             menu.style.top  = y + 'px';
 
-            // Cerrar al tocar fuera
-            setTimeout(() => document.addEventListener('pointerdown', closeExerciseMenu, { once: true }), 50);
+            setTimeout(() => document.addEventListener('click', closeExerciseMenu, { once: true }), 100);
         }
 
         function closeExerciseMenu() {
@@ -18363,21 +18370,30 @@ gg==" alt="Effort Online">
                 document.querySelectorAll('.appointment[data-id]').forEach(el => {
                     let timer;
                     let longPressed = false;
+                    let startX, startY;
 
-                    el.addEventListener('pointerdown', e => {
+                    el.addEventListener('touchstart', e => {
                         longPressed = false;
+                        startX = e.touches[0].clientX;
+                        startY = e.touches[0].clientY;
                         timer = setTimeout(() => {
                             longPressed = true;
-                            showCallMenu(el, e);
+                            showCallMenu(el, { clientX: startX, clientY: startY });
                         }, 600);
-                    });
-                    el.addEventListener('pointerup', () => {
+                    }, { passive: true });
+
+                    el.addEventListener('touchend', e => {
                         clearTimeout(timer);
                         if (!longPressed) openCallDetail(parseInt(el.dataset.idx));
                         longPressed = false;
                     });
-                    el.addEventListener('pointermove',  () => clearTimeout(timer));
-                    el.addEventListener('contextmenu',  e => { e.preventDefault(); showCallMenu(el, e); });
+
+                    el.addEventListener('touchmove', e => {
+                        clearTimeout(timer);
+                    }, { passive: true });
+
+                    // Escritorio: clic derecho
+                    el.addEventListener('contextmenu', e => { e.preventDefault(); showCallMenu(el, e); });
                 });
             }, 50);
 
@@ -18463,11 +18479,14 @@ gg==" alt="Effort Online">
 
             const menu = document.getElementById('callContextMenu');
             menu.style.display = 'block';
-            const x = Math.min(e.clientX, window.innerWidth  - menu.offsetWidth  - 12);
-            const y = Math.min(e.clientY, window.innerHeight - menu.offsetHeight - 12);
+            // Posicionar centrado en pantalla en móvil
+            const mw = menu.offsetWidth  || 220;
+            const mh = menu.offsetHeight || 130;
+            const x = Math.min(Math.max(e.clientX - mw/2, 8), window.innerWidth  - mw - 8);
+            const y = Math.min(Math.max(e.clientY - mh/2, 8), window.innerHeight - mh - 8);
             menu.style.left = x + 'px';
             menu.style.top  = y + 'px';
-            setTimeout(() => document.addEventListener('pointerdown', closeCallMenu, { once: true }), 50);
+            setTimeout(() => document.addEventListener('click', closeCallMenu, { once: true }), 100);
         }
 
         function closeCallMenu() {
