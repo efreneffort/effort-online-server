@@ -431,7 +431,39 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.15s;
         }
+        .exercise-item:active { background: #e8f5f1; }
+
+        /* Menú contextual ejercicio */
+        #exerciseContextMenu {
+            display: none;
+            position: fixed;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.18);
+            overflow: hidden;
+            z-index: 9999;
+            min-width: 200px;
+        }
+        .ctx-item {
+            padding: 0.9rem 1.2rem;
+            font-size: 0.95rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+        }
+        .ctx-item:hover { background: #f8f9fa; }
+        .ctx-item.danger { color: #c53030; }
+        .ctx-item.danger:hover { background: #fff5f5; }
+        .ctx-divider { height: 1px; background: #f0f0f0; margin: 0; }
 
         .exercise-name {
             font-weight: bold;
@@ -17863,6 +17895,35 @@ gg==" alt="Effort Online">
     </div>
 
     <!-- Modal Detalle de Llamada -->
+    <!-- Menú contextual ejercicio (long-press) -->
+    <div id="exerciseContextMenu">
+        <div style="padding:0.6rem 1.2rem 0.4rem;font-size:0.78rem;color:#999;font-weight:600;text-transform:uppercase;letter-spacing:0.05em" id="ctxExerciseName"></div>
+        <hr class="ctx-divider">
+        <button class="ctx-item" onclick="openEditExercise()">✏️ Editar nombre</button>
+        <hr class="ctx-divider">
+        <button class="ctx-item danger" onclick="confirmDeleteExercise()">🗑️ Eliminar</button>
+    </div>
+
+    <!-- Modal editar nombre ejercicio -->
+    <div id="editExerciseModal" class="modal" style="display:none">
+        <div class="modal-content" style="max-width:400px">
+            <div class="modal-header">
+                <h3 class="modal-title">Editar ejercicio</h3>
+                <button class="close-btn" onclick="closeModal('editExerciseModal')">&times;</button>
+            </div>
+            <div class="form-group" style="margin-top:1rem">
+                <label>Nombre del ejercicio</label>
+                <input type="text" id="editExerciseNameInput" class="form-control"
+                    style="width:100%;padding:0.8rem;border:1.5px solid #dde0e4;border-radius:10px;font-size:0.95rem"
+                    placeholder="Nombre del ejercicio">
+            </div>
+            <div style="display:flex;gap:0.8rem;justify-content:flex-end;margin-top:1.5rem">
+                <button class="btn btn-secondary" onclick="closeModal('editExerciseModal')">Cancelar</button>
+                <button class="btn" onclick="saveEditExercise()">Guardar</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal confirmar borrado de cliente -->
     <div id="deleteClientModal" class="modal" style="display:none">
         <div class="modal-content" style="max-width:400px;">
@@ -18113,13 +18174,93 @@ gg==" alt="Effort Online">
                 return;
             }
             list.innerHTML = exercises.map(e => `
-                <div class="exercise-item">
+                <div class="exercise-item" data-id="${e._id}" data-name="${e.name.replace(/"/g,'&quot;')}">
                     <div>
                         <div class="exercise-name">${e.name}</div>
                         <div class="exercise-details">${e.category} | ${e.difficulty} | ${EQUIPMENT_LABEL[e.equipment] || e.equipment}</div>
                     </div>
+                    <span style="color:#ccc;font-size:0.8rem">⠿</span>
                 </div>
             `).join('');
+
+            // Long-press en cada ejercicio
+            list.querySelectorAll('.exercise-item').forEach(el => {
+                let timer;
+                el.addEventListener('pointerdown', e => {
+                    timer = setTimeout(() => showExerciseMenu(el, e), 600);
+                });
+                el.addEventListener('pointerup',   () => clearTimeout(timer));
+                el.addEventListener('pointerleave', () => clearTimeout(timer));
+                el.addEventListener('contextmenu',  e => { e.preventDefault(); showExerciseMenu(el, e); });
+            });
+        }
+
+        // ─── Menú contextual ejercicio ────────────────────────────────
+        let ctxExerciseId   = null;
+        let ctxExerciseName = null;
+
+        function showExerciseMenu(el, e) {
+            ctxExerciseId   = el.dataset.id;
+            ctxExerciseName = el.dataset.name;
+            const menu = document.getElementById('exerciseContextMenu');
+            document.getElementById('ctxExerciseName').textContent = ctxExerciseName;
+            menu.style.display = 'block';
+
+            // Posicionar cerca del toque sin salirse de pantalla
+            const x = Math.min(e.clientX, window.innerWidth  - menu.offsetWidth  - 12);
+            const y = Math.min(e.clientY, window.innerHeight - menu.offsetHeight - 12);
+            menu.style.left = x + 'px';
+            menu.style.top  = y + 'px';
+
+            // Cerrar al tocar fuera
+            setTimeout(() => document.addEventListener('pointerdown', closeExerciseMenu, { once: true }), 50);
+        }
+
+        function closeExerciseMenu() {
+            document.getElementById('exerciseContextMenu').style.display = 'none';
+        }
+
+        function openEditExercise() {
+            closeExerciseMenu();
+            document.getElementById('editExerciseNameInput').value = ctxExerciseName;
+            document.getElementById('editExerciseModal').style.display = 'flex';
+            setTimeout(() => document.getElementById('editExerciseNameInput').focus(), 100);
+        }
+
+        async function saveEditExercise() {
+            const newName = document.getElementById('editExerciseNameInput').value.trim();
+            if (!newName) return;
+            const token = localStorage.getItem('authToken');
+            try {
+                const res = await fetch(`/api/admin/exercises/${ctxExerciseId}`, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: newName })
+                });
+                if (!res.ok) throw new Error();
+                closeModal('editExerciseModal');
+                const exRes = await fetch('/api/admin/exercises', { headers: { 'Authorization': `Bearer ${token}` } });
+                if (exRes.ok) renderExercises(await exRes.json());
+            } catch {
+                alert('Error al guardar el nombre.');
+            }
+        }
+
+        async function confirmDeleteExercise() {
+            closeExerciseMenu();
+            if (!confirm(`¿Eliminar "${ctxExerciseName}"? Esta acción no se puede deshacer.`)) return;
+            const token = localStorage.getItem('authToken');
+            try {
+                const res = await fetch(`/api/admin/exercises/${ctxExerciseId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!res.ok) throw new Error();
+                const exRes = await fetch('/api/admin/exercises', { headers: { 'Authorization': `Bearer ${token}` } });
+                if (exRes.ok) renderExercises(await exRes.json());
+            } catch {
+                alert('Error al eliminar el ejercicio.');
+            }
         }
 
         function filterEquipment(eq) {

@@ -739,6 +739,34 @@ app.get('/api/admin/exercises', authenticateToken, async (req, res) => {
     }
 });
 
+// Editar nombre de ejercicio
+app.put('/api/admin/exercises/:id', authenticateToken, isAdmin, async (req, res) => {
+    try {
+        const { name } = req.body;
+        if (!name || !name.trim()) return res.status(400).json({ error: 'Nombre requerido' });
+        const exercise = await Exercise.findByIdAndUpdate(
+            req.params.id,
+            { name: name.trim() },
+            { new: true }
+        );
+        if (!exercise) return res.status(404).json({ error: 'Ejercicio no encontrado' });
+        res.json(exercise);
+    } catch (error) {
+        res.status(500).json({ error: 'Error al actualizar ejercicio' });
+    }
+});
+
+// Eliminar ejercicio
+app.delete('/api/admin/exercises/:id', authenticateToken, isAdmin, async (req, res) => {
+    try {
+        const exercise = await Exercise.findByIdAndDelete(req.params.id);
+        if (!exercise) return res.status(404).json({ error: 'Ejercicio no encontrado' });
+        res.json({ message: 'Ejercicio eliminado' });
+    } catch (error) {
+        res.status(500).json({ error: 'Error al eliminar ejercicio' });
+    }
+});
+
 // Agendar videollamada
 app.post('/api/admin/videocalls', authenticateToken, isAdmin, async (req, res) => {
     try {
