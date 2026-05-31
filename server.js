@@ -48,7 +48,8 @@ const FROM_EMAIL = _emailMatch
     ? _rawFrom
     : 'Effort Online <hola@effortpozuelo.com>';
 
-const REPLY_TO = process.env.REPLY_TO || 'effortentrenador@gmail.com';
+const REPLY_TO    = process.env.REPLY_TO    || 'effortentrenador@gmail.com';
+const ADMIN_PHONE = process.env.ADMIN_PHONE || ''; // ej: 34612345678 (sin + ni espacios)
 
 // Inicializar Resend para envío de emails
 const resend = new Resend(RESEND_API_KEY);
@@ -1453,7 +1454,7 @@ async function checkSubscriptionReminders() {
                                     Para renovar tu plan y no perder el acceso, contacta con Efrén.
                                 </p>
                             </div>
-                            <a href="https://wa.me/34${REPLY_TO.replace(/\D/g,'')}"
+                            <a href="${ADMIN_PHONE ? 'https://wa.me/' + ADMIN_PHONE : 'mailto:' + REPLY_TO}"
                                style="display:inline-block;background:#00D9A3;color:#001F54;font-weight:700;padding:0.85rem 2rem;border-radius:10px;text-decoration:none;font-size:1rem">
                                 Contactar con Efrén
                             </a>
