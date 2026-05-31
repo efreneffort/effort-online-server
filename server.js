@@ -1080,7 +1080,8 @@ async function sendWelcomeEmail(user) {
 // Email de recuperación de contraseña
 async function sendPasswordResetEmail(email, resetToken) {
     try {
-        const resetUrl = `${process.env.APP_URL || 'http://localhost:3000'}/reset-password.html?token=${resetToken}`;
+        const appBase = (process.env.APP_URL || 'https://app.effortpozuelo.com').replace(/\/$/, '');
+        const resetUrl = `${appBase}/reset-password.html?token=${resetToken}`;
 
         const { data, error } = await resend.emails.send({
             from: FROM_EMAIL,
