@@ -18243,17 +18243,18 @@ gg==" alt="Effort Online">
                 let startX, startY;
 
                 el.addEventListener('touchstart', e => {
+                    e.preventDefault(); // bloquea menú nativo iOS inmediatamente
                     longPressed = false;
                     startX = e.touches[0].clientX;
                     startY = e.touches[0].clientY;
                     timer = setTimeout(() => {
                         longPressed = true;
                         showExerciseMenu(el, { clientX: startX, clientY: startY });
-                    }, 600);
-                }, { passive: true });
+                    }, 500);
+                }, { passive: false });
 
                 el.addEventListener('touchend', () => { clearTimeout(timer); longPressed = false; });
-                el.addEventListener('touchmove', () => clearTimeout(timer), { passive: true });
+                el.addEventListener('touchmove', () => clearTimeout(timer));
                 el.addEventListener('contextmenu', e => { e.preventDefault(); showExerciseMenu(el, e); });
             });
         }
@@ -18378,24 +18379,23 @@ gg==" alt="Effort Online">
                     let startX, startY;
 
                     el.addEventListener('touchstart', e => {
+                        e.preventDefault(); // bloquea menú nativo iOS inmediatamente
                         longPressed = false;
                         startX = e.touches[0].clientX;
                         startY = e.touches[0].clientY;
                         timer = setTimeout(() => {
                             longPressed = true;
                             showCallMenu(el, { clientX: startX, clientY: startY });
-                        }, 600);
-                    }, { passive: true });
+                        }, 500);
+                    }, { passive: false });
 
-                    el.addEventListener('touchend', e => {
+                    el.addEventListener('touchend', () => {
                         clearTimeout(timer);
                         if (!longPressed) openCallDetail(parseInt(el.dataset.idx));
                         longPressed = false;
                     });
 
-                    el.addEventListener('touchmove', e => {
-                        clearTimeout(timer);
-                    }, { passive: true });
+                    el.addEventListener('touchmove', () => clearTimeout(timer));
 
                     // Escritorio: clic derecho
                     el.addEventListener('contextmenu', e => { e.preventDefault(); showCallMenu(el, e); });
