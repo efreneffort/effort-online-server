@@ -1008,8 +1008,9 @@ async function sendWorkoutNotificationToTrainer(user, duration, newBadges = []) 
         const planNames   = { basico: 'Básico', premium: 'Premium', elite: 'Élite' };
         const planLabel   = planNames[user.plan] || user.plan;
         const mins        = Number(duration);
-        const hora        = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
-        const fecha       = new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
+        const TZ          = { timeZone: 'Europe/Madrid' };
+        const hora        = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', ...TZ });
+        const fecha       = new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', ...TZ });
 
         const badgeRows = newBadges.length
             ? `<p style="margin:1rem 0 0.3rem;font-weight:600;color:#001F54;">Logros desbloqueados:</p>
@@ -1316,7 +1317,8 @@ async function sendVideoCallReminderEmail(user, callDate, callType) {
             month: 'long',
             day: 'numeric',
             hour: '2-digit',
-            minute: '2-digit'
+            minute: '2-digit',
+            timeZone: 'Europe/Madrid'
         });
 
         const { data, error } = await resend.emails.send({
@@ -1486,7 +1488,7 @@ async function checkSubscriptionReminders() {
 
         for (const client of clients) {
             const daysLeft = Math.ceil((new Date(client.subscriptionEnd) - now) / 86400000);
-            const endFormatted = new Date(client.subscriptionEnd).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+            const endFormatted = new Date(client.subscriptionEnd).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Madrid' });
 
             await resend.emails.send({
                 from: FROM_EMAIL,
