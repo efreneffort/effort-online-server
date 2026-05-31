@@ -18077,45 +18077,7 @@ gg==" alt="Effort Online">
                         <!-- Contenedor del chat -->
                         <div class="chat-container">
                             <div class="chat-messages" id="chatMessages">
-                                <!-- Mensaje de bienvenida -->
-                                <div class="message received">
-                                    <div class="message-avatar">E</div>
-                                    <div class="message-content">
-                                        <div class="message-header">
-                                            <strong>Efrén</strong>
-                                            <span class="message-time">Hoy, 10:30</span>
-                                        </div>
-                                        <div class="message-text">
-                                            ¡Hola! 👋 Estoy aquí para ayudarte con cualquier duda sobre tu entrenamiento. ¿En qué puedo ayudarte?
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Mensajes anteriores de ejemplo -->
-                                <div class="message sent">
-                                    <div class="message-content">
-                                        <div class="message-header">
-                                            <strong>Tú</strong>
-                                            <span class="message-time">Ayer, 18:45</span>
-                                        </div>
-                                        <div class="message-text">
-                                            Hola Efrén, tengo una duda sobre las sentadillas. ¿Hasta dónde debo bajar?
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="message received">
-                                    <div class="message-avatar">E</div>
-                                    <div class="message-content">
-                                        <div class="message-header">
-                                            <strong>Efrén</strong>
-                                            <span class="message-time">Ayer, 18:52</span>
-                                        </div>
-                                        <div class="message-text">
-                                            ¡Buena pregunta! Lo ideal es bajar hasta que los muslos queden paralelos al suelo. Te envío un vídeo para que veas la técnica correcta. Recuerda mantener la espalda recta y las rodillas alineadas con los pies.
-                                        </div>
-                                    </div>
-                                </div>
+                                <p id="chatLoading" style="color:#999;text-align:center;padding:2rem">Cargando mensajes...</p>
                             </div>
 
                             <!-- Input para escribir -->
@@ -18304,6 +18266,13 @@ gg==" alt="Effort Online">
 
             if (sectionId === 'videollamadas') loadUserCalls();
             if (sectionId === 'logros') loadAchievements();
+            if (sectionId === 'chat') {
+                loadChatMessages();
+                clearInterval(chatPollInterval);
+                chatPollInterval = setInterval(loadChatMessages, 30000);
+            } else {
+                clearInterval(chatPollInterval);
+            }
         }
 
         function startWorkout() {
@@ -18845,58 +18814,70 @@ gg==" alt="Effort Online">
         }
 
         // Función para enviar mensajes
-        function sendMessage() {
-            const input = document.getElementById('chatInput');
-            const message = input.value.trim();
-            
-            if (!message) return;
+        // ── Chat real ────────────────────────────────────────────────
+        let chatPollInterval = null;
 
-            // Añadir mensaje al chat
-            const chatMessages = document.getElementById('chatMessages');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = 'message sent';
-            
-            const now = new Date();
-            const time = `${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
-            
-            messageDiv.innerHTML = `
-                <div class="message-content">
-                    <div class="message-header">
-                        <strong>Tú</strong>
-                        <span class="message-time">Hoy, ${time}</span>
-                    </div>
-                    <div class="message-text">${message}</div>
-                </div>
-            `;
-            
-            chatMessages.appendChild(messageDiv);
-            
-            // Limpiar input
-            input.value = '';
-            input.style.height = 'auto';
-            
-            // Scroll al final
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-            
-            // Simular respuesta automática (en producción iría al backend)
-            setTimeout(() => {
-                const responseDiv = document.createElement('div');
-                responseDiv.className = 'message received';
-                responseDiv.innerHTML = `
-                    <div class="message-avatar">E</div>
+        function chatFmt(dateStr) {
+            const d = new Date(dateStr);
+            const today = new Date();
+            const isToday = d.toDateString() === today.toDateString();
+            const hm = d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+            return isToday ? `Hoy, ${hm}` : `${d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}, ${hm}`;
+        }
+
+        function renderChatMessages(messages) {
+            const box = document.getElementById('chatMessages');
+            if (!messages.length) {
+                box.innerHTML = '<p style="color:#999;text-align:center;padding:2rem">Aún no hay mensajes. ¡Escribe tu primera duda!</p>';
+                return;
+            }
+            box.innerHTML = messages.map(m => {
+                const sent = m.sender === 'client';
+                return `<div class="message ${sent ? 'sent' : 'received'}">
+                    ${!sent ? '<div class="message-avatar">E</div>' : ''}
                     <div class="message-content">
                         <div class="message-header">
-                            <strong>Efrén</strong>
-                            <span class="message-time">Hoy, ${time}</span>
+                            <strong>${sent ? 'Tú' : 'Efrén'}</strong>
+                            <span class="message-time">${chatFmt(m.createdAt)}</span>
                         </div>
-                        <div class="message-text">
-                            Mensaje recibido. Te responderé en menos de 24 horas.
-                        </div>
+                        <div class="message-text">${m.text.replace(/\n/g,'<br>')}</div>
                     </div>
-                `;
-                chatMessages.appendChild(responseDiv);
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-            }, 1000);
+                </div>`;
+            }).join('');
+            box.scrollTop = box.scrollHeight;
+        }
+
+        async function loadChatMessages() {
+            const token = localStorage.getItem('authToken');
+            try {
+                const res = await fetch('/api/messages', { headers: { 'Authorization': `Bearer ${token}` } });
+                if (res.ok) renderChatMessages(await res.json());
+            } catch {}
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const text = input.value.trim();
+            if (!text) return;
+
+            const token = localStorage.getItem('authToken');
+            const btn = document.querySelector('.chat-send-btn');
+            btn.disabled = true;
+            input.value = '';
+            input.style.height = 'auto';
+
+            try {
+                const res = await fetch('/api/messages', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text })
+                });
+                if (res.ok) await loadChatMessages();
+            } catch {
+                input.value = text; // restaurar si falla
+            } finally {
+                btn.disabled = false;
+            }
         }
 
         let currentUser = null;
@@ -18966,7 +18947,7 @@ gg==" alt="Effort Online">
                         ex.rest ? `Descanso: ${ex.rest}s` : null
                     ].filter(Boolean).join(' · ');
                     const videoBtn = e.videoUrl
-                        ? `<a href="${e.videoUrl}" target="_blank" rel="noopener" class="btn btn-primary" style="margin-top:0.75rem; display:inline-block;"><i data-lucide="play-circle" style="width:16px;height:16px;vertical-align:middle;margin-right:4px;"></i> Ver Vídeo</a>`
+                        ? `<button onclick="openVideoModal('${e.videoUrl.replace(/'/g,"\\'")}','${e.name.replace(/'/g,"\\'")}')}" class="btn btn-primary" style="margin-top:0.75rem;font-size:0.85rem;padding:0.5rem 1rem"><i data-lucide="play-circle" style="width:15px;height:15px;vertical-align:middle;margin-right:4px;"></i> Ver Vídeo</button>`
                         : '';
                     const notes = ex.notes ? `<p style="color:#888; font-size:0.85rem; margin-top:0.5rem;"><i data-lucide="file-text" style="width:13px;height:13px;vertical-align:middle;margin-right:3px;"></i>${ex.notes}</p>` : '';
                     return `
@@ -19177,6 +19158,35 @@ gg==" alt="Effort Online">
             const el = document.getElementById('bnav-' + id);
             if (el) el.classList.add('active');
             lucide.createIcons();
+        }
+    </script>
+    <!-- Modal vídeo ejercicio -->
+    <div id="videoModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;align-items:center;justify-content:center;padding:1rem" onclick="closeVideoModal()">
+        <div style="background:white;border-radius:16px;overflow:hidden;max-width:640px;width:100%" onclick="event.stopPropagation()">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:1rem 1.2rem;background:var(--navy)">
+                <span id="videoModalTitle" style="color:white;font-weight:700;font-size:1rem"></span>
+                <button onclick="closeVideoModal()" style="background:none;border:none;color:white;font-size:1.5rem;cursor:pointer;line-height:1">&times;</button>
+            </div>
+            <div style="position:relative;padding-bottom:56.25%;height:0">
+                <iframe id="videoIframe" src="" frameborder="0" allowfullscreen allow="autoplay"
+                    style="position:absolute;top:0;left:0;width:100%;height:100%"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openVideoModal(url, name) {
+            let embedUrl = url;
+            // Convertir YouTube a embed
+            const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&?]+)/);
+            if (ytMatch) embedUrl = `https://www.youtube.com/embed/${ytMatch[1]}?autoplay=1`;
+            document.getElementById('videoIframe').src = embedUrl;
+            document.getElementById('videoModalTitle').textContent = name;
+            document.getElementById('videoModal').style.display = 'flex';
+        }
+        function closeVideoModal() {
+            document.getElementById('videoIframe').src = '';
+            document.getElementById('videoModal').style.display = 'none';
         }
     </script>
     <script>if('serviceWorker'in navigator)navigator.serviceWorker.register('/sw.js').catch(()=>{});</script>

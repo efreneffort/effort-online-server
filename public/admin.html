@@ -17531,6 +17531,10 @@ gg==" alt="Effort Online">
                 <span class="nav-icon"><i data-lucide="trending-up"></i></span>
                 <span>Ingresos</span>
             </div>
+            <div class="nav-item" id="navMensajes" onclick="showSection('mensajes')">
+                <span class="nav-icon"><i data-lucide="message-circle"></i></span>
+                <span>Mensajes <span id="unreadBadge" style="display:none;background:#e53e3e;color:white;border-radius:10px;font-size:0.7rem;padding:0.1rem 0.4rem;margin-left:4px;font-weight:700"></span></span>
+            </div>
         </div>
 
         <!-- Main Content -->
@@ -17616,6 +17620,26 @@ gg==" alt="Effort Online">
             </div>
 
             <!-- Ingresos Section -->
+            <!-- Sección Mensajes -->
+            <div id="mensajes" class="section">
+                <div class="card">
+                    <h2 class="card-title">💬 Mensajes de clientes</h2>
+                    <div id="msgClientList" style="margin-bottom:1.5rem"></div>
+                    <div id="msgConversation" style="display:none">
+                        <div style="display:flex;align-items:center;gap:0.8rem;margin-bottom:1rem">
+                            <button class="btn btn-secondary" style="padding:0.4rem 0.9rem" onclick="closeMsgConversation()">← Volver</button>
+                            <strong id="msgConvTitle" style="color:var(--navy)"></strong>
+                        </div>
+                        <div id="msgMessages" style="height:380px;overflow-y:auto;background:#f8f9fa;border-radius:10px;padding:1.2rem;margin-bottom:1rem"></div>
+                        <div style="display:flex;gap:0.8rem">
+                            <textarea id="msgReplyInput" rows="2" placeholder="Escribe tu respuesta..."
+                                style="flex:1;padding:0.8rem;border:1.5px solid #dde0e4;border-radius:10px;font-family:inherit;font-size:0.95rem;resize:none"></textarea>
+                            <button class="btn" onclick="sendAdminReply()" style="align-self:flex-end">Enviar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div id="ingresos" class="section">
                 <div class="card">
                     <h2 class="card-title">Resumen de Ingresos</h2>
@@ -18738,6 +18762,118 @@ gg==" alt="Effort Online">
         }
 
         document.addEventListener('DOMContentLoaded', () => { init(); lucide.createIcons(); });
+
+        // ─── Mensajes ────────────────────────────────────────────────
+        let activeMsgClientId = null;
+        let msgPollInterval   = null;
+
+        function msgFmt(dateStr) {
+            const d = new Date(dateStr);
+            const isToday = d.toDateString() === new Date().toDateString();
+            const hm = d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+            return isToday ? `Hoy, ${hm}` : `${d.toLocaleDateString('es-ES', { day:'numeric', month:'short' })}, ${hm}`;
+        }
+
+        async function loadMsgClients() {
+            const token = localStorage.getItem('authToken');
+            const res = await fetch('/api/admin/messages', { headers: { 'Authorization': `Bearer ${token}` } });
+            if (!res.ok) return;
+            const clients = await res.json();
+
+            // Badge total no leídos en nav
+            const total = clients.reduce((s, c) => s + c.unread, 0);
+            const badge = document.getElementById('unreadBadge');
+            badge.textContent = total;
+            badge.style.display = total ? 'inline' : 'none';
+
+            const list = document.getElementById('msgClientList');
+            if (!clients.length) {
+                list.innerHTML = '<p style="color:#999">Ningún cliente ha enviado mensajes aún.</p>';
+                return;
+            }
+            const planClass = { basico:'plan-basico', premium:'plan-premium', elite:'plan-elite' };
+            list.innerHTML = clients.map(c => `
+                <div class="client-card" style="cursor:pointer" onclick="openMsgConversation('${c._id}','${c.name.replace(/'/g,"\\'")}')">
+                    <div class="client-info">
+                        <div class="client-name">${c.name}
+                            ${c.unread ? `<span style="background:#e53e3e;color:white;border-radius:10px;font-size:0.72rem;padding:0.1rem 0.45rem;margin-left:6px;font-weight:700">${c.unread} nuevo${c.unread>1?'s':''}</span>` : ''}
+                        </div>
+                    </div>
+                    <span class="client-plan ${planClass[c.plan]||''}">${(c.plan||'').toUpperCase()}</span>
+                </div>`).join('');
+        }
+
+        async function openMsgConversation(clientId, name) {
+            activeMsgClientId = clientId;
+            document.getElementById('msgClientList').style.display = 'none';
+            document.getElementById('msgConversation').style.display = 'block';
+            document.getElementById('msgConvTitle').textContent = name;
+            await loadMsgMessages();
+            clearInterval(msgPollInterval);
+            msgPollInterval = setInterval(loadMsgMessages, 15000);
+        }
+
+        function closeMsgConversation() {
+            clearInterval(msgPollInterval);
+            activeMsgClientId = null;
+            document.getElementById('msgConversation').style.display = 'none';
+            document.getElementById('msgClientList').style.display = 'block';
+            loadMsgClients();
+        }
+
+        async function loadMsgMessages() {
+            if (!activeMsgClientId) return;
+            const token = localStorage.getItem('authToken');
+            const res = await fetch(`/api/admin/messages/${activeMsgClientId}`, { headers: { 'Authorization': `Bearer ${token}` } });
+            if (!res.ok) return;
+            const messages = await res.json();
+            const box = document.getElementById('msgMessages');
+            box.innerHTML = messages.map(m => {
+                const isAdmin = m.sender === 'admin';
+                return `<div style="display:flex;flex-direction:${isAdmin?'row-reverse':'row'};gap:0.6rem;margin-bottom:1rem">
+                    ${!isAdmin ? '<div style="width:32px;height:32px;border-radius:50%;background:var(--navy);color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;flex-shrink:0">C</div>' : ''}
+                    <div style="max-width:70%">
+                        <div style="font-size:0.75rem;color:#999;margin-bottom:0.2rem;text-align:${isAdmin?'right':'left'}">${msgFmt(m.createdAt)}</div>
+                        <div style="background:${isAdmin?'var(--navy)':'white'};color:${isAdmin?'white':'#333'};padding:0.7rem 1rem;border-radius:12px;font-size:0.92rem;line-height:1.5">${m.text.replace(/\n/g,'<br>')}</div>
+                    </div>
+                </div>`;
+            }).join('') || '<p style="color:#999;text-align:center">Sin mensajes</p>';
+            box.scrollTop = box.scrollHeight;
+        }
+
+        async function sendAdminReply() {
+            const input = document.getElementById('msgReplyInput');
+            const text = input.value.trim();
+            if (!text || !activeMsgClientId) return;
+            const token = localStorage.getItem('authToken');
+            input.value = '';
+            await fetch(`/api/admin/messages/${activeMsgClientId}`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text })
+            });
+            await loadMsgMessages();
+        }
+
+        // Cargar mensajes cuando se abre la sección
+        const _origShowSection = showSection;
+        function showSection(id) {
+            _origShowSection(id);
+            if (id === 'mensajes') loadMsgClients();
+        }
+
+        // Polling badge no leídos cada 60s
+        setInterval(() => {
+            const token = localStorage.getItem('authToken');
+            if (!token) return;
+            fetch('/api/admin/messages', { headers: { 'Authorization': `Bearer ${token}` } })
+                .then(r => r.ok ? r.json() : [])
+                .then(clients => {
+                    const total = clients.reduce((s,c) => s + c.unread, 0);
+                    const badge = document.getElementById('unreadBadge');
+                    if (badge) { badge.textContent = total; badge.style.display = total ? 'inline' : 'none'; }
+                }).catch(() => {});
+        }, 60000);
     </script>
     <script>if('serviceWorker'in navigator)navigator.serviceWorker.register('/sw.js').catch(()=>{});</script>
 </body>

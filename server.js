@@ -196,6 +196,16 @@ const AchievementSchema = new mongoose.Schema({
 
 const Achievement = mongoose.model('Achievement', AchievementSchema);
 
+// Mensaje de chat
+const MessageSchema = new mongoose.Schema({
+    userId:       { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    text:         { type: String, required: true },
+    sender:       { type: String, enum: ['client', 'admin'], required: true },
+    readByAdmin:  { type: Boolean, default: false },
+    createdAt:    { type: Date, default: Date.now }
+});
+const Message = mongoose.model('Message', MessageSchema);
+
 // ============================================
 // MIDDLEWARE DE AUTENTICACIÓN
 // ============================================
@@ -833,6 +843,103 @@ app.get('/api/user/videocalls', authenticateToken, async (req, res) => {
         res.json(calls);
     } catch (error) {
         res.status(500).json({ error: 'Error al obtener videollamadas' });
+    }
+});
+
+// ============================================
+// CHAT
+// ============================================
+
+// Cliente: obtener su conversación
+app.get('/api/messages', authenticateToken, async (req, res) => {
+    try {
+        const messages = await Message.find({ userId: req.user.userId })
+            .sort({ createdAt: 1 }).limit(200);
+        res.json(messages);
+    } catch (err) {
+        res.status(500).json({ error: 'Error al obtener mensajes' });
+    }
+});
+
+// Cliente: enviar mensaje
+app.post('/api/messages', authenticateToken, async (req, res) => {
+    try {
+        const { text } = req.body;
+        if (!text || !text.trim()) return res.status(400).json({ error: 'Mensaje vacío' });
+
+        const msg = await new Message({
+            userId: req.user.userId,
+            text:   text.trim(),
+            sender: 'client'
+        }).save();
+
+        // Notificación por email al admin
+        const user = await User.findById(req.user.userId).select('name plan');
+        const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'hola@effortpozuelo.com';
+        resend.emails.send({
+            from: FROM_EMAIL, to: ADMIN_EMAIL, replyTo: REPLY_TO,
+            subject: `💬 Nuevo mensaje de ${user?.name || 'un cliente'}`,
+            html: `<div style="font-family:sans-serif;padding:1.5rem">
+                <p><strong>${user?.name || 'Cliente'}</strong> (${(user?.plan||'').toUpperCase()}) te ha enviado un mensaje:</p>
+                <blockquote style="border-left:4px solid #00D9A3;padding:0.8rem 1.2rem;background:#f0fff4;border-radius:4px;margin:1rem 0">
+                    ${text.trim()}
+                </blockquote>
+                <a href="${appBase()}/admin.html" style="background:#001F54;color:white;padding:0.7rem 1.5rem;border-radius:8px;text-decoration:none;font-weight:700">Ver en el panel admin</a>
+                ${emailFooter()}
+            </div>`
+        }).catch(() => {});
+
+        res.status(201).json(msg);
+    } catch (err) {
+        res.status(500).json({ error: 'Error al enviar mensaje' });
+    }
+});
+
+// Admin: lista de clientes con mensajes (y nº no leídos)
+app.get('/api/admin/messages', authenticateToken, isAdmin, async (req, res) => {
+    try {
+        const unread = await Message.aggregate([
+            { $match: { sender: 'client', readByAdmin: false } },
+            { $group: { _id: '$userId', count: { $sum: 1 }, last: { $max: '$createdAt' } } }
+        ]);
+        const clientIds = [...new Set([
+            ...unread.map(u => u._id.toString()),
+            ...(await Message.distinct('userId'))
+        ])];
+        const clients = await User.find({ _id: { $in: clientIds } }).select('name plan');
+        const unreadMap = Object.fromEntries(unread.map(u => [u._id.toString(), u.count]));
+        res.json(clients.map(c => ({ ...c.toObject(), unread: unreadMap[c._id.toString()] || 0 })));
+    } catch (err) {
+        res.status(500).json({ error: 'Error' });
+    }
+});
+
+// Admin: conversación con un cliente
+app.get('/api/admin/messages/:clientId', authenticateToken, isAdmin, async (req, res) => {
+    try {
+        const messages = await Message.find({ userId: req.params.clientId })
+            .sort({ createdAt: 1 }).limit(200);
+        // Marcar como leídos
+        await Message.updateMany({ userId: req.params.clientId, sender: 'client', readByAdmin: false }, { readByAdmin: true });
+        res.json(messages);
+    } catch (err) {
+        res.status(500).json({ error: 'Error' });
+    }
+});
+
+// Admin: responder a un cliente
+app.post('/api/admin/messages/:clientId', authenticateToken, isAdmin, async (req, res) => {
+    try {
+        const { text } = req.body;
+        if (!text || !text.trim()) return res.status(400).json({ error: 'Mensaje vacío' });
+        const msg = await new Message({
+            userId: req.params.clientId,
+            text:   text.trim(),
+            sender: 'admin'
+        }).save();
+        res.status(201).json(msg);
+    } catch (err) {
+        res.status(500).json({ error: 'Error al enviar respuesta' });
     }
 });
 
