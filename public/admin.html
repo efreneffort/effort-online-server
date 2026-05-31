@@ -18049,7 +18049,8 @@ gg==" alt="Effort Online">
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
             document.getElementById(sectionId).classList.add('active');
-            event.currentTarget.classList.add('active');
+            if (event && event.currentTarget) event.currentTarget.classList.add('active');
+            if (sectionId === 'mensajes') loadMsgClients();
         }
 
         function openModal(modalType) {
@@ -18853,13 +18854,6 @@ gg==" alt="Effort Online">
                 body: JSON.stringify({ text })
             });
             await loadMsgMessages();
-        }
-
-        // Cargar mensajes cuando se abre la sección
-        const _origShowSection = showSection;
-        function showSection(id) {
-            _origShowSection(id);
-            if (id === 'mensajes') loadMsgClients();
         }
 
         // Polling badge no leídos cada 60s

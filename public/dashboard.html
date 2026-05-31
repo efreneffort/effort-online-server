@@ -18947,7 +18947,7 @@ gg==" alt="Effort Online">
                         ex.rest ? `Descanso: ${ex.rest}s` : null
                     ].filter(Boolean).join(' · ');
                     const videoBtn = e.videoUrl
-                        ? `<button onclick="openVideoModal('${e.videoUrl.replace(/'/g,"\\'")}','${e.name.replace(/'/g,"\\'")}')}" class="btn btn-primary" style="margin-top:0.75rem;font-size:0.85rem;padding:0.5rem 1rem"><i data-lucide="play-circle" style="width:15px;height:15px;vertical-align:middle;margin-right:4px;"></i> Ver Vídeo</button>`
+                        ? `<button class="btn btn-primary video-play-btn" data-url="${encodeURIComponent(e.videoUrl)}" data-name="${encodeURIComponent(e.name)}" style="margin-top:0.75rem;font-size:0.85rem;padding:0.5rem 1rem"><i data-lucide="play-circle" style="width:15px;height:15px;vertical-align:middle;margin-right:4px;"></i> Ver Vídeo</button>`
                         : '';
                     const notes = ex.notes ? `<p style="color:#888; font-size:0.85rem; margin-top:0.5rem;"><i data-lucide="file-text" style="width:13px;height:13px;vertical-align:middle;margin-right:3px;"></i>${ex.notes}</p>` : '';
                     return `
@@ -18960,6 +18960,14 @@ gg==" alt="Effort Online">
                 }).join('');
 
                 content.innerHTML = `<ul class="workout-list">${items}</ul>`;
+
+                // Asociar clicks a botones de vídeo (evita problemas de comillas en onclick)
+                content.querySelectorAll('.video-play-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        openVideoModal(decodeURIComponent(btn.dataset.url), decodeURIComponent(btn.dataset.name));
+                    });
+                });
+
                 lucide.createIcons();
             } catch (err) {
                 console.error('Error cargando rutina:', err);
