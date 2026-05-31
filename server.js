@@ -1111,26 +1111,29 @@ async function sendPasswordResetEmail(email, resetToken) {
                                 </a>
                             </div>
                             
-                            <p style="color: #666; line-height: 1.6; font-size: 0.95rem;">
-                                O copia este enlace en tu navegador:<br>
-                                <span style="color: #00D9A3; word-break: break-all;">${resetUrl}</span>
+                            <p style="color: #666; line-height: 1.6; font-size: 0.9rem;">
+                                Si el botón no funciona, pulsa este enlace:<br>
+                                <a href="${resetUrl}" style="color: #00897B; word-break: break-all; font-size: 0.85rem;">${resetUrl}</a>
                             </p>
-                            
+
                             <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 1rem 1.5rem; margin: 1.5rem 0; border-radius: 8px;">
                                 <p style="margin: 0; color: #856404; font-size: 0.9rem;">
                                     ⚠️ Este enlace expira en <strong>1 hora</strong>.<br>
                                     Si no solicitaste este cambio, ignora este email.
                                 </p>
                             </div>
-                            
+
                             <p style="color: #001F54; margin-top: 2rem;">
                                 <strong>Effort Online</strong><br>
                                 <span style="color: #00D9A3;">Efrén</span>
                             </p>
                         </div>
-                        
+
                         <div style="background: #f8f9fa; padding: 1.5rem; text-align: center; color: #999; font-size: 0.85rem;">
-                            <p style="margin: 0;">📧 effortentrenador@gmail.com | 📱 609 539 485</p>
+                            <p style="margin: 0;">
+                                <a href="mailto:effortentrenador@gmail.com" style="color: #999; text-decoration: none;">effortentrenador@gmail.com</a>
+                                &nbsp;|&nbsp; 609 539 485
+                            </p>
                         </div>
                     </div>
                 </body>
