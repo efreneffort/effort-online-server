@@ -150,6 +150,23 @@
 
         .form-group { margin-bottom: 1.1rem; }
 
+        .pw-wrap { position: relative; }
+        .pw-wrap input { padding-right: 2.8rem; }
+        .pw-toggle {
+            position: absolute;
+            right: 0.8rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #aaa;
+            font-size: 1.1rem;
+            padding: 0;
+            line-height: 1;
+        }
+        .pw-toggle:hover { color: var(--navy); }
+
         .form-group label {
             display: block;
             margin-bottom: 0.35rem;
@@ -17269,7 +17286,10 @@ gg==" alt="Effort Online">
                     </div>
                     <div class="form-group">
                         <label for="loginPassword">Contraseña</label>
-                        <input type="password" id="loginPassword" placeholder="••••••••" required>
+                        <div class="pw-wrap">
+                            <input type="password" id="loginPassword" placeholder="••••••••" required>
+                            <button type="button" class="pw-toggle" onclick="togglePw('loginPassword',this)" tabindex="-1">👁</button>
+                        </div>
                     </div>
                     <div class="link">
                         <a href="javascript:void(0)" onclick="showForgotPassword()">¿Olvidaste tu contraseña?</a>
@@ -17306,11 +17326,17 @@ gg==" alt="Effort Online">
                         </div>
                         <div class="form-group">
                             <label for="registerPassword">Contraseña</label>
-                            <input type="password" id="registerPassword" placeholder="Mínimo 8 caracteres" required minlength="8">
+                            <div class="pw-wrap">
+                                <input type="password" id="registerPassword" placeholder="Mínimo 8 caracteres" required minlength="8">
+                                <button type="button" class="pw-toggle" onclick="togglePw('registerPassword',this)" tabindex="-1">👁</button>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label for="registerPasswordConfirm">Confirmar contraseña</label>
-                            <input type="password" id="registerPasswordConfirm" placeholder="Repite tu contraseña" required>
+                            <div class="pw-wrap">
+                                <input type="password" id="registerPasswordConfirm" placeholder="Repite tu contraseña" required>
+                                <button type="button" class="pw-toggle" onclick="togglePw('registerPasswordConfirm',this)" tabindex="-1">👁</button>
+                            </div>
                         </div>
                         <div id="step1Error" style="display:none;color:#e53e3e;font-size:0.82rem;margin:-0.5rem 0 0.8rem;padding:0.6rem 0.8rem;background:#fff5f5;border-radius:8px;border-left:3px solid #e53e3e;"></div>
                         <button type="submit" class="btn">Siguiente →</button>
@@ -17650,6 +17676,13 @@ gg==" alt="Effort Online">
                 if (card) card.prepend(div);
             }
         })();
+
+        function togglePw(inputId, btn) {
+            const input = document.getElementById(inputId);
+            const show = input.type === 'password';
+            input.type = show ? 'text' : 'password';
+            btn.textContent = show ? '🙈' : '👁';
+        }
 
         // Initialize pricing on load
         updatePricing();
