@@ -585,6 +585,169 @@
             white-space: pre-wrap;
         }
 
+        /* ── WhatsApp-style Chat ─────────────────────────────────── */
+        .wa-shell {
+            display: flex;
+            height: calc(100vh - 140px);
+            min-height: 520px;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+        }
+        .wa-sidebar {
+            width: 340px;
+            min-width: 280px;
+            border-right: 1px solid #e9ecef;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+        .wa-sidebar-header {
+            background: var(--navy);
+            padding: 1rem 1.2rem;
+            display: flex;
+            align-items: center;
+        }
+        .wa-client-list { flex: 1; overflow-y: auto; }
+        .wa-client-item {
+            display: flex;
+            align-items: center;
+            gap: 0.9rem;
+            padding: 0.9rem 1.2rem;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background 0.12s;
+        }
+        .wa-client-item:hover  { background: #f5f5f5; }
+        .wa-client-item.active { background: #e8f5e9; }
+        .wa-avatar {
+            width: 44px; height: 44px;
+            border-radius: 50%;
+            background: var(--navy);
+            color: white;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 1rem;
+            flex-shrink: 0;
+        }
+        .wa-client-info { flex: 1; min-width: 0; }
+        .wa-client-name { font-weight: 600; color: #111; font-size: 0.95rem; }
+        .wa-client-preview { font-size: 0.82rem; color: #999; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top:0.1rem; }
+        .wa-unread {
+            background: #00D9A3; color: #001F54;
+            border-radius: 50%; width: 20px; height: 20px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.72rem; font-weight: 800; flex-shrink: 0;
+        }
+        .wa-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #efeae2 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Crect width='40' height='40' fill='%23efeae2'/%3E%3C/svg%3E");
+            position: relative;
+        }
+        .wa-empty {
+            flex: 1; display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            color: #888;
+        }
+        .wa-conv { display: flex; flex-direction: column; height: 100%; }
+        .wa-conv-header {
+            background: var(--navy);
+            padding: 0.8rem 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.9rem;
+            flex-shrink: 0;
+        }
+        .wa-back-btn {
+            background: none; border: none; color: white;
+            font-size: 1.2rem; cursor: pointer; padding: 0.2rem 0.4rem;
+            display: none;
+        }
+        @media (max-width: 680px) {
+            .wa-sidebar { width: 100%; }
+            .wa-main { display: none; }
+            .wa-shell.conv-open .wa-sidebar { display: none; }
+            .wa-shell.conv-open .wa-main { display: flex; }
+            .wa-back-btn { display: block !important; }
+        }
+        .wa-conv-avatar {
+            width: 38px; height: 38px; border-radius: 50%;
+            background: var(--green); color: var(--navy);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 0.95rem;
+        }
+        .wa-conv-name  { color: white; font-weight: 700; font-size: 0.95rem; }
+        .wa-conv-plan  { color: #00D9A3; font-size: 0.78rem; }
+        .wa-messages {
+            flex: 1; overflow-y: auto;
+            padding: 1rem 1.2rem;
+            display: flex; flex-direction: column; gap: 0.4rem;
+        }
+        .wa-bubble-wrap {
+            display: flex;
+            flex-direction: column;
+        }
+        .wa-bubble-wrap.me  { align-items: flex-end; }
+        .wa-bubble-wrap.them { align-items: flex-start; }
+        .wa-bubble {
+            max-width: 70%;
+            padding: 0.55rem 0.95rem;
+            border-radius: 12px;
+            font-size: 0.92rem;
+            line-height: 1.5;
+            position: relative;
+            word-break: break-word;
+        }
+        .wa-bubble-wrap.me   .wa-bubble { background: #d9fdd3; color: #111; border-bottom-right-radius: 3px; }
+        .wa-bubble-wrap.them .wa-bubble { background: white;   color: #111; border-bottom-left-radius: 3px; }
+        .wa-bubble-time {
+            font-size: 0.68rem; color: #999;
+            margin-top: 0.2rem; padding: 0 0.3rem;
+        }
+        .wa-date-divider {
+            text-align: center; color: #999;
+            font-size: 0.76rem; margin: 0.8rem 0;
+        }
+        .wa-date-divider span {
+            background: #d0d0d0;
+            border-radius: 8px;
+            padding: 0.2rem 0.7rem;
+            color: #444;
+        }
+        .wa-input-bar {
+            background: #f0f2f5;
+            padding: 0.7rem 1rem;
+            display: flex;
+            align-items: flex-end;
+            gap: 0.7rem;
+            flex-shrink: 0;
+        }
+        .wa-input {
+            flex: 1;
+            border: none;
+            border-radius: 20px;
+            padding: 0.65rem 1rem;
+            font-size: 0.95rem;
+            font-family: inherit;
+            resize: none;
+            max-height: 120px;
+            outline: none;
+            background: white;
+        }
+        .wa-send-btn {
+            width: 42px; height: 42px;
+            border-radius: 50%;
+            background: var(--navy);
+            border: none;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            transition: background 0.15s;
+        }
+        .wa-send-btn:hover { background: #003875; }
+
         /* Search Bar */
         .search-bar {
             width: 100%;
@@ -17620,21 +17783,49 @@ gg==" alt="Effort Online">
             </div>
 
             <!-- Ingresos Section -->
-            <!-- Sección Mensajes -->
+            <!-- Sección Mensajes — estilo WhatsApp -->
             <div id="mensajes" class="section">
-                <div class="card">
-                    <h2 class="card-title">💬 Mensajes de clientes</h2>
-                    <div id="msgClientList" style="margin-bottom:1.5rem"></div>
-                    <div id="msgConversation" style="display:none">
-                        <div style="display:flex;align-items:center;gap:0.8rem;margin-bottom:1rem">
-                            <button class="btn btn-secondary" style="padding:0.4rem 0.9rem" onclick="closeMsgConversation()">← Volver</button>
-                            <strong id="msgConvTitle" style="color:var(--navy)"></strong>
+                <div class="wa-shell">
+                    <!-- Columna izquierda: lista de clientes -->
+                    <div class="wa-sidebar" id="waSidebar">
+                        <div class="wa-sidebar-header">
+                            <span style="font-weight:700;font-size:1rem;color:white">Mensajes</span>
                         </div>
-                        <div id="msgMessages" style="height:380px;overflow-y:auto;background:#f8f9fa;border-radius:10px;padding:1.2rem;margin-bottom:1rem"></div>
-                        <div style="display:flex;gap:0.8rem">
-                            <textarea id="msgReplyInput" rows="2" placeholder="Escribe tu respuesta..."
-                                style="flex:1;padding:0.8rem;border:1.5px solid #dde0e4;border-radius:10px;font-family:inherit;font-size:0.95rem;resize:none"></textarea>
-                            <button class="btn" onclick="sendAdminReply()" style="align-self:flex-end">Enviar</button>
+                        <div class="wa-client-list" id="msgClientList">
+                            <p style="color:#999;padding:1.5rem;font-size:0.9rem">Cargando...</p>
+                        </div>
+                    </div>
+
+                    <!-- Columna derecha: conversación -->
+                    <div class="wa-main" id="waMain">
+                        <!-- Estado vacío -->
+                        <div class="wa-empty" id="waEmpty">
+                            <div style="font-size:3rem;margin-bottom:1rem">💬</div>
+                            <div style="font-weight:600;color:#667;margin-bottom:0.4rem">Selecciona un cliente</div>
+                            <div style="font-size:0.88rem;color:#aaa">Elige una conversación de la lista</div>
+                        </div>
+
+                        <!-- Conversación activa -->
+                        <div class="wa-conv" id="waConv" style="display:none">
+                            <div class="wa-conv-header">
+                                <button class="wa-back-btn" onclick="closeMsgConversation()">←</button>
+                                <div class="wa-conv-avatar" id="waConvAvatar"></div>
+                                <div>
+                                    <div class="wa-conv-name" id="waConvName"></div>
+                                    <div class="wa-conv-plan" id="waConvPlan"></div>
+                                </div>
+                            </div>
+                            <div class="wa-messages" id="msgMessages"></div>
+                            <div class="wa-input-bar">
+                                <textarea id="msgReplyInput" class="wa-input" rows="1"
+                                    placeholder="Escribe un mensaje..."></textarea>
+                                <button class="wa-send-btn" onclick="sendAdminReply()">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                        <path d="M22 2L11 13" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+                                        <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -18764,82 +18955,141 @@ gg==" alt="Effort Online">
 
         document.addEventListener('DOMContentLoaded', () => { init(); lucide.createIcons(); });
 
-        // ─── Mensajes ────────────────────────────────────────────────
-        let activeMsgClientId = null;
-        let msgPollInterval   = null;
+        // ─── Chat estilo WhatsApp ─────────────────────────────────
+        let activeMsgClientId   = null;
+        let activeMsgClientName = '';
+        let msgPollInterval     = null;
+        let msgClientsCache     = [];
 
-        function msgFmt(dateStr) {
+        function waFmt(dateStr) {
             const d = new Date(dateStr);
-            const isToday = d.toDateString() === new Date().toDateString();
-            const hm = d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
-            return isToday ? `Hoy, ${hm}` : `${d.toLocaleDateString('es-ES', { day:'numeric', month:'short' })}, ${hm}`;
+            return d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
         }
+        function waDayLabel(dateStr) {
+            const d = new Date(dateStr);
+            const today     = new Date();
+            const yesterday = new Date(); yesterday.setDate(today.getDate() - 1);
+            if (d.toDateString() === today.toDateString())     return 'Hoy';
+            if (d.toDateString() === yesterday.toDateString()) return 'Ayer';
+            return d.toLocaleDateString('es-ES', { day:'numeric', month:'long', year:'numeric' });
+        }
+        function waInitial(name) { return (name || '?')[0].toUpperCase(); }
 
         async function loadMsgClients() {
             const token = localStorage.getItem('authToken');
-            const res = await fetch('/api/admin/messages', { headers: { 'Authorization': `Bearer ${token}` } });
-            if (!res.ok) return;
-            const clients = await res.json();
+            try {
+                const res = await fetch('/api/admin/messages', { headers: { 'Authorization': `Bearer ${token}` } });
+                if (!res.ok) return;
+                msgClientsCache = await res.json();
+            } catch { return; }
 
-            // Badge total no leídos en nav
-            const total = clients.reduce((s, c) => s + c.unread, 0);
+            // Badge nav
+            const total = msgClientsCache.reduce((s,c) => s + c.unread, 0);
             const badge = document.getElementById('unreadBadge');
-            badge.textContent = total;
+            badge.textContent = total || '';
             badge.style.display = total ? 'inline' : 'none';
 
             const list = document.getElementById('msgClientList');
-            if (!clients.length) {
-                list.innerHTML = '<p style="color:#999">Ningún cliente ha enviado mensajes aún.</p>';
+            if (!msgClientsCache.length) {
+                list.innerHTML = '<p style="color:#999;padding:1.5rem;font-size:0.88rem">Aún no hay mensajes de clientes.</p>';
                 return;
             }
-            const planClass = { basico:'plan-basico', premium:'plan-premium', elite:'plan-elite' };
-            list.innerHTML = clients.map(c => `
-                <div class="client-card" style="cursor:pointer" onclick="openMsgConversation('${c._id}','${c.name.replace(/'/g,"\\'")}')">
-                    <div class="client-info">
-                        <div class="client-name">${c.name}
-                            ${c.unread ? `<span style="background:#e53e3e;color:white;border-radius:10px;font-size:0.72rem;padding:0.1rem 0.45rem;margin-left:6px;font-weight:700">${c.unread} nuevo${c.unread>1?'s':''}</span>` : ''}
-                        </div>
+            list.innerHTML = msgClientsCache.map(c => `
+                <div class="wa-client-item ${c._id === activeMsgClientId ? 'active':''}"
+                     onclick="openMsgConversation('${c._id}','${c.name.replace(/'/g,"\\'")}','${(c.plan||'')}')">
+                    <div class="wa-avatar">${waInitial(c.name)}</div>
+                    <div class="wa-client-info">
+                        <div class="wa-client-name">${c.name}</div>
+                        <div class="wa-client-preview">${c.plan ? c.plan.toUpperCase() : ''}</div>
                     </div>
-                    <span class="client-plan ${planClass[c.plan]||''}">${(c.plan||'').toUpperCase()}</span>
+                    ${c.unread ? `<div class="wa-unread">${c.unread}</div>` : ''}
                 </div>`).join('');
         }
 
-        async function openMsgConversation(clientId, name) {
-            activeMsgClientId = clientId;
-            document.getElementById('msgClientList').style.display = 'none';
-            document.getElementById('msgConversation').style.display = 'block';
-            document.getElementById('msgConvTitle').textContent = name;
+        async function openMsgConversation(clientId, name, plan) {
+            activeMsgClientId   = clientId;
+            activeMsgClientName = name;
+
+            // Actualizar cabecera
+            document.getElementById('waConvAvatar').textContent = waInitial(name);
+            document.getElementById('waConvName').textContent   = name;
+            document.getElementById('waConvPlan').textContent   = plan ? plan.toUpperCase() : '';
+
+            // Mostrar conversación, ocultar vacío
+            document.getElementById('waEmpty').style.display = 'none';
+            document.getElementById('waConv').style.display  = 'flex';
+            document.getElementById('waMain').style.display  = 'flex';
+
+            // Móvil: ocultar sidebar
+            document.querySelector('.wa-shell').classList.add('conv-open');
+
+            // Marcar activo en lista
+            document.querySelectorAll('.wa-client-item').forEach(el => el.classList.remove('active'));
+
             await loadMsgMessages();
             clearInterval(msgPollInterval);
             msgPollInterval = setInterval(loadMsgMessages, 15000);
+
+            document.getElementById('msgReplyInput').focus();
         }
 
         function closeMsgConversation() {
             clearInterval(msgPollInterval);
             activeMsgClientId = null;
-            document.getElementById('msgConversation').style.display = 'none';
-            document.getElementById('msgClientList').style.display = 'block';
+            document.getElementById('waConv').style.display  = 'none';
+            document.getElementById('waEmpty').style.display = 'flex';
+            document.querySelector('.wa-shell').classList.remove('conv-open');
             loadMsgClients();
         }
 
         async function loadMsgMessages() {
             if (!activeMsgClientId) return;
             const token = localStorage.getItem('authToken');
-            const res = await fetch(`/api/admin/messages/${activeMsgClientId}`, { headers: { 'Authorization': `Bearer ${token}` } });
-            if (!res.ok) return;
-            const messages = await res.json();
-            const box = document.getElementById('msgMessages');
-            box.innerHTML = messages.map(m => {
-                const isAdmin = m.sender === 'admin';
-                return `<div style="display:flex;flex-direction:${isAdmin?'row-reverse':'row'};gap:0.6rem;margin-bottom:1rem">
-                    ${!isAdmin ? '<div style="width:32px;height:32px;border-radius:50%;background:var(--navy);color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;flex-shrink:0">C</div>' : ''}
-                    <div style="max-width:70%">
-                        <div style="font-size:0.75rem;color:#999;margin-bottom:0.2rem;text-align:${isAdmin?'right':'left'}">${msgFmt(m.createdAt)}</div>
-                        <div style="background:${isAdmin?'var(--navy)':'white'};color:${isAdmin?'white':'#333'};padding:0.7rem 1rem;border-radius:12px;font-size:0.92rem;line-height:1.5">${m.text.replace(/\n/g,'<br>')}</div>
-                    </div>
-                </div>`;
-            }).join('') || '<p style="color:#999;text-align:center">Sin mensajes</p>';
-            box.scrollTop = box.scrollHeight;
+            try {
+                const res = await fetch(`/api/admin/messages/${activeMsgClientId}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!res.ok) return;
+                const messages = await res.json();
+                const box = document.getElementById('msgMessages');
+                if (!messages.length) {
+                    box.innerHTML = '<p style="color:#999;text-align:center;margin-top:2rem">Sin mensajes aún</p>';
+                    return;
+                }
+
+                let html = '';
+                let lastDay = '';
+                messages.forEach(m => {
+                    const day = waDayLabel(m.createdAt);
+                    if (day !== lastDay) {
+                        html += `<div class="wa-date-divider"><span>${day}</span></div>`;
+                        lastDay = day;
+                    }
+                    const me = m.sender === 'admin';
+                    html += `<div class="wa-bubble-wrap ${me?'me':'them'}">
+                        <div class="wa-bubble">${m.text.replace(/\n/g,'<br>')}</div>
+                        <div class="wa-bubble-time">${waFmt(m.createdAt)}${me?' ✓✓':''}</div>
+                    </div>`;
+                });
+                box.innerHTML = html;
+                box.scrollTop = box.scrollHeight;
+
+                // Refrescar badge
+                loadMsgClientsQuiet();
+            } catch {}
+        }
+
+        async function loadMsgClientsQuiet() {
+            const token = localStorage.getItem('authToken');
+            try {
+                const res = await fetch('/api/admin/messages', { headers: { 'Authorization': `Bearer ${token}` } });
+                if (!res.ok) return;
+                const clients = await res.json();
+                const total = clients.reduce((s,c) => s + c.unread, 0);
+                const badge = document.getElementById('unreadBadge');
+                badge.textContent = total || '';
+                badge.style.display = total ? 'inline' : 'none';
+            } catch {}
         }
 
         async function sendAdminReply() {
@@ -18848,26 +19098,30 @@ gg==" alt="Effort Online">
             if (!text || !activeMsgClientId) return;
             const token = localStorage.getItem('authToken');
             input.value = '';
-            await fetch(`/api/admin/messages/${activeMsgClientId}`, {
-                method: 'POST',
-                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text })
-            });
-            await loadMsgMessages();
+            input.style.height = 'auto';
+            try {
+                await fetch(`/api/admin/messages/${activeMsgClientId}`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text })
+                });
+                await loadMsgMessages();
+            } catch {}
         }
 
-        // Polling badge no leídos cada 60s
-        setInterval(() => {
-            const token = localStorage.getItem('authToken');
-            if (!token) return;
-            fetch('/api/admin/messages', { headers: { 'Authorization': `Bearer ${token}` } })
-                .then(r => r.ok ? r.json() : [])
-                .then(clients => {
-                    const total = clients.reduce((s,c) => s + c.unread, 0);
-                    const badge = document.getElementById('unreadBadge');
-                    if (badge) { badge.textContent = total; badge.style.display = total ? 'inline' : 'none'; }
-                }).catch(() => {});
-        }, 60000);
+        // Enter para enviar (Shift+Enter = salto de línea)
+        document.getElementById('msgReplyInput').addEventListener('keydown', e => {
+            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendAdminReply(); }
+        });
+
+        // Auto-resize textarea
+        document.getElementById('msgReplyInput').addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+        });
+
+        // Polling badge no leídos cada 30s
+        setInterval(loadMsgClientsQuiet, 30000);
     </script>
     <script>if('serviceWorker'in navigator)navigator.serviceWorker.register('/sw.js').catch(()=>{});</script>
 </body>
