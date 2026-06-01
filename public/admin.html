@@ -17665,9 +17665,9 @@ PLl+F9SJeGpJHFivHwYI+2aIBFcd5mHUYf+N7OuM6eGsw/Hw7z9YfTzYmwQ6PQAAAABJRU5ErkJg
 gg==" alt="Effort Online">
             <div class="admin-menu">
                 <span class="admin-name">Efrén — Admin</span>
-                <button id="pushBellBtn" onclick="enablePushNotifications()" title="Activar notificaciones push"
-                    style="display:none;background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.4);color:white;border-radius:20px;padding:0.3rem 0.8rem;font-size:0.8rem;cursor:pointer;margin-right:0.5rem">
-                    🔔 Avisos
+                <button id="pushBellBtn" onclick="togglePushNotifications()" title="Notificaciones push"
+                    style="background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.3);color:white;border-radius:20px;padding:0.3rem 0.8rem;font-size:0.8rem;cursor:pointer;margin-right:0.5rem;transition:all 0.2s">
+                    🔕 Avisos OFF
                 </button>
                 <button class="logout-btn" onclick="logout()">Cerrar Sesión</button>
             </div>
@@ -19135,43 +19135,62 @@ gg==" alt="Effort Online">
         navigator.serviceWorker.register('/sw.js').catch(() => {});
     }
 
-    async function checkPushState() {
-        if (!_swSupported) return;
+    function setPushBtnState(active) {
         const btn = document.getElementById('pushBellBtn');
         if (!btn) return;
+        if (active) {
+            btn.textContent = '🔔 Avisos ON';
+            btn.style.background = 'rgba(0,217,163,0.25)';
+            btn.style.borderColor = '#00D9A3';
+            btn.style.color = '#00D9A3';
+        } else {
+            btn.textContent = '🔕 Avisos OFF';
+            btn.style.background = 'rgba(229,62,62,0.2)';
+            btn.style.borderColor = '#fc8181';
+            btn.style.color = '#fc8181';
+        }
+    }
+
+    async function checkPushState() {
+        if (!_swSupported) {
+            setPushBtnState(false);
+            return;
+        }
         const perm = Notification.permission;
         if (perm === 'granted') {
             const reg = await navigator.serviceWorker.ready;
             const sub = await reg.pushManager.getSubscription();
-            if (sub) {
-                btn.style.display = 'none'; // ya suscrito, no hace falta el botón
-            } else {
-                btn.textContent   = '🔔 Avisos';
-                btn.style.display = 'inline-block';
-            }
-        } else if (perm === 'default') {
-            btn.textContent   = '🔔 Avisos';
-            btn.style.display = 'inline-block';
+            setPushBtnState(!!sub);
+        } else {
+            setPushBtnState(false);
         }
-        // si 'denied': no mostramos nada
     }
 
-    async function enablePushNotifications() {
+    async function togglePushNotifications() {
         if (!_swSupported) {
-            alert('Tu navegador no soporta notificaciones push.\nAsegúrate de tener la app instalada en la pantalla de inicio (PWA).');
+            alert('Asegúrate de tener la app instalada en la pantalla de inicio (PWA) y usar iOS 16.4 o superior.');
             return;
         }
         try {
+            const reg = await navigator.serviceWorker.ready;
+            const existing = await reg.pushManager.getSubscription();
+
+            if (existing) {
+                // Ya activo — no hacemos nada, las notificaciones siguen activas
+                alert('✅ Las notificaciones ya están activas.');
+                return;
+            }
+
+            // Pedir permiso y suscribir
             const perm = await Notification.requestPermission();
             if (perm !== 'granted') {
-                alert('Has denegado las notificaciones. Para activarlas, ve a Ajustes del iPhone → Safari/Aplicaciones → Effort Admin → Notificaciones.');
+                alert('Permiso denegado.\nVe a Ajustes del iPhone → [tu app Effort] → Notificaciones → Permitir.');
                 return;
             }
 
             const token = localStorage.getItem('authToken');
-            const reg = await navigator.serviceWorker.ready;
-
             const vapidRes = await fetch('/api/push/vapid-public');
+            if (!vapidRes.ok) { alert('Error de configuración del servidor.'); return; }
             const { key } = await vapidRes.json();
 
             const sub = await reg.pushManager.subscribe({
@@ -19185,14 +19204,13 @@ gg==" alt="Effort Online">
                 body: JSON.stringify({ subscription: sub })
             });
 
-            document.getElementById('pushBellBtn').style.display = 'none';
-            alert('✅ Notificaciones activadas. Te avisaré cuando te escriban.');
+            setPushBtnState(true);
+            alert('✅ Notificaciones activadas.');
         } catch (err) {
-            alert('Error activando notificaciones: ' + err.message);
+            alert('Error: ' + err.message);
         }
     }
 
-    // Comprobar estado al cargar (después de que el DOM esté listo)
     window.addEventListener('load', () => setTimeout(checkPushState, 1500));
     </script>
 </body>
