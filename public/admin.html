@@ -17665,7 +17665,11 @@ PLl+F9SJeGpJHFivHwYI+2aIBFcd5mHUYf+N7OuM6eGsw/Hw7z9YfTzYmwQ6PQAAAABJRU5ErkJg
 gg==" alt="Effort Online">
             <div class="admin-menu">
                 <span class="admin-name">Efrén — Admin</span>
-                <button class="logout-btn">Cerrar Sesión</button>
+                <button id="pushBellBtn" onclick="enablePushNotifications()" title="Activar notificaciones push"
+                    style="display:none;background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.4);color:white;border-radius:20px;padding:0.3rem 0.8rem;font-size:0.8rem;cursor:pointer;margin-right:0.5rem">
+                    🔔 Avisos
+                </button>
+                <button class="logout-btn" onclick="logout()">Cerrar Sesión</button>
             </div>
         </div>
     </div>
@@ -17788,13 +17792,8 @@ gg==" alt="Effort Online">
                 <div class="wa-shell">
                     <!-- Columna izquierda: lista de clientes -->
                     <div class="wa-sidebar" id="waSidebar">
-                        <div class="wa-sidebar-header" style="justify-content:space-between">
+                        <div class="wa-sidebar-header">
                             <span style="font-weight:700;font-size:1rem;color:white">Mensajes</span>
-                            <button id="pushEnableBtn" onclick="enablePushNotifications()"
-                                style="background:rgba(255,255,255,0.15);border:none;color:white;border-radius:20px;padding:0.3rem 0.8rem;font-size:0.78rem;cursor:pointer;display:none">
-                                🔔 Activar avisos
-                            </button>
-                            <span id="pushEnabledTag" style="display:none;font-size:0.75rem;color:#00D9A3">🔔 Avisos ON</span>
                         </div>
                         <div class="wa-client-list" id="msgClientList">
                             <p style="color:#999;padding:1.5rem;font-size:0.9rem">Cargando...</p>
@@ -19138,22 +19137,23 @@ gg==" alt="Effort Online">
 
     async function checkPushState() {
         if (!_swSupported) return;
+        const btn = document.getElementById('pushBellBtn');
+        if (!btn) return;
         const perm = Notification.permission;
         if (perm === 'granted') {
-            // Verificar si ya hay suscripción activa
             const reg = await navigator.serviceWorker.ready;
             const sub = await reg.pushManager.getSubscription();
             if (sub) {
-                document.getElementById('pushEnabledTag').style.display = 'inline';
-                document.getElementById('pushEnableBtn').style.display  = 'none';
+                btn.style.display = 'none'; // ya suscrito, no hace falta el botón
             } else {
-                document.getElementById('pushEnableBtn').style.display  = 'inline-block';
-                document.getElementById('pushEnabledTag').style.display = 'none';
+                btn.textContent   = '🔔 Avisos';
+                btn.style.display = 'inline-block';
             }
         } else if (perm === 'default') {
-            document.getElementById('pushEnableBtn').style.display = 'inline-block';
+            btn.textContent   = '🔔 Avisos';
+            btn.style.display = 'inline-block';
         }
-        // si 'denied', no mostramos nada (usuario lo denegó explícitamente)
+        // si 'denied': no mostramos nada
     }
 
     async function enablePushNotifications() {
@@ -19185,8 +19185,7 @@ gg==" alt="Effort Online">
                 body: JSON.stringify({ subscription: sub })
             });
 
-            document.getElementById('pushEnableBtn').style.display  = 'none';
-            document.getElementById('pushEnabledTag').style.display = 'inline';
+            document.getElementById('pushBellBtn').style.display = 'none';
             alert('✅ Notificaciones activadas. Te avisaré cuando te escriban.');
         } catch (err) {
             alert('Error activando notificaciones: ' + err.message);
