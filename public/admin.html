@@ -17788,8 +17788,13 @@ gg==" alt="Effort Online">
                 <div class="wa-shell">
                     <!-- Columna izquierda: lista de clientes -->
                     <div class="wa-sidebar" id="waSidebar">
-                        <div class="wa-sidebar-header">
+                        <div class="wa-sidebar-header" style="justify-content:space-between">
                             <span style="font-weight:700;font-size:1rem;color:white">Mensajes</span>
+                            <button id="pushEnableBtn" onclick="enablePushNotifications()"
+                                style="background:rgba(255,255,255,0.15);border:none;color:white;border-radius:20px;padding:0.3rem 0.8rem;font-size:0.78rem;cursor:pointer;display:none">
+                                🔔 Activar avisos
+                            </button>
+                            <span id="pushEnabledTag" style="display:none;font-size:0.75rem;color:#00D9A3">🔔 Avisos ON</span>
                         </div>
                         <div class="wa-client-list" id="msgClientList">
                             <p style="color:#999;padding:1.5rem;font-size:0.9rem">Cargando...</p>
@@ -19125,38 +19130,71 @@ gg==" alt="Effort Online">
     </script>
     <script>
     // Service Worker + Push Notifications
-    if ('serviceWorker' in navigator && 'PushManager' in window) {
-        navigator.serviceWorker.register('/sw.js').then(async reg => {
-            // Esperar a que el SW esté activo
-            await navigator.serviceWorker.ready;
+    const _swSupported = 'serviceWorker' in navigator && 'PushManager' in window;
 
-            // Pedir permiso si no está concedido
-            if (Notification.permission === 'default') {
-                await Notification.requestPermission();
+    if (_swSupported) {
+        navigator.serviceWorker.register('/sw.js').catch(() => {});
+    }
+
+    async function checkPushState() {
+        if (!_swSupported) return;
+        const perm = Notification.permission;
+        if (perm === 'granted') {
+            // Verificar si ya hay suscripción activa
+            const reg = await navigator.serviceWorker.ready;
+            const sub = await reg.pushManager.getSubscription();
+            if (sub) {
+                document.getElementById('pushEnabledTag').style.display = 'inline';
+                document.getElementById('pushEnableBtn').style.display  = 'none';
+            } else {
+                document.getElementById('pushEnableBtn').style.display  = 'inline-block';
+                document.getElementById('pushEnabledTag').style.display = 'none';
             }
-            if (Notification.permission !== 'granted') return;
+        } else if (perm === 'default') {
+            document.getElementById('pushEnableBtn').style.display = 'inline-block';
+        }
+        // si 'denied', no mostramos nada (usuario lo denegó explícitamente)
+    }
 
-            // Obtener clave VAPID pública del servidor
+    async function enablePushNotifications() {
+        if (!_swSupported) {
+            alert('Tu navegador no soporta notificaciones push.\nAsegúrate de tener la app instalada en la pantalla de inicio (PWA).');
+            return;
+        }
+        try {
+            const perm = await Notification.requestPermission();
+            if (perm !== 'granted') {
+                alert('Has denegado las notificaciones. Para activarlas, ve a Ajustes del iPhone → Safari/Aplicaciones → Effort Admin → Notificaciones.');
+                return;
+            }
+
             const token = localStorage.getItem('authToken');
-            if (!token) return;
+            const reg = await navigator.serviceWorker.ready;
 
             const vapidRes = await fetch('/api/push/vapid-public');
             const { key } = await vapidRes.json();
 
-            // Suscribir al push
             const sub = await reg.pushManager.subscribe({
                 userVisibleOnly: true,
                 applicationServerKey: key
             });
 
-            // Enviar suscripción al servidor
             await fetch('/api/push/subscribe', {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
                 body: JSON.stringify({ subscription: sub })
             });
-        }).catch(() => {});
+
+            document.getElementById('pushEnableBtn').style.display  = 'none';
+            document.getElementById('pushEnabledTag').style.display = 'inline';
+            alert('✅ Notificaciones activadas. Te avisaré cuando te escriban.');
+        } catch (err) {
+            alert('Error activando notificaciones: ' + err.message);
+        }
     }
+
+    // Comprobar estado al cargar (después de que el DOM esté listo)
+    window.addEventListener('load', () => setTimeout(checkPushState, 1500));
     </script>
 </body>
 </html>
