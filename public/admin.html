@@ -19123,6 +19123,40 @@ gg==" alt="Effort Online">
         // Polling badge no leídos cada 30s
         setInterval(loadMsgClientsQuiet, 30000);
     </script>
-    <script>if('serviceWorker'in navigator)navigator.serviceWorker.register('/sw.js').catch(()=>{});</script>
+    <script>
+    // Service Worker + Push Notifications
+    if ('serviceWorker' in navigator && 'PushManager' in window) {
+        navigator.serviceWorker.register('/sw.js').then(async reg => {
+            // Esperar a que el SW esté activo
+            await navigator.serviceWorker.ready;
+
+            // Pedir permiso si no está concedido
+            if (Notification.permission === 'default') {
+                await Notification.requestPermission();
+            }
+            if (Notification.permission !== 'granted') return;
+
+            // Obtener clave VAPID pública del servidor
+            const token = localStorage.getItem('authToken');
+            if (!token) return;
+
+            const vapidRes = await fetch('/api/push/vapid-public');
+            const { key } = await vapidRes.json();
+
+            // Suscribir al push
+            const sub = await reg.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: key
+            });
+
+            // Enviar suscripción al servidor
+            await fetch('/api/push/subscribe', {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ subscription: sub })
+            });
+        }).catch(() => {});
+    }
+    </script>
 </body>
 </html>

@@ -1,6 +1,6 @@
 // Effort Online — Service Worker
 // Versión: cambia este número al desplegar para forzar actualización
-const CACHE_VERSION = 'effort-v3';
+const CACHE_VERSION = 'effort-v4';
 
 const PAGES_TO_CACHE = [
     '/login.html',
@@ -61,5 +61,35 @@ self.addEventListener('fetch', e => {
                 // Sin red → sirve desde caché (funciona offline)
                 caches.match(e.request)
             )
+    );
+});
+
+// ── Push notifications ──────────────────────────────────────────
+self.addEventListener('push', e => {
+    if (!e.data) return;
+    const data = e.data.json();
+    e.waitUntil(
+        self.registration.showNotification(data.title || 'Effort Online', {
+            body:    data.body || '',
+            icon:    '/icon-192.png',
+            badge:   '/icon-192.png',
+            tag:     'effort-msg',
+            renotify: true,
+            data:    data.data || {}
+        })
+    );
+});
+
+// Clic en notificación → abrir admin
+self.addEventListener('notificationclick', e => {
+    e.notification.close();
+    const url = (e.notification.data && e.notification.data.url) || '/admin.html';
+    e.waitUntil(
+        clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
+            for (const c of list) {
+                if (c.url.includes('admin') && 'focus' in c) return c.focus();
+            }
+            return clients.openWindow(url);
+        })
     );
 });

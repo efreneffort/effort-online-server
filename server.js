@@ -12,6 +12,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { Resend } = require('resend');
+const webpush = require('web-push');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
@@ -49,6 +50,11 @@ const FROM_EMAIL = _emailMatch
     : 'Effort Online <hola@effortpozuelo.com>';
 
 const REPLY_TO    = process.env.REPLY_TO    || 'effortentrenador@gmail.com';
+
+// VAPID para notificaciones push
+const VAPID_PUBLIC  = process.env.VAPID_PUBLIC  || 'BJELofuyvBXs8iw0fQVLLYQexocdyzurgkjwhEWp3D3QPBr1L1nEYYEi17LU6S3FnW9JOkO1girM0_Rf1BwOHMM';
+const VAPID_PRIVATE = process.env.VAPID_PRIVATE || '1LpDK6D9k5bCuJzxyIAsvx9ksF06yFaW32f7yoyP7QY';
+webpush.setVapidDetails(`mailto:${REPLY_TO}`, VAPID_PUBLIC, VAPID_PRIVATE);
 const ADMIN_PHONE = process.env.ADMIN_PHONE || ''; // ej: 34612345678 (sin + ni espacios)
 
 // Inicializar Resend para envío de emails
@@ -195,6 +201,15 @@ const AchievementSchema = new mongoose.Schema({
 });
 
 const Achievement = mongoose.model('Achievement', AchievementSchema);
+
+// Suscripción push
+const PushSubSchema = new mongoose.Schema({
+    userId:       { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    role:         { type: String, default: 'admin' },
+    subscription: { type: Object, required: true },
+    createdAt:    { type: Date, default: Date.now }
+});
+const PushSub = mongoose.model('PushSub', PushSubSchema);
 
 // Mensaje de chat
 const MessageSchema = new mongoose.Schema({
@@ -847,6 +862,57 @@ app.get('/api/user/videocalls', authenticateToken, async (req, res) => {
 });
 
 // ============================================
+// PUSH NOTIFICATIONS
+// ============================================
+
+// Clave pública VAPID (para el frontend)
+app.get('/api/push/vapid-public', (req, res) => {
+    res.json({ key: VAPID_PUBLIC });
+});
+
+// Guardar suscripción push
+app.post('/api/push/subscribe', authenticateToken, async (req, res) => {
+    try {
+        const { subscription } = req.body;
+        if (!subscription) return res.status(400).json({ error: 'Suscripción requerida' });
+        // Upsert: si ya existe para este userId, actualizar
+        await PushSub.findOneAndUpdate(
+            { userId: req.user.userId },
+            { userId: req.user.userId, role: req.user.role, subscription },
+            { upsert: true, new: true }
+        );
+        res.json({ ok: true });
+    } catch (err) {
+        res.status(500).json({ error: 'Error guardando suscripción' });
+    }
+});
+
+// Eliminar suscripción
+app.delete('/api/push/subscribe', authenticateToken, async (req, res) => {
+    await PushSub.deleteOne({ userId: req.user.userId });
+    res.json({ ok: true });
+});
+
+// Enviar notificación push a todos los admins
+async function sendPushToAdmins(title, body, data = {}) {
+    try {
+        const subs = await PushSub.find({ role: 'admin' });
+        const payload = JSON.stringify({ title, body, data });
+        await Promise.all(subs.map(s =>
+            webpush.sendNotification(s.subscription, payload)
+                .catch(async err => {
+                    // Si el endpoint ya no existe, borrar suscripción
+                    if (err.statusCode === 410 || err.statusCode === 404) {
+                        await PushSub.deleteOne({ _id: s._id });
+                    }
+                })
+        ));
+    } catch (err) {
+        console.error('Error enviando push:', err.message);
+    }
+}
+
+// ============================================
 // CHAT
 // ============================================
 
@@ -873,8 +939,17 @@ app.post('/api/messages', authenticateToken, async (req, res) => {
             sender: 'client'
         }).save();
 
-        // Notificación por email al admin
+        // Push + email al admin
         const user = await User.findById(req.user.userId).select('name plan');
+
+        // Push notification inmediata
+        sendPushToAdmins(
+            `💬 ${user?.name || 'Cliente'}`,
+            text.trim().slice(0, 100),
+            { url: '/admin.html', clientId: req.user.userId }
+        ).catch(() => {});
+
+        const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'hola@effortpozuelo.com';
         const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'hola@effortpozuelo.com';
         resend.emails.send({
             from: FROM_EMAIL, to: ADMIN_EMAIL, replyTo: REPLY_TO,
