@@ -18185,9 +18185,15 @@ gg==" alt="Effort Online">
             </div>
             <div class="form-group" style="margin-top:1rem">
                 <label>Nombre del ejercicio</label>
-                <input type="text" id="editExerciseNameInput" class="form-control"
+                <input type="text" id="editExerciseNameInput"
                     style="width:100%;padding:0.8rem;border:1.5px solid #dde0e4;border-radius:10px;font-size:0.95rem"
                     placeholder="Nombre del ejercicio">
+            </div>
+            <div class="form-group" style="margin-top:1rem">
+                <label>URL del vídeo (YouTube "No listado")</label>
+                <input type="url" id="editExerciseVideoInput"
+                    style="width:100%;padding:0.8rem;border:1.5px solid #dde0e4;border-radius:10px;font-size:0.95rem"
+                    placeholder="https://www.youtube.com/watch?v=...">
             </div>
             <div style="display:flex;gap:0.8rem;justify-content:flex-end;margin-top:1.5rem">
                 <button class="btn btn-secondary" onclick="closeModal('editExerciseModal')">Cancelar</button>
@@ -18506,27 +18512,30 @@ gg==" alt="Effort Online">
 
         function openEditExercise() {
             closeExerciseMenu();
-            document.getElementById('editExerciseNameInput').value = ctxExerciseName;
+            const ex = exercisesCache.find(e => e._id === ctxExerciseId);
+            document.getElementById('editExerciseNameInput').value  = ctxExerciseName;
+            document.getElementById('editExerciseVideoInput').value = ex?.videoUrl || '';
             document.getElementById('editExerciseModal').classList.add('active');
             setTimeout(() => document.getElementById('editExerciseNameInput').focus(), 100);
         }
 
         async function saveEditExercise() {
             const newName = document.getElementById('editExerciseNameInput').value.trim();
+            const videoUrl = document.getElementById('editExerciseVideoInput').value.trim();
             if (!newName) return;
             const token = localStorage.getItem('authToken');
             try {
                 const res = await fetch(`/api/admin/exercises/${ctxExerciseId}`, {
                     method: 'PUT',
                     headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name: newName })
+                    body: JSON.stringify({ name: newName, videoUrl: videoUrl || null })
                 });
                 if (!res.ok) throw new Error();
                 closeModal('editExerciseModal');
                 const exRes = await fetch('/api/admin/exercises', { headers: { 'Authorization': `Bearer ${token}` } });
                 if (exRes.ok) renderExercises(await exRes.json());
             } catch {
-                alert('Error al guardar el nombre.');
+                alert('Error al guardar el ejercicio.');
             }
         }
 

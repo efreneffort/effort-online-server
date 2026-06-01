@@ -768,16 +768,14 @@ app.get('/api/admin/exercises', authenticateToken, async (req, res) => {
     }
 });
 
-// Editar nombre de ejercicio
+// Editar ejercicio (nombre + videoUrl)
 app.put('/api/admin/exercises/:id', authenticateToken, isAdmin, async (req, res) => {
     try {
-        const { name } = req.body;
+        const { name, videoUrl } = req.body;
         if (!name || !name.trim()) return res.status(400).json({ error: 'Nombre requerido' });
-        const exercise = await Exercise.findByIdAndUpdate(
-            req.params.id,
-            { name: name.trim() },
-            { new: true }
-        );
+        const update = { name: name.trim() };
+        if (videoUrl !== undefined) update.videoUrl = videoUrl || null;
+        const exercise = await Exercise.findByIdAndUpdate(req.params.id, update, { new: true });
         if (!exercise) return res.status(404).json({ error: 'Ejercicio no encontrado' });
         res.json(exercise);
     } catch (error) {
