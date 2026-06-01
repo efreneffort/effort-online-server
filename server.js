@@ -955,7 +955,6 @@ app.post('/api/messages', authenticateToken, async (req, res) => {
         ).catch(() => {});
 
         const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'hola@effortpozuelo.com';
-        const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'hola@effortpozuelo.com';
         resend.emails.send({
             from: FROM_EMAIL, to: ADMIN_EMAIL, replyTo: REPLY_TO,
             subject: `💬 Nuevo mensaje de ${user?.name || 'un cliente'}`,
