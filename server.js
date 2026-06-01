@@ -51,10 +51,14 @@ const FROM_EMAIL = _emailMatch
 
 const REPLY_TO    = process.env.REPLY_TO    || 'effortentrenador@gmail.com';
 
-// VAPID para notificaciones push
-const VAPID_PUBLIC  = process.env.VAPID_PUBLIC  || 'BJELofuyvBXs8iw0fQVLLYQexocdyzurgkjwhEWp3D3QPBr1L1nEYYEi17LU6S3FnW9JOkO1girM0_Rf1BwOHMM';
-const VAPID_PRIVATE = process.env.VAPID_PRIVATE || '1LpDK6D9k5bCuJzxyIAsvx9ksF06yFaW32f7yoyP7QY';
-webpush.setVapidDetails(`mailto:${REPLY_TO}`, VAPID_PUBLIC, VAPID_PRIVATE);
+// VAPID para notificaciones push — claves SOLO en variables de entorno Railway
+const VAPID_PUBLIC  = process.env.VAPID_PUBLIC;
+const VAPID_PRIVATE = process.env.VAPID_PRIVATE;
+if (VAPID_PUBLIC && VAPID_PRIVATE) {
+    webpush.setVapidDetails(`mailto:${REPLY_TO}`, VAPID_PUBLIC, VAPID_PRIVATE);
+} else {
+    console.warn('⚠️  VAPID_PUBLIC / VAPID_PRIVATE no configuradas — push desactivado');
+}
 const ADMIN_PHONE = process.env.ADMIN_PHONE || ''; // ej: 34612345678 (sin + ni espacios)
 
 // Inicializar Resend para envío de emails
@@ -867,6 +871,7 @@ app.get('/api/user/videocalls', authenticateToken, async (req, res) => {
 
 // Clave pública VAPID (para el frontend)
 app.get('/api/push/vapid-public', (req, res) => {
+    if (!VAPID_PUBLIC) return res.status(503).json({ error: 'Push no configurado' });
     res.json({ key: VAPID_PUBLIC });
 });
 
