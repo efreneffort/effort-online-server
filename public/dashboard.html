@@ -17885,7 +17885,7 @@ gg==" alt="Effort Online">
                     
                     <div id="timerNotStarted">
                         <div class="alert alert-warning">
-                            ⚠️ Debes completar el tiempo mínimo para que la sesión cuente como realizada.
+                            Debes completar el tiempo mínimo para que la sesión cuente como realizada.
                         </div>
 
                         <div class="workout-duration">
@@ -18092,7 +18092,7 @@ gg==" alt="Effort Online">
                             </div>
 
                             <p style="color: #999; font-size: 0.85rem; text-align: center; margin-top: 1rem;">
-                                💡 Tiempo de respuesta: menos de 24 horas
+                                Tiempo de respuesta: menos de 24 horas
                             </p>
                         </div>
                     </div>
@@ -18326,7 +18326,7 @@ gg==" alt="Effort Online">
 
         async function finishWorkout() {
             if (seconds < requiredMinutes * 60) {
-                alert('⚠️ Debes completar al menos ' + requiredMinutes + ' minutos para validar la sesión.');
+                alert('Debes completar al menos ' + requiredMinutes + ' minutos para validar la sesión.');
                 return;
             }
 
@@ -19035,7 +19035,7 @@ gg==" alt="Effort Online">
                 document.getElementById('streakCount').textContent = streak;
                 const daysLeft = Math.max(0, 7 - streak);
                 document.getElementById('streakMsg').textContent = streak >= 7
-                    ? '🏆 ¡Racha semanal conseguida!'
+                    ? '¡Racha semanal conseguida!'
                     : streak > 0
                         ? `¡Solo ${daysLeft} día${daysLeft !== 1 ? 's' : ''} más para tu Racha Semanal!`
                         : 'Entrena hoy para empezar tu racha';
