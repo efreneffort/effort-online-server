@@ -17472,11 +17472,10 @@ gg==" alt="Effort Online">
     <!-- Pricing Section -->
     <section class="pricing-section" id="pricing">
         <h2>Elige Tu Plan</h2>
-        <p class="section-subtitle">Sin permanencia · Cancela cuando quieras · Pago seguro con Stripe</p>
+        <p class="section-subtitle">Compromiso mínimo 3 meses · Pago seguro con Stripe</p>
 
         <div class="period-selector">
-            <button class="period-btn active" onclick="changePeriod('monthly', this)">Mensual</button>
-            <button class="period-btn" onclick="changePeriod('quarterly', this)">Trimestral</button>
+            <button class="period-btn active" onclick="changePeriod('quarterly', this)">Trimestral</button>
             <button class="period-btn" onclick="changePeriod('biannual', this)">Semestral</button>
             <button class="period-btn" onclick="changePeriod('annual', this)">Anual</button>
         </div>
@@ -36955,11 +36954,6 @@ gg==" alt="Effort Online">
 
     <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
         const pricingData = {
-            monthly: {
-                basico: { price: '149€', period: '/mes', savings: null, total: null },
-                premium: { price: '199€', period: '/mes', savings: null, total: null },
-                elite: { price: '249€', period: '/mes', savings: null, total: null }
-            },
             quarterly: {
                 basico: { price: '133€', period: '/mes', savings: 'Ahorra 48€', total: '399€ cada 3 meses' },
                 premium: { price: '183€', period: '/mes', savings: 'Ahorra 48€', total: '549€ cada 3 meses' },
@@ -37062,7 +37056,7 @@ gg==" alt="Effort Online">
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            updatePricingCards('monthly');
+            updatePricingCards('quarterly');
             lucide.createIcons();
         });
 
