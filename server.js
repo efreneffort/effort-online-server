@@ -38,9 +38,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Configuración
 const PORT = process.env.PORT || 3000;
-const JWT_SECRET = process.env.JWT_SECRET || 'effort_online_secret_key_2025';
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) throw new Error('JWT_SECRET no configurado — requerido para iniciar');
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/effort-online';
-const RESEND_API_KEY = process.env.RESEND_API_KEY || 're_BiC1NgD5_5CqHZ6HFSaJFAkoRCqQ3tG9M';
+const RESEND_API_KEY = process.env.RESEND_API_KEY;
 
 // FROM_EMAIL: validar que el dominio tenga TLD (al menos un punto después del @)
 const _rawFrom = process.env.FROM_EMAIL || '';
@@ -473,16 +474,13 @@ app.post('/api/payments/webhook', express.raw({ type: 'application/json' }), asy
 
     let event;
     try {
-        if (webhookSecret) {
-            event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
-        } else if (process.env.NODE_ENV !== 'production') {
-            event = JSON.parse(req.body.toString());
-        } else {
-            return res.status(400).send('Stripe webhook secret no configurado');
+        if (!webhookSecret) {
+            return res.status(400).send('Webhook secret no configurado');
         }
+        event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
     } catch (error) {
         console.error('Error verificando webhook:', error.message);
-        return res.status(400).send(`Webhook Error: ${error.message}`);
+        return res.status(400).send('Webhook signature inválida');
     }
 
     try {
@@ -1815,7 +1813,8 @@ setTimeout(() => {
 
 app.listen(PORT, () => {
     console.log(`🚀 Servidor Effort Online corriendo en http://localhost:${PORT}`);
-    console.log(`📊 MongoDB: ${MONGODB_URI}`);
+    const mongoHost = MONGODB_URI.split('@')[1]?.split('/')[0] || 'local';
+    console.log(`📊 MongoDB: ${mongoHost}`);
     console.log(`📧 Resend: ${RESEND_API_KEY ? 'Configurado ✅' : 'NO CONFIGURADO ❌'}`);
     console.log(`📤 FROM_EMAIL: ${FROM_EMAIL}`);
     console.log(`💰 Tarifas 2025 - Básico: 149€ | Premium: 199€ | Élite: 249€`);
