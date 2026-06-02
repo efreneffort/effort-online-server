@@ -17359,15 +17359,9 @@ gg==" alt="Effort Online">
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td>Mes.</td>
-                                        <td id="cell-basico-monthly"   onclick="selectCombo('basico','monthly')">149€</td>
-                                        <td id="cell-premium-monthly"  onclick="selectCombo('premium','monthly')" class="selected-cell">199€</td>
-                                        <td id="cell-elite-monthly"    onclick="selectCombo('elite','monthly')" class="elite-col">249€</td>
-                                    </tr>
-                                    <tr>
                                         <td>Trim.</td>
                                         <td id="cell-basico-quarterly"  onclick="selectCombo('basico','quarterly')">133€</td>
-                                        <td id="cell-premium-quarterly" onclick="selectCombo('premium','quarterly')">183€</td>
+                                        <td id="cell-premium-quarterly" onclick="selectCombo('premium','quarterly')" class="selected-cell">183€</td>
                                         <td id="cell-elite-quarterly"   onclick="selectCombo('elite','quarterly')" class="elite-col">233€</td>
                                     </tr>
                                     <tr>
@@ -17389,9 +17383,9 @@ gg==" alt="Effort Online">
                         <div class="price-summary">
                             <div class="price-row price-total">
                                 <span>Total a pagar:</span>
-                                <span id="totalPrice">199€</span>
+                                <span id="totalPrice">549€</span>
                             </div>
-                            <div style="font-size:0.78rem;color:#888;margin-top:0.3rem;" id="priceDetails">Pago mensual · Cancela cuando quieras</div>
+                            <div style="font-size:0.78rem;color:#888;margin-top:0.3rem;" id="priceDetails">549€ cada 3 meses (183€/mes) • Ahorra 48€</div>
                             <div id="savingsBadge" style="display:none;margin-top:0.5rem;background:var(--green);color:var(--navy);font-weight:800;font-size:0.8rem;padding:0.3rem 0.8rem;border-radius:50px;display:inline-block;"></div>
                         </div>
 
@@ -17446,18 +17440,13 @@ gg==" alt="Effort Online">
         const periodFromStorage = localStorage.getItem('selectedPeriod');
         
         let selectedPlan = planFromStorage || 'premium';
-        let selectedPeriod = periodFromStorage || 'monthly';
+        let selectedPeriod = periodFromStorage || 'quarterly';
         
         // Limpiar localStorage después de leer
         localStorage.removeItem('selectedPlan');
         localStorage.removeItem('selectedPeriod');
 
         const pricing = {
-            monthly: {
-                basico: { price: 149, total: 149, details: 'Pago mensual • Cancela cuando quieras' },
-                premium: { price: 199, total: 199, details: 'Pago mensual • Cancela cuando quieras' },
-                elite: { price: 249, total: 249, details: 'Pago mensual • Cancela cuando quieras' }
-            },
             quarterly: {
                 basico: { price: 133, total: 399, details: '399€ cada 3 meses (133€/mes) • Ahorra 48€' },
                 premium: { price: 183, total: 549, details: '549€ cada 3 meses (183€/mes) • Ahorra 48€' },
@@ -17476,7 +17465,6 @@ gg==" alt="Effort Online">
         };
 
         const periodNames = {
-            monthly: 'Mensual',
             quarterly: 'Trimestral',
             biannual: 'Semestral',
             annual: 'Anual'
@@ -17560,7 +17548,7 @@ gg==" alt="Effort Online">
             document.getElementById('priceDetails').textContent = mainDetail;
 
             const badge = document.getElementById('savingsBadge');
-            if (savingsPart && period !== 'monthly') {
+            if (savingsPart) {
                 badge.textContent = savingsPart.trim();
                 badge.style.display = 'inline-block';
             } else {

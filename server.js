@@ -135,7 +135,7 @@ const UserSchema = new mongoose.Schema({
     password: { type: String, required: true },
     phone: String,
     plan: { type: String, enum: ['basico', 'premium', 'elite'], required: true },
-    period: { type: String, enum: ['monthly', 'quarterly', 'biannual', 'annual'], required: true },
+    period: { type: String, enum: ['quarterly', 'biannual', 'annual'], required: true },
     stripeCustomerId: String,
     stripeSubscriptionId: String,
     isActive: { type: Boolean, default: true },
@@ -389,9 +389,9 @@ app.post('/api/payments/create-intent', authenticateToken, async (req, res) => {
 
         // TARIFAS 2025 FINALES (en céntimos para Stripe)
         const prices = {
-            basico: { monthly: 14900, quarterly: 39900, biannual: 69900, annual: 118800 },
-            premium: { monthly: 19900, quarterly: 54900, biannual: 99900, annual: 154800 },
-            elite: { monthly: 24900, quarterly: 69900, biannual: 129900, annual: 190800 }
+            basico: { quarterly: 39900, biannual: 69900, annual: 118800 },
+            premium: { quarterly: 54900, biannual: 99900, annual: 154800 },
+            elite: { quarterly: 69900, biannual: 129900, annual: 190800 }
         };
 
         const amount = prices[plan][period];
@@ -422,20 +422,20 @@ app.post('/api/payments/create-checkout-session', authenticateToken, async (req,
         const { plan, period } = req.body;
 
         const validPlans = ['basico', 'premium', 'elite'];
-        const validPeriods = ['monthly', 'quarterly', 'biannual', 'annual'];
+        const validPeriods = ['quarterly', 'biannual', 'annual'];
         if (!validPlans.includes(plan) || !validPeriods.includes(period)) {
             return res.status(400).json({ error: 'Plan o período inválido' });
         }
 
         // TARIFAS 2025 FINALES (en céntimos para Stripe)
         const prices = {
-            basico:   { monthly: 14900, quarterly:  39900, biannual:  69900, annual: 118800 },
-            premium:  { monthly: 19900, quarterly:  54900, biannual:  99900, annual: 154800 },
-            elite:    { monthly: 24900, quarterly:  69900, biannual: 129900, annual: 190800 }
+            basico:   { quarterly:  39900, biannual:  69900, annual: 118800 },
+            premium:  { quarterly:  54900, biannual:  99900, annual: 154800 },
+            elite:    { quarterly:  69900, biannual: 129900, annual: 190800 }
         };
 
         const planNames   = { basico: 'Plan Básico', premium: 'Plan Premium', elite: 'Plan Élite' };
-        const periodNames = { monthly: 'Mensual', quarterly: 'Trimestral', biannual: 'Semestral', annual: 'Anual' };
+        const periodNames = { quarterly: 'Trimestral', biannual: 'Semestral', annual: 'Anual' };
 
         const amount  = prices[plan][period];
         const APP_URL = appBase();
