@@ -162,15 +162,21 @@ const ExerciseSchema = new mongoose.Schema({
 const Exercise = mongoose.model('Exercise', ExerciseSchema);
 
 // Rutina
+const ExerciseEntrySchema = {
+    exerciseId: { type: mongoose.Schema.Types.ObjectId, ref: 'Exercise' },
+    sets: Number,
+    reps: String,
+    rest: Number,
+    notes: String
+};
 const RoutineSchema = new mongoose.Schema({
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-    exercises: [{
-        exerciseId: { type: mongoose.Schema.Types.ObjectId, ref: 'Exercise' },
-        sets: Number,
-        reps: String,
-        rest: Number,
-        notes: String
+    days: [{
+        name: { type: String, default: 'Día 1' },
+        exercises: [ExerciseEntrySchema]
     }],
+    // Campo legacy — se mantiene para compatibilidad con rutinas antiguas
+    exercises: [ExerciseEntrySchema],
     updatedAt: { type: Date, default: Date.now }
 });
 
@@ -547,6 +553,7 @@ app.get('/api/user/me', authenticateToken, async (req, res) => {
 app.get('/api/user/routine', authenticateToken, async (req, res) => {
     try {
         const routine = await Routine.findOne({ userId: req.user.userId })
+            .populate('days.exercises.exerciseId')
             .populate('exercises.exerciseId');
         res.json(routine);
     } catch (error) {
@@ -708,6 +715,7 @@ app.delete('/api/admin/clients/:clientId', authenticateToken, isAdmin, async (re
 app.get('/api/admin/clients/:clientId/routine', authenticateToken, isAdmin, async (req, res) => {
     try {
         const routine = await Routine.findOne({ userId: req.params.clientId })
+            .populate('days.exercises.exerciseId')
             .populate('exercises.exerciseId');
         res.json(routine || null);
     } catch (error) {
@@ -719,26 +727,20 @@ app.get('/api/admin/clients/:clientId/routine', authenticateToken, isAdmin, asyn
 app.put('/api/admin/clients/:clientId/routine', authenticateToken, isAdmin, async (req, res) => {
     try {
         const { clientId } = req.params;
-        const { exercises } = req.body;
+        const { days } = req.body;
 
         let routine = await Routine.findOne({ userId: clientId });
 
         if (routine) {
-            routine.exercises = exercises;
+            routine.days = days;
             routine.updatedAt = new Date();
             await routine.save();
         } else {
-            routine = new Routine({
-                userId: clientId,
-                exercises
-            });
+            routine = new Routine({ userId: clientId, days });
             await routine.save();
         }
 
-        res.json({
-            message: 'Rutina actualizada exitosamente',
-            routine
-        });
+        res.json({ message: 'Rutina actualizada exitosamente', routine });
     } catch (error) {
         res.status(500).json({ error: 'Error al actualizar rutina' });
     }

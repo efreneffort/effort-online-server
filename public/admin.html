@@ -17883,37 +17883,41 @@ gg==" alt="Effort Online">
 
     <!-- Modal Editar Rutina -->
     <div id="routineModal" class="modal">
-        <div class="modal-content">
+        <div class="modal-content" style="max-width:700px">
             <div class="modal-header">
                 <h3 class="modal-title" id="routineModalTitle">Editar Rutina - Cliente</h3>
                 <button class="close-btn" onclick="closeModal('routineModal')">&times;</button>
             </div>
 
-            <div class="form-group">
-                <label>Ejercicios Actuales</label>
-                <div class="exercise-list" id="currentExercises">
-                    <p style="color:#999">Sin ejercicios aún. Añade uno abajo.</p>
-                </div>
-            </div>
+            <input type="hidden" id="routineClientId">
+
+            <!-- Lista de días -->
+            <div id="daysList"></div>
+
+            <button class="btn-add" onclick="addDay()" style="margin-top:1rem">+ Añadir Día</button>
 
             <hr style="margin: 2rem 0; border: none; border-top: 2px solid #e0e0e0;">
 
-            <h4 style="color: var(--navy); margin-bottom: 1rem;">Añadir Nuevo Ejercicio</h4>
+            <!-- Formulario añadir ejercicio -->
+            <h4 style="color: var(--navy); margin-bottom: 1rem;">Añadir Ejercicio</h4>
 
-            <input type="hidden" id="routineClientId">
+            <div class="form-group">
+                <label>Al día</label>
+                <select id="targetDaySelect">
+                    <option value="">-- Selecciona un día primero --</option>
+                </select>
+            </div>
 
             <div style="display:flex; gap:0.5rem; margin-bottom:1rem; flex-wrap:wrap;">
-                <button type="button" class="equipment-filter active" data-eq="todos"         onclick="filterEquipment('todos')">Todos</button>
-                <button type="button" class="equipment-filter"        data-eq="sin_material"  onclick="filterEquipment('sin_material')">Sin material</button>
-                <button type="button" class="equipment-filter"        data-eq="bandas"        onclick="filterEquipment('bandas')">Bandas</button>
-                <button type="button" class="equipment-filter"        data-eq="pesas"         onclick="filterEquipment('pesas')">Pesas</button>
+                <button type="button" class="equipment-filter active" data-eq="todos"        onclick="filterEquipment('todos')">Todos</button>
+                <button type="button" class="equipment-filter"        data-eq="sin_material" onclick="filterEquipment('sin_material')">Sin material</button>
+                <button type="button" class="equipment-filter"        data-eq="bandas"       onclick="filterEquipment('bandas')">Bandas</button>
+                <button type="button" class="equipment-filter"        data-eq="pesas"        onclick="filterEquipment('pesas')">Pesas</button>
             </div>
 
             <div class="form-group">
-                <label>Seleccionar Ejercicio</label>
-                <select id="exerciseSelect">
-                    <option value="">-- Seleccionar --</option>
-                </select>
+                <label>Ejercicio</label>
+                <select id="exerciseSelect"><option value="">-- Seleccionar --</option></select>
             </div>
 
             <div class="form-row">
@@ -17934,12 +17938,12 @@ gg==" alt="Effort Online">
 
             <div class="form-group">
                 <label>Notas adicionales</label>
-                <textarea id="routineNotes" placeholder="Indicaciones especiales para el cliente..."></textarea>
+                <textarea id="routineNotes" placeholder="Indicaciones especiales..."></textarea>
             </div>
 
-            <button class="btn-add" onclick="addExerciseToRoutine()">+ Añadir Ejercicio a la Rutina</button>
+            <button class="btn-add" onclick="addExerciseToRoutine()">+ Añadir Ejercicio al Día</button>
 
-            <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+            <div style="display:flex; gap:1rem; margin-top:2rem;">
                 <button class="btn btn-primary" onclick="saveRoutine()">Guardar Rutina</button>
                 <button class="btn btn-secondary" onclick="closeModal('routineModal')">Cancelar</button>
             </div>
@@ -18268,7 +18272,7 @@ gg==" alt="Effort Online">
         function openRoutineModal(clientId, clientName) {
             document.getElementById('routineModalTitle').textContent = 'Editar Rutina - ' + clientName;
             document.getElementById('routineClientId').value = clientId;
-            currentRoutineExercises = [];
+            currentDays = [];
             loadRoutineForClient(clientId);
             populateExerciseSelect();
             document.getElementById('routineModal').classList.add('active');
@@ -18788,65 +18792,120 @@ gg==" alt="Effort Online">
                 clientsCache.map(c => `<option value="${c._id}">${c.name}</option>`).join('');
         }
 
-        // ─── Rutina ──────────────────────────────────────────────────
+        // ─── Rutina con días ─────────────────────────────────────────
+        let currentDays = []; // [{ name, exercises: [{exerciseId, name, sets, reps, rest, notes}] }]
+
         async function loadRoutineForClient(clientId) {
             try {
                 const res = await fetch(`/api/admin/clients/${clientId}/routine`, { headers: authHeaders() });
-                if (!res.ok) { renderCurrentExercises([]); return; }
+                if (!res.ok) { currentDays = []; renderDays(); return; }
                 const routine = await res.json();
-                if (!routine || !routine.exercises || !routine.exercises.length) {
-                    renderCurrentExercises([]);
-                    return;
+
+                // Migración: si tiene ejercicios legacy sin días, crear un Día 1
+                if (routine && routine.days && routine.days.length > 0) {
+                    currentDays = routine.days.map(day => ({
+                        name: day.name || 'Día 1',
+                        exercises: (day.exercises || []).map(ex => {
+                            const e = ex.exerciseId;
+                            return {
+                                exerciseId: e?._id || ex.exerciseId,
+                                name: e?.name || 'Ejercicio',
+                                sets: ex.sets, reps: ex.reps, rest: ex.rest, notes: ex.notes || ''
+                            };
+                        })
+                    }));
+                } else if (routine && routine.exercises && routine.exercises.length > 0) {
+                    currentDays = [{ name: 'Día 1', exercises: routine.exercises.map(ex => {
+                        const e = ex.exerciseId;
+                        return { exerciseId: e?._id || ex.exerciseId, name: e?.name || 'Ejercicio',
+                                 sets: ex.sets, reps: ex.reps, rest: ex.rest, notes: ex.notes || '' };
+                    })}];
+                } else {
+                    currentDays = [];
                 }
-                currentRoutineExercises = routine.exercises.map(ex => {
-                    const exercise = ex.exerciseId;
-                    return {
-                        exerciseId: exercise?._id || ex.exerciseId,
-                        name: exercise?.name || ex.exerciseId,
-                        sets: ex.sets,
-                        reps: ex.reps,
-                        rest: ex.rest,
-                        notes: ex.notes || ''
-                    };
-                });
-                renderCurrentExercises(currentRoutineExercises);
-            } catch(e) {
-                renderCurrentExercises([]);
-            }
+                renderDays();
+            } catch(e) { currentDays = []; renderDays(); }
         }
 
-        function renderCurrentExercises(exercises) {
-            const container = document.getElementById('currentExercises');
-            if (!exercises.length) {
-                container.innerHTML = '<p style="color:#999">Sin ejercicios aún. Añade uno abajo.</p>';
+        function addDay() {
+            const n = currentDays.length + 1;
+            currentDays.push({ name: `Día ${n}`, exercises: [] });
+            renderDays();
+        }
+
+        function removeDay(dayIndex) {
+            if (!confirm(`¿Eliminar "${currentDays[dayIndex].name}" y todos sus ejercicios?`)) return;
+            currentDays.splice(dayIndex, 1);
+            renderDays();
+        }
+
+        function updateDayName(dayIndex, value) {
+            currentDays[dayIndex].name = value;
+            refreshDaySelect();
+        }
+
+        function removeExerciseFromDay(dayIndex, exIndex) {
+            currentDays[dayIndex].exercises.splice(exIndex, 1);
+            renderDays();
+        }
+
+        function renderDays() {
+            const container = document.getElementById('daysList');
+            if (!currentDays.length) {
+                container.innerHTML = '<p style="color:#999;margin-bottom:0.5rem">Sin días aún. Pulsa "+ Añadir Día" para empezar.</p>';
+                refreshDaySelect();
                 return;
             }
-            container.innerHTML = exercises.map((ex, i) => `
-                <div class="exercise-item">
-                    <div>
-                        <div class="exercise-name">${ex.name || ex.exerciseId}</div>
-                        <div class="exercise-details">${ex.sets} series x ${ex.reps} | Descanso: ${ex.rest}seg</div>
-                        ${ex.notes ? `<div class="exercise-details" style="font-style:italic">${ex.notes}</div>` : ''}
+            container.innerHTML = currentDays.map((day, di) => `
+                <div style="border:1.5px solid #e0e8f0;border-radius:12px;padding:1rem;margin-bottom:1rem;background:#f8fafc;">
+                    <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem;">
+                        <input type="text" value="${day.name}" onchange="updateDayName(${di}, this.value)"
+                               style="flex:1;font-weight:700;font-size:1rem;border:1px solid #dde;border-radius:8px;padding:0.4rem 0.75rem;color:var(--navy)">
+                        <button onclick="removeDay(${di})" style="background:#fee;color:#c53030;border:none;border-radius:8px;padding:0.4rem 0.75rem;cursor:pointer;font-weight:600;">Eliminar día</button>
                     </div>
-                    <button class="btn-remove" onclick="removeExerciseFromRoutine(${i})">×</button>
+                    ${day.exercises.length === 0
+                        ? '<p style="color:#bbb;font-size:0.85rem;margin:0">Sin ejercicios. Añade uno abajo seleccionando este día.</p>'
+                        : day.exercises.map((ex, ei) => `
+                            <div class="exercise-item" style="margin-bottom:0.5rem">
+                                <div>
+                                    <div class="exercise-name">${ex.name}</div>
+                                    <div class="exercise-details">${ex.sets} series × ${ex.reps}${ex.rest ? ` | Descanso: ${ex.rest}s` : ''}${ex.notes ? ` | ${ex.notes}` : ''}</div>
+                                </div>
+                                <button class="btn-remove" onclick="removeExerciseFromDay(${di},${ei})">×</button>
+                            </div>`).join('')
+                    }
                 </div>
             `).join('');
-            lucide.createIcons();
+            refreshDaySelect();
+        }
+
+        function refreshDaySelect() {
+            const sel = document.getElementById('targetDaySelect');
+            const prev = sel.value;
+            sel.innerHTML = currentDays.length
+                ? currentDays.map((d, i) => `<option value="${i}">${d.name}</option>`).join('')
+                : '<option value="">-- Añade un día primero --</option>';
+            if (prev !== '' && prev < currentDays.length) sel.value = prev;
         }
 
         function addExerciseToRoutine() {
-            const exId   = document.getElementById('exerciseSelect').value;
-            const sets   = document.getElementById('routineSets').value;
-            const reps   = document.getElementById('routineReps').value;
-            const rest   = document.getElementById('routineRest').value;
-            const notes  = document.getElementById('routineNotes').value;
+            const dayIndex = document.getElementById('targetDaySelect').value;
+            const exId     = document.getElementById('exerciseSelect').value;
+            const sets     = document.getElementById('routineSets').value;
+            const reps     = document.getElementById('routineReps').value;
+            const rest     = document.getElementById('routineRest').value;
+            const notes    = document.getElementById('routineNotes').value;
 
-            if (!exId || !sets || !reps) { alert('Selecciona ejercicio, series y repeticiones.'); return; }
-
+            if (dayIndex === '' || !exId || !sets || !reps) {
+                alert('Selecciona un día, ejercicio, series y repeticiones.');
+                return;
+            }
             const exName = exercisesCache.find(e => e._id === exId)?.name || exId;
-            currentRoutineExercises.push({ exerciseId: exId, name: exName, sets: Number(sets), reps, rest: Number(rest) || 60, notes });
-            renderCurrentExercises(currentRoutineExercises);
-
+            currentDays[dayIndex].exercises.push({
+                exerciseId: exId, name: exName,
+                sets: Number(sets), reps, rest: Number(rest) || 60, notes
+            });
+            renderDays();
             document.getElementById('exerciseSelect').value = '';
             document.getElementById('routineSets').value = '';
             document.getElementById('routineReps').value = '';
@@ -18854,20 +18913,17 @@ gg==" alt="Effort Online">
             document.getElementById('routineNotes').value = '';
         }
 
-        function removeExerciseFromRoutine(index) {
-            currentRoutineExercises.splice(index, 1);
-            renderCurrentExercises(currentRoutineExercises);
-        }
+        // Mantener compatibilidad — no se usa ya pero evita errores
+        function removeExerciseFromRoutine(index) {}
 
         async function saveRoutine() {
             const clientId = document.getElementById('routineClientId').value;
             if (!clientId) { alert('Error: cliente no identificado.'); return; }
-
             try {
                 const res = await fetch(`/api/admin/clients/${clientId}/routine`, {
                     method: 'PUT',
                     headers: authHeaders(),
-                    body: JSON.stringify({ exercises: currentRoutineExercises })
+                    body: JSON.stringify({ days: currentDays })
                 });
                 if (!res.ok) throw new Error((await res.json()).error || 'Error al guardar');
                 alert('Rutina guardada. El cliente verá los cambios en su dashboard.');

@@ -18937,7 +18937,7 @@ gg==" alt="Effort Online">
                     pesas:        '<i data-lucide="dumbbell" style="width:16px;height:16px;vertical-align:middle;"></i>'
                 };
 
-                const items = routine.exercises.map(ex => {
+                function buildExerciseItem(ex) {
                     const e = ex.exerciseId;
                     if (!e) return '';
                     const icon = equipmentIcon[e.equipment] || '<i data-lucide="activity" style="width:16px;height:16px;vertical-align:middle;"></i>';
@@ -18949,19 +18949,34 @@ gg==" alt="Effort Online">
                     const videoBtn = e.videoUrl
                         ? `<button class="btn btn-primary video-play-btn" data-url="${encodeURIComponent(e.videoUrl)}" data-name="${encodeURIComponent(e.name)}" style="margin-top:0.75rem;font-size:0.85rem;padding:0.5rem 1rem"><i data-lucide="play-circle" style="width:15px;height:15px;vertical-align:middle;margin-right:4px;"></i> Ver Vídeo</button>`
                         : '';
-                    const notes = ex.notes ? `<p style="color:#888; font-size:0.85rem; margin-top:0.5rem;"><i data-lucide="file-text" style="width:13px;height:13px;vertical-align:middle;margin-right:3px;"></i>${ex.notes}</p>` : '';
-                    return `
-                        <li class="workout-item">
-                            <div class="workout-name">${icon} ${e.name}</div>
-                            <div class="workout-details">${details}</div>
-                            ${notes}
-                            ${videoBtn}
-                        </li>`;
-                }).join('');
+                    const notes = ex.notes ? `<p style="color:#888;font-size:0.85rem;margin-top:0.5rem;">${ex.notes}</p>` : '';
+                    return `<li class="workout-item">
+                        <div class="workout-name">${icon} ${e.name}</div>
+                        <div class="workout-details">${details}</div>
+                        ${notes}${videoBtn}
+                    </li>`;
+                }
 
-                content.innerHTML = `<ul class="workout-list">${items}</ul>`;
+                // Rutina con días
+                const hasDays = routine.days && routine.days.length > 0;
+                if (hasDays) {
+                    content.innerHTML = routine.days.map(day => `
+                        <div style="margin-bottom:2rem;">
+                            <div style="font-weight:800;font-size:1.05rem;color:var(--navy);margin-bottom:0.75rem;padding:0.5rem 0.75rem;background:#f0f4ff;border-radius:10px;border-left:4px solid var(--green);">
+                                ${day.name}
+                            </div>
+                            <ul class="workout-list" style="margin:0">
+                                ${(day.exercises || []).map(buildExerciseItem).join('')}
+                            </ul>
+                        </div>
+                    `).join('');
+                } else {
+                    // Fallback: rutina sin días (legacy)
+                    const items = (routine.exercises || []).map(buildExerciseItem).join('');
+                    content.innerHTML = `<ul class="workout-list">${items}</ul>`;
+                }
 
-                // Asociar clicks a botones de vídeo (evita problemas de comillas en onclick)
+                // Asociar clicks a botones de vídeo
                 content.querySelectorAll('.video-play-btn').forEach(btn => {
                     btn.addEventListener('click', () => {
                         openVideoModal(decodeURIComponent(btn.dataset.url), decodeURIComponent(btn.dataset.name));
