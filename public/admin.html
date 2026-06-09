@@ -421,6 +421,9 @@
         /* Exercise Builder */
         .exercise-list {
             margin-top: 1rem;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
         }
 
         .exercise-item {
@@ -17767,9 +17770,12 @@ gg==" alt="Effort Online">
             <div id="ejercicios" class="section">
                 <div class="card">
                     <h2 class="card-title">Biblioteca de Ejercicios</h2>
-                    <button class="btn btn-primary" onclick="openModal('newExercise')" style="margin-bottom: 1.5rem;">+ Crear Nuevo Ejercicio</button>
+                    <button class="btn btn-primary" onclick="openModal('newExercise')" style="margin-bottom: 1rem;">+ Crear Nuevo Ejercicio</button>
 
-                    <div class="exercise-list" id="exerciseList">
+                    <input type="text" id="exerciseSearch" placeholder="Buscar ejercicio..." oninput="filterExerciseList()"
+                        style="width:100%;padding:0.65rem 1rem;border:1.5px solid #dde;border-radius:10px;font-size:0.95rem;margin-bottom:1rem;box-sizing:border-box;outline:none;">
+
+                    <div class="exercise-list" id="exerciseList" style="overflow-y:auto;max-height:60vh;overscroll-behavior:contain;">
                         <p style="color:#999">Cargando ejercicios...</p>
                     </div>
                 </div>
@@ -18443,17 +18449,26 @@ gg==" alt="Effort Online">
         let exercisesCache = [];
         let currentEquipmentFilter = 'todos';
 
+        function filterExerciseList() {
+            const query = document.getElementById('exerciseSearch').value.toLowerCase().trim();
+            const filtered = exercisesCache.filter(e =>
+                e.name.toLowerCase().includes(query) ||
+                (e.category || '').toLowerCase().includes(query) ||
+                (e.muscleGroup || '').toLowerCase().includes(query)
+            );
+            renderExerciseItems(filtered);
+        }
+
         const EQUIPMENT_LABEL = {
             sin_material: 'Sin material',
             bandas: 'Bandas',
             pesas: 'Pesas'
         };
 
-        function renderExercises(exercises) {
-            exercisesCache = exercises;
+        function renderExerciseItems(exercises) {
             const list = document.getElementById('exerciseList');
             if (!exercises.length) {
-                list.innerHTML = '<p style="color:#999">No hay ejercicios aún.</p>';
+                list.innerHTML = '<p style="color:#999">No se encontraron ejercicios.</p>';
                 return;
             }
             list.innerHTML = exercises.map(e => `
@@ -18465,6 +18480,12 @@ gg==" alt="Effort Online">
                     <span style="color:#ccc;font-size:0.8rem">⠿</span>
                 </div>
             `).join('');
+
+            // Long-press en cada ejercicio
+            list.querySelectorAll('.exercise-item').forEach(el => {
+                let timer;
+                let longPressed = false;
+                let startX, startY;
 
             // Long-press en cada ejercicio
             list.querySelectorAll('.exercise-item').forEach(el => {
@@ -18487,6 +18508,14 @@ gg==" alt="Effort Online">
                 el.addEventListener('touchmove', () => clearTimeout(timer));
                 el.addEventListener('contextmenu', e => { e.preventDefault(); showExerciseMenu(el, e); });
             });
+        }
+
+        function renderExercises(exercises) {
+            exercisesCache = exercises;
+            // Limpiar buscador al recargar
+            const search = document.getElementById('exerciseSearch');
+            if (search) search.value = '';
+            renderExerciseItems(exercises);
         }
 
         // ─── Menú contextual ejercicio ────────────────────────────────
