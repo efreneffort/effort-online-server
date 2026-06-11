@@ -20,6 +20,9 @@ const path = require('path');
 
 const app = express();
 
+// Confiar en el proxy de Railway (necesario para rate limiting y X-Forwarded-For)
+app.set('trust proxy', 1);
+
 // Middleware
 const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(',')
