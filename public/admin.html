@@ -17957,6 +17957,19 @@ gg==" alt="Effort Online">
     </div>
 
     <!-- Modal Nuevo Cliente -->
+    <!-- Modal Sesiones Cliente -->
+    <div id="sessionsModal" class="modal">
+        <div class="modal-content" style="max-width:540px">
+            <div class="modal-header">
+                <h3 class="modal-title" id="sessionsModalTitle">Sesiones</h3>
+                <button class="close-btn" onclick="closeModal('sessionsModal')">&times;</button>
+            </div>
+            <div id="sessionsModalContent">
+                <p style="color:#999">Cargando...</p>
+            </div>
+        </div>
+    </div>
+
     <div id="newClientModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -18275,6 +18288,58 @@ gg==" alt="Effort Online">
             }
         }
 
+        async function openSessionsModal(clientId, clientName) {
+            document.getElementById('sessionsModalTitle').textContent = `Sesiones — ${clientName}`;
+            document.getElementById('sessionsModalContent').innerHTML = '<p style="color:#999">Cargando...</p>';
+            document.getElementById('sessionsModal').classList.add('active');
+
+            try {
+                const res = await fetch(`/api/admin/clients/${clientId}/sessions`, { headers: authHeaders() });
+                const data = await res.json();
+                const months = data.months || {};
+                const keys = Object.keys(months).sort().reverse();
+
+                if (!keys.length) {
+                    document.getElementById('sessionsModalContent').innerHTML =
+                        '<p style="color:#999;text-align:center;padding:2rem">Este cliente aún no tiene sesiones registradas.</p>';
+                    return;
+                }
+
+                document.getElementById('sessionsModalContent').innerHTML = `
+                    <p style="color:#666;margin-bottom:1.5rem;">Total: <strong>${data.total} sesiones</strong></p>
+                    ${keys.map(k => {
+                        const m = months[k];
+                        const hours = Math.floor(m.totalMinutes / 60);
+                        const mins  = m.totalMinutes % 60;
+                        const timeStr = hours > 0 ? `${hours}h ${mins}min` : `${mins}min`;
+                        return `
+                        <div style="margin-bottom:1.5rem;">
+                            <div style="font-weight:700;font-size:1rem;color:var(--navy);text-transform:capitalize;
+                                        border-left:4px solid var(--green);padding-left:0.75rem;margin-bottom:0.6rem;">
+                                ${m.label}
+                                <span style="font-weight:400;font-size:0.85rem;color:#888;margin-left:0.5rem;">
+                                    ${m.sessions.length} sesiones · ${timeStr}
+                                </span>
+                            </div>
+                            ${m.sessions.map(s => {
+                                const d = new Date(s.date);
+                                const dia = d.toLocaleDateString('es-ES', { weekday:'long', day:'numeric', month:'short' });
+                                const hora = d.toLocaleTimeString('es-ES', { hour:'2-digit', minute:'2-digit' });
+                                return `<div style="display:flex;justify-content:space-between;padding:0.4rem 0.5rem;
+                                    border-bottom:1px solid #f0f0f0;font-size:0.88rem;">
+                                    <span style="text-transform:capitalize;color:#444">${dia} · ${hora}</span>
+                                    <span style="color:var(--green);font-weight:600">${s.duration} min</span>
+                                </div>`;
+                            }).join('')}
+                        </div>`;
+                    }).join('')}
+                `;
+            } catch(e) {
+                document.getElementById('sessionsModalContent').innerHTML =
+                    '<p style="color:#c00">Error al cargar las sesiones.</p>';
+            }
+        }
+
         function openRoutineModal(clientId, clientName) {
             document.getElementById('routineModalTitle').textContent = 'Editar Rutina - ' + clientName;
             document.getElementById('routineClientId').value = clientId;
@@ -18371,6 +18436,7 @@ gg==" alt="Effort Online">
                     <div style="display:flex;flex-direction:column;gap:0.4rem;align-items:flex-end">
                         <span class="client-plan ${planClass[c.plan] || ''}">${(c.plan || '').toUpperCase()}</span>
                         <button class="btn btn-edit" onclick="openRoutineModal('${c._id}', '${c.name.replace(/'/g,"\\'")}')">Editar Rutina</button>
+                        <button class="btn btn-secondary" onclick="openSessionsModal('${c._id}', '${c.name.replace(/'/g,"\\'")}')">Ver Sesiones</button>
                         <button class="btn btn-toggle-active ${isInactive ? 'is-inactive' : ''}"
                             onclick="toggleClientActive('${c._id}', this)">
                             ${isInactive ? 'Activar' : 'Desactivar'}

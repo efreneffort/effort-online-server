@@ -711,6 +711,29 @@ app.delete('/api/admin/clients/:clientId', authenticateToken, isAdmin, async (re
     }
 });
 
+// Obtener sesiones de un cliente agrupadas por mes (admin)
+app.get('/api/admin/clients/:clientId/sessions', authenticateToken, isAdmin, async (req, res) => {
+    try {
+        const sessions = await WorkoutSession.find({ userId: req.params.clientId })
+            .sort({ completedAt: -1 });
+
+        // Agrupar por mes
+        const grouped = {};
+        sessions.forEach(s => {
+            const d = new Date(s.completedAt);
+            const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+            const label = d.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
+            if (!grouped[key]) grouped[key] = { label, sessions: [], totalMinutes: 0 };
+            grouped[key].sessions.push({ date: s.completedAt, duration: s.duration });
+            grouped[key].totalMinutes += s.duration || 0;
+        });
+
+        res.json({ total: sessions.length, months: grouped });
+    } catch (error) {
+        res.status(500).json({ error: 'Error al obtener sesiones' });
+    }
+});
+
 // Obtener rutina de un cliente (admin)
 app.get('/api/admin/clients/:clientId/routine', authenticateToken, isAdmin, async (req, res) => {
     try {

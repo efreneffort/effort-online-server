@@ -17793,7 +17793,10 @@ gg==" alt="Effort Online">
                 <span>Dashboard</span>
             </div>
             <div class="nav-item" onclick="showSection('entrenar')">
-                <span class="nav-icon"><i data-lucide="dumbbell"></i></span>
+                <span class="nav-icon" style="position:relative">
+                    <i data-lucide="dumbbell"></i>
+                    <span id="timerNavDot" style="display:none;position:absolute;top:-3px;right:-3px;width:8px;height:8px;background:#00c896;border-radius:50%;"></span>
+                </span>
                 <span>Entrenar</span>
             </div>
             <div class="nav-item" onclick="showSection('progreso')">
@@ -18250,6 +18253,12 @@ gg==" alt="Effort Online">
         let seconds = 0;
         let isPaused = false;
         let requiredMinutes = 10;
+        let timerActive = false;
+
+        function updateTimerNavBadge() {
+            const dot = document.getElementById('timerNavDot');
+            if (dot) dot.style.display = timerActive ? 'block' : 'none';
+        }
 
         function showSection(sectionId) {
             document.querySelectorAll('.section').forEach(section => {
@@ -18263,6 +18272,9 @@ gg==" alt="Effort Online">
             document.getElementById(sectionId).classList.add('active');
 
             event.currentTarget.classList.add('active');
+
+            // Si el crono está corriendo, mostrar indicador en la nav
+            updateTimerNavBadge();
 
             if (sectionId === 'videollamadas') loadUserCalls();
             if (sectionId === 'logros') loadAchievements();
@@ -18278,13 +18290,15 @@ gg==" alt="Effort Online">
         function startWorkout() {
             requiredMinutes = parseInt(document.getElementById('workoutDuration').value);
             document.getElementById('requiredTime').textContent = requiredMinutes;
-            
+
             document.getElementById('timerNotStarted').style.display = 'none';
             document.getElementById('timerRunning').style.display = 'block';
-            
+
             seconds = 0;
             isPaused = false;
-            
+            timerActive = true;
+            updateTimerNavBadge();
+
             timerInterval = setInterval(updateTimer, 1000);
         }
 
@@ -18395,6 +18409,8 @@ gg==" alt="Effort Online">
             if (circ) circ.style.strokeDashoffset = '339.29';
             seconds = 0;
             isPaused = false;
+            timerActive = false;
+            updateTimerNavBadge();
         }
 
         // EJERCICIOS CON VÍDEOS
