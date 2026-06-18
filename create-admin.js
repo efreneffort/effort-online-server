@@ -5,9 +5,15 @@ require('dns').setServers(['8.8.8.8', '8.8.4.4']);
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
-const ADMIN_EMAIL    = 'efren@effortonline.com';
-const ADMIN_PASSWORD = 'Admin2026!';
-const ADMIN_NAME     = 'Efrén Pérez';
+const ADMIN_EMAIL    = process.env.ADMIN_EMAIL    || process.argv[2];
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || process.argv[3];
+const ADMIN_NAME     = process.env.ADMIN_NAME     || process.argv[4] || 'Admin';
+
+if (!ADMIN_EMAIL || !ADMIN_PASSWORD) {
+    console.error('Uso: node create-admin.js <email> <contraseña> [nombre]');
+    console.error('  o define ADMIN_EMAIL y ADMIN_PASSWORD en .env');
+    process.exit(1);
+}
 
 async function main() {
     await mongoose.connect(process.env.MONGODB_URI);

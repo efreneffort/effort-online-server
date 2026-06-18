@@ -80,7 +80,13 @@ const authLimiter = rateLimit({
 // Conectar a MongoDB
 mongoose.connect(MONGODB_URI)
   .then(() => console.log('✅ Conectado a MongoDB'))
-  .catch(err => console.error('⚠️ MongoDB no disponible, usando modo memoria:', err.message));
+  .catch(err => {
+    if (process.env.NODE_ENV === 'production') {
+        console.error('❌ MongoDB connection failed in production. Exiting.', err.message);
+        process.exit(1);
+    }
+    console.warn('⚠️ MongoDB no disponible, usando modo memoria (solo desarrollo):', err.message);
+  });
 
 // ============================================
 // STORE EN MEMORIA (fallback sin MongoDB)
@@ -291,8 +297,8 @@ app.post('/api/auth/register', authLimiter, async (req, res) => {
         if (!name || !email || !password || !plan || !period) {
             return res.status(400).json({ error: 'Todos los campos obligatorios son requeridos' });
         }
-        if (password.length < 8) {
-            return res.status(400).json({ error: 'La contraseña debe tener al menos 8 caracteres' });
+        if (password.length < 8 || !/[A-Z]/.test(password) || !/[0-9]/.test(password)) {
+            return res.status(400).json({ error: 'La contraseña debe tener al menos 8 caracteres, una mayúscula y un número' });
         }
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
             return res.status(400).json({ error: 'Email no válido' });
@@ -496,38 +502,40 @@ app.post('/api/payments/webhook', express.raw({ type: 'application/json' }), asy
         if (event.type === 'checkout.session.completed') {
             const session = event.data.object;
             if (session.payment_status === 'paid') {
-                const { userId, plan, period } = session.metadata;
-                const user = await User.findByIdAndUpdate(
-                    userId,
-                    { isActive: true, stripeCustomerId: session.customer },
-                    { new: true }
-                );
-                if (user) {
-                    const amount = (session.amount_total / 100).toFixed(0);
-                    sendPaymentConfirmationEmail(user, amount, plan, period).catch(err =>
-                        console.error('Error enviando email pago:', err)
-                    );
-                    console.log(`✅ Checkout completado para usuario ${userId} — Plan ${plan} ${period} ${amount}€`);
+                const { userId, plan, period } = session.metadata || {};
+                if (!userId) { console.error('Webhook: userId ausente en metadata'); }
+                else {
+                    const user = await User.findById(userId);
+                    if (!user) {
+                        console.error(`Webhook checkout: usuario ${userId} no encontrado`);
+                    } else {
+                        await user.updateOne({ isActive: true, stripeCustomerId: session.customer });
+                        const amount = (session.amount_total / 100).toFixed(0);
+                        sendPaymentConfirmationEmail(user, amount, plan, period).catch(err =>
+                            console.error('Error enviando email pago:', err)
+                        );
+                        console.log(`✅ Checkout completado para usuario ${userId} — Plan ${plan} ${period} ${amount}€`);
+                    }
                 }
             }
         }
 
         if (event.type === 'payment_intent.succeeded') {
             const paymentIntent = event.data.object;
-            const { userId, plan, period } = paymentIntent.metadata;
-
-            const user = await User.findByIdAndUpdate(
-                userId,
-                { isActive: true, stripeCustomerId: paymentIntent.customer },
-                { new: true }
-            );
-
-            if (user) {
-                const amount = (paymentIntent.amount / 100).toFixed(0);
-                sendPaymentConfirmationEmail(user, amount, plan, period).catch(err =>
-                    console.error('Error enviando email pago:', err)
-                );
-                console.log(`✅ Pago exitoso para usuario ${userId} — Plan ${plan} ${period} ${amount}€`);
+            const { userId, plan, period } = paymentIntent.metadata || {};
+            if (!userId) { console.error('Webhook: userId ausente en metadata'); }
+            else {
+                const user = await User.findById(userId);
+                if (!user) {
+                    console.error(`Webhook payment_intent: usuario ${userId} no encontrado`);
+                } else {
+                    await user.updateOne({ isActive: true, stripeCustomerId: paymentIntent.customer });
+                    const amount = (paymentIntent.amount / 100).toFixed(0);
+                    sendPaymentConfirmationEmail(user, amount, plan, period).catch(err =>
+                        console.error('Error enviando email pago:', err)
+                    );
+                    console.log(`✅ Pago exitoso para usuario ${userId} — Plan ${plan} ${period} ${amount}€`);
+                }
             }
         }
 
@@ -705,6 +713,8 @@ app.delete('/api/admin/clients/:clientId', authenticateToken, isAdmin, async (re
             WorkoutSession.deleteMany({ userId: clientId }),
             VideoCall.deleteMany({ userId: clientId }),
             Routine.deleteOne({ userId: clientId }),
+            PushSub.deleteMany({ userId: clientId }),
+            Message.deleteMany({ userId: clientId }),
             User.findByIdAndDelete(clientId)
         ]);
 
@@ -775,7 +785,12 @@ app.put('/api/admin/clients/:clientId/routine', authenticateToken, isAdmin, asyn
 // Crear ejercicio
 app.post('/api/admin/exercises', authenticateToken, isAdmin, async (req, res) => {
     try {
-        const exercise = new Exercise(req.body);
+        const { name, category, muscleGroup, difficulty, equipment, description, videoUrl } = req.body;
+        if (!name || !name.trim()) return res.status(400).json({ error: 'Nombre requerido' });
+        if (!category || !difficulty || !equipment) return res.status(400).json({ error: 'Categoría, dificultad y equipamiento son obligatorios' });
+        const VALID_EQUIPMENT = ['sin_material', 'bandas', 'pesas'];
+        if (!VALID_EQUIPMENT.includes(equipment)) return res.status(400).json({ error: 'Equipamiento inválido' });
+        const exercise = new Exercise({ name: name.trim(), category, muscleGroup, difficulty, equipment, description, videoUrl });
         await exercise.save();
         res.status(201).json(exercise);
     } catch (error) {
@@ -786,7 +801,12 @@ app.post('/api/admin/exercises', authenticateToken, isAdmin, async (req, res) =>
 // Listar ejercicios (filtrable por equipment con ?equipment=sin_material|bandas|pesas)
 app.get('/api/admin/exercises', authenticateToken, async (req, res) => {
     try {
-        const filter = req.query.equipment ? { equipment: req.query.equipment } : {};
+        const VALID_EQUIPMENT = ['sin_material', 'bandas', 'pesas'];
+        const { equipment } = req.query;
+        if (equipment && !VALID_EQUIPMENT.includes(equipment)) {
+            return res.status(400).json({ error: 'Equipamiento inválido' });
+        }
+        const filter = equipment ? { equipment } : {};
         const exercises = await Exercise.find(filter).sort({ equipment: 1, category: 1, name: 1 });
         res.json(exercises);
     } catch (error) {
@@ -823,9 +843,10 @@ app.delete('/api/admin/exercises/:id', authenticateToken, isAdmin, async (req, r
 // Editar videollamada
 app.put('/api/admin/videocalls/:id', authenticateToken, isAdmin, async (req, res) => {
     try {
+        const { userId, scheduledFor, meetLink, notes } = req.body;
         const call = await VideoCall.findByIdAndUpdate(
             req.params.id,
-            { ...req.body, reminderSent: false },
+            { userId, scheduledFor, meetLink, notes, reminderSent: false },
             { new: true }
         );
         if (!call) return res.status(404).json({ error: 'Llamada no encontrada' });
@@ -1838,6 +1859,21 @@ setTimeout(() => {
 // ============================================
 // INICIAR SERVIDOR
 // ============================================
+
+// Error handler global (debe ir ANTES de app.listen, DESPUÉS de todas las rutas)
+app.use((err, req, res, next) => {
+    console.error('Unhandled error:', err);
+    res.status(500).json({ error: 'Error interno del servidor' });
+});
+
+process.on('unhandledRejection', (reason) => {
+    console.error('Unhandled Rejection:', reason);
+});
+
+process.on('uncaughtException', (err) => {
+    console.error('Uncaught Exception:', err);
+    process.exit(1);
+});
 
 app.listen(PORT, () => {
     console.log(`🚀 Servidor Effort Online corriendo en http://localhost:${PORT}`);
