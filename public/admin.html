@@ -18021,7 +18021,7 @@ gg==" alt="Effort Online">
 
             <div class="form-group">
                 <label>Contraseña temporal</label>
-                <input type="text" id="newClientPassword" placeholder="Mín. 8 caracteres">
+                <input type="text" id="newClientPassword" placeholder="Mín. 8 caracteres, 1 mayúscula y 1 número">
             </div>
 
             <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
@@ -18065,6 +18065,15 @@ gg==" alt="Effort Online">
                         <option value="alta">Alta</option>
                     </select>
                 </div>
+            </div>
+
+            <div class="form-group">
+                <label>Equipamiento</label>
+                <select id="exerciseEquipment">
+                    <option value="sin_material">Sin material</option>
+                    <option value="bandas">Bandas</option>
+                    <option value="pesas">Pesas</option>
+                </select>
             </div>
 
             <div class="form-group">
@@ -18546,12 +18555,6 @@ gg==" alt="Effort Online">
                     <span style="color:#ccc;font-size:0.8rem">⠿</span>
                 </div>
             `).join('');
-
-            // Long-press en cada ejercicio
-            list.querySelectorAll('.exercise-item').forEach(el => {
-                let timer;
-                let longPressed = false;
-                let startX, startY;
 
             // Long-press en cada ejercicio
             list.querySelectorAll('.exercise-item').forEach(el => {
@@ -19063,6 +19066,7 @@ gg==" alt="Effort Online">
             const name        = document.getElementById('exerciseName').value.trim();
             const category    = document.getElementById('exerciseCategory').value;
             const difficulty  = document.getElementById('exerciseDifficulty').value;
+            const equipment   = document.getElementById('exerciseEquipment').value;
             const description = document.getElementById('exerciseDescription').value.trim();
             const videoUrl    = document.getElementById('exerciseVideoUrl').value.trim();
 
@@ -19072,7 +19076,7 @@ gg==" alt="Effort Online">
                 const res = await fetch('/api/admin/exercises', {
                     method: 'POST',
                     headers: authHeaders(),
-                    body: JSON.stringify({ name, category, difficulty, description, videoUrl })
+                    body: JSON.stringify({ name, category, difficulty, equipment, description, videoUrl })
                 });
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.error || 'Error al crear ejercicio');
