@@ -19485,7 +19485,7 @@ gg==" alt="Effort Online">
         function openVideoModal(url, name) {
             let embedUrl = url;
             // Convertir YouTube a embed
-            const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&?]+)/);
+            const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([^&?]+)/);
             if (ytMatch) embedUrl = `https://www.youtube.com/embed/${ytMatch[1]}?autoplay=1`;
             document.getElementById('videoIframe').src = embedUrl;
             document.getElementById('videoModalTitle').textContent = name;
