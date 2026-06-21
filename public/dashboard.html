@@ -17936,7 +17936,7 @@ gg==" alt="Effort Online">
                             <button onclick="cancelSession()" style="background:none;border:none;cursor:pointer;padding:0.4rem 0.75rem;border-radius:8px;color:#666;font-size:0.9rem;border:1px solid #ddd;">← Volver</button>
                             <div style="flex:1">
                                 <div id="sessionDayTitle" style="font-weight:800;font-size:1.1rem;color:var(--navy);"></div>
-                                <div id="sessionElapsed" style="font-size:0.82rem;color:#aaa;margin-top:2px;">⏱ 00:00</div>
+                                <div id="sessionElapsed" style="display:none;"></div>
                             </div>
                             <div id="sessionProgress" style="font-size:0.85rem;font-weight:600;color:var(--green);white-space:nowrap;">0 / 0</div>
                         </div>
@@ -18356,18 +18356,7 @@ gg==" alt="Effort Online">
             renderChecklist(exercises);
             updateProgress(exercises.length);
 
-            // Stopwatch
             clearInterval(elapsedInterval);
-            elapsedInterval = setInterval(() => {
-                const secs = Math.floor((Date.now() - sessionStartTime) / 1000);
-                const m = String(Math.floor(secs / 60)).padStart(2,'0');
-                const s = String(secs % 60).padStart(2,'0');
-                const el = document.getElementById('sessionElapsed');
-                if (el) el.textContent = `⏱ ${m}:${s}`;
-                // update bubble if visible
-                const bbl = document.getElementById('bubbleTime');
-                if (bbl) bbl.textContent = `${m}:${s}`;
-            }, 1000);
 
             // Reset finish checkbox
             const fb = document.getElementById('finishCheckBox');
@@ -18390,13 +18379,17 @@ gg==" alt="Effort Online">
                 const icon = equipmentIcon[e.equipment] || '<i data-lucide="activity" style="width:16px;height:16px;vertical-align:middle;color:#888;"></i>';
                 const details = [ex.sets ? `${ex.sets} series` : null, ex.reps ? `${ex.reps} reps` : null, ex.rest ? `Descanso: ${ex.rest}s` : null].filter(Boolean).join(' · ');
                 const name = e.name || 'Ejercicio';
-                return `<div id="exrow-${idx}" onclick="toggleExercise(${idx}, ${exercises.length})" style="display:flex;align-items:center;gap:0;padding:1rem 0;border-bottom:1px solid #f0f2f5;cursor:pointer;user-select:none;">
-                    <div style="flex:1;padding-right:1rem;">
-                        <div style="font-weight:700;color:var(--navy);font-size:0.97rem;">${icon} ${name}</div>
+                const hasVideo = e.videoUrl;
+                const infoClick = hasVideo
+                    ? `onclick="openVideoModal(decodeURIComponent('${encodeURIComponent(e.videoUrl)}'), decodeURIComponent('${encodeURIComponent(name)}'))" style="flex:1;padding-right:1.5rem;cursor:pointer;"`
+                    : `style="flex:1;padding-right:1.5rem;"`;
+                return `<div id="exrow-${idx}" style="display:flex;align-items:center;padding:1rem 0;border-bottom:1px solid #f0f2f5;">
+                    <div ${infoClick}>
+                        <div style="font-weight:700;color:var(--navy);font-size:0.97rem;">${icon} ${name}${hasVideo ? ' <i data-lucide="play-circle" style="width:14px;height:14px;vertical-align:middle;color:var(--green);margin-left:4px;"></i>' : ''}</div>
                         ${details ? `<div style="font-size:0.82rem;color:#888;margin-top:4px;">${details}</div>` : ''}
                         ${ex.notes ? `<div style="font-size:0.82rem;color:#aaa;margin-top:2px;">${ex.notes}</div>` : ''}
                     </div>
-                    <div id="excheck-${idx}" style="width:48px;height:48px;border-radius:14px;border:3px solid #d8dfe8;background:white;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-left:auto;transition:all 0.18s;">
+                    <div id="excheck-${idx}" onclick="toggleExercise(${idx}, ${exercises.length})" style="width:48px;height:48px;border-radius:14px;border:3px solid #d8dfe8;background:white;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-left:auto;cursor:pointer;transition:all 0.18s;-webkit-tap-highlight-color:transparent;">
                         <i data-lucide="check" style="width:26px;height:26px;color:white;display:none;" id="excheckicon-${idx}"></i>
                     </div>
                 </div>`;
@@ -18407,21 +18400,18 @@ gg==" alt="Effort Online">
         function toggleExercise(idx, total) {
             const box = document.getElementById(`excheck-${idx}`);
             const icon = document.getElementById(`excheckicon-${idx}`);
-            const row = document.getElementById(`exrow-${idx}`);
             if (checkedExercises.has(idx)) {
                 checkedExercises.delete(idx);
                 box.style.background = 'white';
                 box.style.borderColor = '#d8dfe8';
                 icon.style.display = 'none';
-                row.style.opacity = '1';
             } else {
                 checkedExercises.add(idx);
                 box.style.background = 'var(--green)';
                 box.style.borderColor = 'var(--green)';
                 icon.style.display = 'block';
-                row.style.opacity = '0.6';
+                lucide.createIcons();
             }
-            lucide.createIcons();
             updateProgress(total);
         }
 
