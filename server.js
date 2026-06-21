@@ -17,6 +17,8 @@ const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
+const multer = require('multer');
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 200 * 1024 * 1024 } });
 
 const app = express();
 
@@ -855,6 +857,41 @@ app.delete('/api/admin/exercises/:id', authenticateToken, isAdmin, async (req, r
         res.json({ message: 'Ejercicio eliminado' });
     } catch (error) {
         res.status(500).json({ error: 'Error al eliminar ejercicio' });
+    }
+});
+
+// Subir vídeo a Cloudflare R2
+app.post('/api/admin/exercises/:id/video', authenticateToken, isAdmin, upload.single('video'), async (req, res) => {
+    try {
+        if (!req.file) return res.status(400).json({ error: 'No se recibió ningún archivo' });
+        const ext = req.file.originalname.split('.').pop().toLowerCase();
+        const allowed = ['mp4', 'mov', 'webm', 'mkv'];
+        if (!allowed.includes(ext)) return res.status(400).json({ error: 'Formato no permitido. Usa MP4, MOV o WEBM.' });
+
+        const key = `exercises/${req.params.id}.${ext}`;
+        const cfUrl = `https://api.cloudflare.com/client/v4/accounts/${process.env.CF_ACCOUNT_ID}/r2/buckets/${process.env.CF_R2_BUCKET}/objects/${key}`;
+
+        const cfRes = await fetch(cfUrl, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${process.env.CF_API_TOKEN}`,
+                'Content-Type': req.file.mimetype
+            },
+            body: req.file.buffer
+        });
+
+        if (!cfRes.ok) {
+            const err = await cfRes.text();
+            console.error('R2 error:', err);
+            return res.status(500).json({ error: 'Error al subir el vídeo a Cloudflare' });
+        }
+
+        const publicUrl = `${process.env.CF_R2_PUBLIC_URL}/${key}`;
+        await Exercise.findByIdAndUpdate(req.params.id, { videoUrl: publicUrl });
+        res.json({ videoUrl: publicUrl });
+    } catch (error) {
+        console.error('Error subiendo vídeo:', error);
+        res.status(500).json({ error: 'Error interno al subir el vídeo' });
     }
 });
 

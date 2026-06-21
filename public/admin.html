@@ -18205,7 +18205,35 @@ gg==" alt="Effort Online">
         <hr class="ctx-divider">
         <button class="ctx-item" onclick="openEditExercise()">✏️ Editar nombre</button>
         <hr class="ctx-divider">
+        <button class="ctx-item" onclick="openUploadVideoModal()">🎬 Subir vídeo</button>
+        <hr class="ctx-divider">
         <button class="ctx-item danger" onclick="confirmDeleteExercise()">🗑️ Eliminar</button>
+    </div>
+
+    <!-- Modal subir vídeo -->
+    <div id="uploadVideoModal" class="modal">
+        <div class="modal-content" style="max-width:420px">
+            <div class="modal-header">
+                <h3 class="modal-title">Subir vídeo</h3>
+                <button class="close-btn" onclick="closeModal('uploadVideoModal')">&times;</button>
+            </div>
+            <p id="uploadVideoExerciseName" style="font-weight:700;color:var(--navy);margin:1rem 0 0.5rem"></p>
+            <div id="uploadVideoDropZone" onclick="document.getElementById('uploadVideoInput').click()"
+                style="border:2px dashed #c8d0e0;border-radius:14px;padding:2.5rem 1rem;text-align:center;cursor:pointer;transition:border-color 0.2s;margin-bottom:1rem"
+                ondragover="event.preventDefault();this.style.borderColor='var(--green)'"
+                ondragleave="this.style.borderColor='#c8d0e0'"
+                ondrop="handleVideoDropZone(event)">
+                <div style="font-size:2rem;margin-bottom:0.5rem">📁</div>
+                <div style="font-weight:600;color:var(--navy)">Arrastra el vídeo aquí</div>
+                <div style="font-size:0.82rem;color:#999;margin-top:4px">o haz clic para seleccionar · MP4, MOV, WEBM</div>
+            </div>
+            <input type="file" id="uploadVideoInput" accept="video/mp4,video/mov,video/webm,video/quicktime" style="display:none" onchange="handleVideoFileSelected(this.files[0])">
+            <div id="uploadVideoStatus" style="display:none;margin-bottom:1rem;font-size:0.9rem;color:#666"></div>
+            <div style="display:flex;gap:0.8rem;justify-content:flex-end">
+                <button class="btn btn-secondary" onclick="closeModal('uploadVideoModal')">Cancelar</button>
+                <button class="btn btn-primary" id="uploadVideoBtn" onclick="uploadVideoFile()" disabled>Subir vídeo</button>
+            </div>
+        </div>
     </div>
 
     <!-- Modal editar nombre ejercicio -->
@@ -18659,6 +18687,73 @@ gg==" alt="Effort Online">
                 if (exRes.ok) renderExercises(await exRes.json());
             } catch {
                 alert('Error al guardar el ejercicio.');
+            }
+        }
+
+        let uploadVideoFile_selected = null;
+
+        function openUploadVideoModal() {
+            closeExerciseMenu();
+            document.getElementById('uploadVideoExerciseName').textContent = ctxExerciseName;
+            document.getElementById('uploadVideoStatus').style.display = 'none';
+            document.getElementById('uploadVideoStatus').textContent = '';
+            document.getElementById('uploadVideoBtn').disabled = true;
+            document.getElementById('uploadVideoInput').value = '';
+            uploadVideoFile_selected = null;
+            openModal('uploadVideoModal');
+        }
+
+        function handleVideoDropZone(event) {
+            event.preventDefault();
+            document.getElementById('uploadVideoDropZone').style.borderColor = '#c8d0e0';
+            const file = event.dataTransfer.files[0];
+            if (file) handleVideoFileSelected(file);
+        }
+
+        function handleVideoFileSelected(file) {
+            if (!file) return;
+            uploadVideoFile_selected = file;
+            const mb = (file.size / 1024 / 1024).toFixed(1);
+            const status = document.getElementById('uploadVideoStatus');
+            status.style.display = 'block';
+            status.innerHTML = `📄 <strong>${file.name}</strong> (${mb} MB)`;
+            document.getElementById('uploadVideoBtn').disabled = false;
+        }
+
+        async function uploadVideoFile() {
+            if (!uploadVideoFile_selected) return;
+            const btn = document.getElementById('uploadVideoBtn');
+            const status = document.getElementById('uploadVideoStatus');
+            btn.disabled = true;
+            btn.textContent = 'Subiendo...';
+            status.style.display = 'block';
+            status.textContent = 'Subiendo vídeo, espera un momento...';
+
+            const formData = new FormData();
+            formData.append('video', uploadVideoFile_selected);
+            const token = localStorage.getItem('authToken');
+            try {
+                const res = await fetch(`/api/admin/exercises/${ctxExerciseId}/video`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: formData
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    status.innerHTML = '✅ Vídeo subido correctamente.';
+                    btn.textContent = 'Subir vídeo';
+                    const exRes = await fetch('/api/admin/exercises', { headers: { 'Authorization': `Bearer ${token}` } });
+                    if (exRes.ok) renderExercises(await exRes.json());
+                    setTimeout(() => closeModal('uploadVideoModal'), 1500);
+                } else {
+                    status.textContent = '❌ ' + (data.error || 'Error al subir el vídeo.');
+                    btn.disabled = false;
+                    btn.textContent = 'Subir vídeo';
+                }
+            } catch {
+                status.textContent = '❌ Error de conexión.';
+                btn.disabled = false;
+                btn.textContent = 'Subir vídeo';
             }
         }
 
