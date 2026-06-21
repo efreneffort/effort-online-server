@@ -17916,55 +17916,55 @@ gg==" alt="Effort Online">
 
             <!-- Entrenar Section -->
             <div id="entrenar" class="section">
-                <div class="card">
-                    <h2 class="card-title">Iniciar Entrenamiento</h2>
-                    
-                    <div id="timerNotStarted">
-                        <div class="alert alert-warning">
-                            Tu entrenador ha fijado la duración de tu sesión. Pulsa iniciar cuando estés listo.
-                        </div>
 
-                        <div class="timer-container">
-                            <h3 style="color: var(--navy); margin-bottom: 0.5rem;">Timer de Entrenamiento</h3>
-                            <p style="color:#666;font-size:0.9rem;margin-bottom:1rem;">Duración: <strong id="sessionDurationLabel">— min</strong></p>
-                            <div class="timer-display" id="timerDisplay">00:00</div>
-                            <div class="timer-buttons">
-                                <button class="btn btn-primary" id="startBtn" onclick="startWorkout()"><i data-lucide="play" style="width:16px;height:16px;vertical-align:middle;margin-right:6px;"></i>Iniciar Sesión</button>
-                            </div>
+                <!-- ESTADO 1: Selección de día -->
+                <div id="dayPicker" class="card">
+                    <h2 class="card-title">¿Qué entrenas hoy?</h2>
+                    <div id="dayPickerContent">
+                        <div style="text-align:center;padding:2rem;color:#999;">
+                            <i data-lucide="loader" style="width:32px;height:32px;color:#ccc;"></i>
+                            <p style="margin-top:0.75rem;">Cargando tu rutina...</p>
                         </div>
                     </div>
-
-                    <div id="timerRunning" style="display: none;">
-                        <div class="alert alert-success">
-                            ¡Sesión en curso! Tiempo restante: <strong><span id="requiredTime"></span> min</strong>
-                        </div>
-
-                        <div class="timer-container">
-                            <h3 style="color: var(--navy); margin-bottom: 1rem; text-align:center;">Entrenando...</h3>
-                            <div class="timer-circle-wrap">
-                                <div class="timer-circle-container">
-                                    <svg class="timer-circle-svg" width="130" height="130" viewBox="0 0 130 130">
-                                        <circle class="timer-circle-track" cx="65" cy="65" r="54"/>
-                                        <circle class="timer-circle-fill" id="timerCircleFill" cx="65" cy="65" r="54"/>
-                                    </svg>
-                                    <span class="timer-circle-text" id="timerDisplayRunning">00:00</span>
-                                </div>
-                            </div>
-                            <div class="timer-buttons" style="margin-top: 1.5rem;">
-                                <button class="btn btn-secondary" onclick="pauseWorkout()"><i data-lucide="pause" style="width:16px;height:16px;vertical-align:middle;margin-right:6px;"></i>Pausar</button>
-                                <button class="btn btn-danger" onclick="cancelWorkout()"><i data-lucide="x" style="width:16px;height:16px;vertical-align:middle;margin-right:6px;"></i>Cancelar</button>
-                                <button class="btn btn-primary" id="finishBtn" onclick="finishWorkout()" disabled><i data-lucide="check" style="width:16px;height:16px;vertical-align:middle;margin-right:6px;"></i>Finalizar</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div id="workoutFeedback" style="display:none; margin-top: 1.5rem;"></div>
                 </div>
 
-                <div class="card" style="margin-top: 1.5rem;">
+                <!-- ESTADO 2: Sesión activa -->
+                <div id="activeSession" style="display:none;">
+                    <div class="card">
+                        <!-- Cabecera sesión -->
+                        <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;">
+                            <button onclick="cancelSession()" style="background:none;border:none;cursor:pointer;padding:0.4rem 0.75rem;border-radius:8px;color:#666;font-size:0.9rem;border:1px solid #ddd;">← Volver</button>
+                            <div style="flex:1">
+                                <div id="sessionDayTitle" style="font-weight:800;font-size:1.1rem;color:var(--navy);"></div>
+                                <div id="sessionElapsed" style="font-size:0.82rem;color:#aaa;margin-top:2px;">⏱ 00:00</div>
+                            </div>
+                            <div id="sessionProgress" style="font-size:0.85rem;font-weight:600;color:var(--green);white-space:nowrap;">0 / 0</div>
+                        </div>
+
+                        <!-- Lista de ejercicios con checkboxes -->
+                        <div id="exerciseChecklist"></div>
+
+                        <!-- Checkbox de finalizar -->
+                        <div style="margin-top:2rem;padding:1.25rem 1rem;background:#f8f9fb;border-radius:14px;border:2px dashed #dde3ec;" id="finishSection">
+                            <p style="font-size:0.85rem;color:#888;margin-bottom:1rem;text-align:center;">Marca cuando hayas terminado <strong>todos los ejercicios</strong></p>
+                            <div id="finishCheckRow" onclick="toggleFinishSession()" style="display:flex;align-items:center;gap:1.25rem;cursor:pointer;padding:0.5rem 0.25rem;user-select:none;">
+                                <div style="flex:1;font-weight:700;font-size:1rem;color:var(--navy);">Sesión completada · Finalizar</div>
+                                <div id="finishCheckBox" style="width:52px;height:52px;border-radius:14px;border:3px solid #c8d0e0;background:white;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.2s;">
+                                    <i data-lucide="check" style="width:28px;height:28px;color:white;display:none;" id="finishCheckIcon"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Feedback tras guardar -->
+                    <div id="workoutFeedback" style="display:none;margin-top:1rem;"></div>
+                </div>
+
+                <!-- Historial -->
+                <div class="card" style="margin-top:1.5rem;">
                     <h2 class="card-title">Mis Últimas Sesiones</h2>
                     <div id="sessionHistoryContent">
-                        <div style="text-align:center; padding: 1.5rem; color: #999;"><i data-lucide="loader" style="width:16px;height:16px;vertical-align:middle;animation:spin 1s linear infinite;"></i> Cargando...</div>
+                        <div style="text-align:center;padding:1.5rem;color:#999;"><i data-lucide="loader" style="width:16px;height:16px;vertical-align:middle;animation:spin 1s linear infinite;"></i> Cargando...</div>
                     </div>
                 </div>
             </div>
@@ -18271,22 +18271,26 @@ gg==" alt="Effort Online">
     </style>
 
     <script>
-        let timerInterval;
-        let secondsLeft = 0;
-        let totalSeconds = 0;
-        let isPaused = false;
+        // --- CHECKLIST STATE ---
+        let sessionActive = false;
+        let sessionDayIndex = null;
+        let checkedExercises = new Set();
+        let sessionStartTime = null;
+        let elapsedInterval = null;
+        let finishChecked = false;
+        let userRoutine = null;
         let requiredMinutes = 60;
-        let timerActive = false;
+        let timerActive = false; // kept for nav bubble compatibility
 
         function updateTimerNavBadge() {
             const dot = document.getElementById('timerNavDot');
-            if (dot) dot.style.display = timerActive ? 'block' : 'none';
+            if (dot) dot.style.display = sessionActive ? 'block' : 'none';
         }
 
         function updateTimerBubble(sectionId) {
             const bubble = document.getElementById('timerBubble');
             if (!bubble) return;
-            if (timerActive && sectionId !== 'entrenar') {
+            if (sessionActive && sectionId !== 'entrenar') {
                 bubble.style.display = 'flex';
             } else {
                 bubble.style.display = 'none';
@@ -18294,12 +18298,227 @@ gg==" alt="Effort Online">
         }
 
         function goBackToTimer() {
-            // Simula pulsar el nav item de Entrenar
             const navItem = document.querySelector('.nav-item[onclick*="entrenar"]');
             if (navItem) navItem.click();
-            // En móvil (bottom nav)
             const bnav = document.getElementById('bnav-entrenar');
             if (bnav) bnav.click();
+        }
+
+        function renderDayPicker() {
+            const content = document.getElementById('dayPickerContent');
+            if (!userRoutine) {
+                content.innerHTML = '<div style="text-align:center;padding:2rem;color:#999;"><p>Aún no tienes rutina asignada.</p></div>';
+                return;
+            }
+            const hasDays = userRoutine.days && userRoutine.days.length > 0;
+            if (!hasDays) {
+                // Rutina sin días: un solo bloque
+                content.innerHTML = `<div onclick="selectDay(-1)" style="cursor:pointer;padding:1.25rem 1rem;border-radius:14px;border:2px solid #e8edf5;margin-bottom:0.75rem;display:flex;align-items:center;gap:1rem;transition:border-color 0.2s;" onmouseover="this.style.borderColor='var(--green)'" onmouseout="this.style.borderColor='#e8edf5'">
+                    <div style="width:42px;height:42px;border-radius:12px;background:var(--green);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i data-lucide="dumbbell" style="width:20px;height:20px;color:white;"></i></div>
+                    <div><div style="font-weight:700;color:var(--navy);">Entrenamiento</div><div style="font-size:0.82rem;color:#888;">${(userRoutine.exercises||[]).length} ejercicios</div></div>
+                    <i data-lucide="chevron-right" style="width:18px;height:18px;color:#bbb;margin-left:auto;"></i>
+                </div>`;
+            } else {
+                content.innerHTML = userRoutine.days.map((day, i) => `
+                    <div onclick="selectDay(${i})" style="cursor:pointer;padding:1.25rem 1rem;border-radius:14px;border:2px solid #e8edf5;margin-bottom:0.75rem;display:flex;align-items:center;gap:1rem;transition:border-color 0.2s;" onmouseover="this.style.borderColor='var(--green)'" onmouseout="this.style.borderColor='#e8edf5'">
+                        <div style="width:42px;height:42px;border-radius:12px;background:var(--green);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:800;color:white;font-size:1rem;">${i+1}</div>
+                        <div><div style="font-weight:700;color:var(--navy);">${day.name}</div><div style="font-size:0.82rem;color:#888;">${(day.exercises||[]).length} ejercicios</div></div>
+                        <i data-lucide="chevron-right" style="width:18px;height:18px;color:#bbb;margin-left:auto;"></i>
+                    </div>
+                `).join('');
+            }
+            lucide.createIcons();
+        }
+
+        function selectDay(dayIndex) {
+            sessionDayIndex = dayIndex;
+            checkedExercises = new Set();
+            finishChecked = false;
+            sessionStartTime = Date.now();
+            sessionActive = true;
+            timerActive = true;
+            updateTimerNavBadge();
+
+            document.getElementById('dayPicker').style.display = 'none';
+            document.getElementById('activeSession').style.display = 'block';
+
+            let exercises = [];
+            let dayName = 'Entrenamiento';
+            if (dayIndex === -1) {
+                exercises = (userRoutine.exercises || []);
+            } else {
+                const day = userRoutine.days[dayIndex];
+                dayName = day.name;
+                exercises = day.exercises || [];
+            }
+
+            document.getElementById('sessionDayTitle').textContent = dayName;
+            renderChecklist(exercises);
+            updateProgress(exercises.length);
+
+            // Stopwatch
+            clearInterval(elapsedInterval);
+            elapsedInterval = setInterval(() => {
+                const secs = Math.floor((Date.now() - sessionStartTime) / 1000);
+                const m = String(Math.floor(secs / 60)).padStart(2,'0');
+                const s = String(secs % 60).padStart(2,'0');
+                const el = document.getElementById('sessionElapsed');
+                if (el) el.textContent = `⏱ ${m}:${s}`;
+                // update bubble if visible
+                const bbl = document.getElementById('bubbleTime');
+                if (bbl) bbl.textContent = `${m}:${s}`;
+            }, 1000);
+
+            // Reset finish checkbox
+            const fb = document.getElementById('finishCheckBox');
+            const fi = document.getElementById('finishCheckIcon');
+            if (fb) { fb.style.background = 'white'; fb.style.borderColor = '#c8d0e0'; }
+            if (fi) fi.style.display = 'none';
+
+            lucide.createIcons();
+        }
+
+        function renderChecklist(exercises) {
+            const equipmentIcon = {
+                sin_material: '<i data-lucide="person-standing" style="width:16px;height:16px;vertical-align:middle;color:#888;"></i>',
+                bandas:       '<i data-lucide="zap" style="width:16px;height:16px;vertical-align:middle;color:#888;"></i>',
+                pesas:        '<i data-lucide="dumbbell" style="width:16px;height:16px;vertical-align:middle;color:#888;"></i>'
+            };
+            const list = document.getElementById('exerciseChecklist');
+            list.innerHTML = exercises.map((ex, idx) => {
+                const e = ex.exerciseId || {};
+                const icon = equipmentIcon[e.equipment] || '<i data-lucide="activity" style="width:16px;height:16px;vertical-align:middle;color:#888;"></i>';
+                const details = [ex.sets ? `${ex.sets} series` : null, ex.reps ? `${ex.reps} reps` : null, ex.rest ? `Descanso: ${ex.rest}s` : null].filter(Boolean).join(' · ');
+                const name = e.name || 'Ejercicio';
+                return `<div id="exrow-${idx}" onclick="toggleExercise(${idx}, ${exercises.length})" style="display:flex;align-items:center;gap:0;padding:1rem 0;border-bottom:1px solid #f0f2f5;cursor:pointer;user-select:none;">
+                    <div style="flex:1;padding-right:1rem;">
+                        <div style="font-weight:700;color:var(--navy);font-size:0.97rem;">${icon} ${name}</div>
+                        ${details ? `<div style="font-size:0.82rem;color:#888;margin-top:4px;">${details}</div>` : ''}
+                        ${ex.notes ? `<div style="font-size:0.82rem;color:#aaa;margin-top:2px;">${ex.notes}</div>` : ''}
+                    </div>
+                    <div id="excheck-${idx}" style="width:48px;height:48px;border-radius:14px;border:3px solid #d8dfe8;background:white;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-left:auto;transition:all 0.18s;">
+                        <i data-lucide="check" style="width:26px;height:26px;color:white;display:none;" id="excheckicon-${idx}"></i>
+                    </div>
+                </div>`;
+            }).join('');
+            lucide.createIcons();
+        }
+
+        function toggleExercise(idx, total) {
+            const box = document.getElementById(`excheck-${idx}`);
+            const icon = document.getElementById(`excheckicon-${idx}`);
+            const row = document.getElementById(`exrow-${idx}`);
+            if (checkedExercises.has(idx)) {
+                checkedExercises.delete(idx);
+                box.style.background = 'white';
+                box.style.borderColor = '#d8dfe8';
+                icon.style.display = 'none';
+                row.style.opacity = '1';
+            } else {
+                checkedExercises.add(idx);
+                box.style.background = 'var(--green)';
+                box.style.borderColor = 'var(--green)';
+                icon.style.display = 'block';
+                row.style.opacity = '0.6';
+            }
+            lucide.createIcons();
+            updateProgress(total);
+        }
+
+        function updateProgress(total) {
+            const el = document.getElementById('sessionProgress');
+            if (el) el.textContent = `${checkedExercises.size} / ${total}`;
+        }
+
+        function toggleFinishSession() {
+            finishChecked = !finishChecked;
+            const box = document.getElementById('finishCheckBox');
+            const icon = document.getElementById('finishCheckIcon');
+            if (finishChecked) {
+                box.style.background = 'var(--green)';
+                box.style.borderColor = 'var(--green)';
+                icon.style.display = 'block';
+                lucide.createIcons();
+                setTimeout(finishWorkout, 400);
+            } else {
+                box.style.background = 'white';
+                box.style.borderColor = '#c8d0e0';
+                icon.style.display = 'none';
+            }
+        }
+
+        async function finishWorkout() {
+            clearInterval(elapsedInterval);
+            const mins = Math.max(1, Math.floor((Date.now() - sessionStartTime) / 60000));
+            const feedback = document.getElementById('workoutFeedback');
+            const finishRow = document.getElementById('finishCheckRow');
+            if (finishRow) finishRow.style.pointerEvents = 'none';
+
+            try {
+                const token = localStorage.getItem('authToken');
+                const res = await fetch('/api/user/workout-session', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ duration: mins })
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    const newBadges = data.newBadges || [];
+                    let successHtml = `<div class="alert alert-success"><i data-lucide="check-circle" style="width:16px;height:16px;vertical-align:middle;margin-right:4px;"></i> ¡Sesión registrada! Has entrenado <strong>${mins} minutos</strong>. ¡Buen trabajo!</div>`;
+                    if (newBadges.length > 0) {
+                        const badgeLabels = { first_step:'Primer Paso', weekly_active:'Semana Activa', committed:'Constante', monthly_active:'Mes de Hierro', warrior:'Guerrero', ironman:'Ironman', centurion:'Centurión' };
+                        const names = newBadges.map(b => badgeLabels[b] || b).join(', ');
+                        successHtml += `<div class="alert" style="background:linear-gradient(135deg,#e8f8f5,#d1f2eb);border-left:4px solid #00D9A3;margin-top:0.75rem;"><i data-lucide="award" style="width:16px;height:16px;vertical-align:middle;margin-right:4px;"></i> <strong>Logro desbloqueado:</strong> ${names}</div>`;
+                    }
+                    feedback.style.display = 'block';
+                    feedback.innerHTML = successHtml;
+                    lucide.createIcons();
+                    sessionActive = false;
+                    timerActive = false;
+                    updateTimerNavBadge();
+                    loadAchievements();
+                    loadSessionHistory(localStorage.getItem('authToken'));
+                    setTimeout(() => resetSession(), 3000);
+                } else {
+                    feedback.style.display = 'block';
+                    feedback.innerHTML = `<div class="alert alert-warning"><i data-lucide="alert-triangle" style="width:16px;height:16px;vertical-align:middle;margin-right:4px;"></i> La sesión terminó pero no se pudo guardar.</div>`;
+                    lucide.createIcons();
+                    if (finishRow) finishRow.style.pointerEvents = 'auto';
+                    finishChecked = false;
+                    const box = document.getElementById('finishCheckBox');
+                    const icon = document.getElementById('finishCheckIcon');
+                    if (box) { box.style.background = 'white'; box.style.borderColor = '#c8d0e0'; }
+                    if (icon) icon.style.display = 'none';
+                }
+            } catch (err) {
+                feedback.style.display = 'block';
+                feedback.innerHTML = `<div class="alert alert-warning"><i data-lucide="alert-triangle" style="width:16px;height:16px;vertical-align:middle;margin-right:4px;"></i> Error de conexión. La sesión no se guardó.</div>`;
+                lucide.createIcons();
+                if (finishRow) finishRow.style.pointerEvents = 'auto';
+                finishChecked = false;
+            }
+        }
+
+        function cancelSession() {
+            clearInterval(elapsedInterval);
+            resetSession();
+        }
+
+        function resetSession() {
+            sessionActive = false;
+            timerActive = false;
+            sessionDayIndex = null;
+            checkedExercises = new Set();
+            finishChecked = false;
+            sessionStartTime = null;
+            document.getElementById('dayPicker').style.display = 'block';
+            document.getElementById('activeSession').style.display = 'none';
+            const fb = document.getElementById('workoutFeedback');
+            if (fb) { fb.style.display = 'none'; fb.innerHTML = ''; }
+            updateTimerNavBadge();
+            const bubble = document.getElementById('timerBubble');
+            if (bubble) bubble.style.display = 'none';
         }
 
         function showSection(sectionId) {
@@ -18981,6 +19200,10 @@ gg==" alt="Effort Online">
                 const res = await fetch('/api/user/routine', { headers: { 'Authorization': `Bearer ${token}` } });
                 const routine = res.ok ? await res.json() : null;
 
+                // Save globally for the checklist
+                userRoutine = routine && (routine.exercises || routine.days) ? routine : null;
+                renderDayPicker();
+
                 const subtitle = document.getElementById('routineSubtitle');
                 const content = document.getElementById('routineContent');
 
@@ -19096,12 +19319,8 @@ gg==" alt="Effort Online">
                 document.getElementById('userNameText').textContent = user.name;
 
                 // Saludo dinámico con nombre real
-                // Duración de sesión fijada por el entrenador
+                // Duración de sesión fijada por el entrenador (guardada para referencia)
                 requiredMinutes = user.sessionDuration || 60;
-                const durLabel = document.getElementById('sessionDurationLabel');
-                if (durLabel) durLabel.textContent = requiredMinutes + ' min';
-                const timerDisplay = document.getElementById('timerDisplay');
-                if (timerDisplay) timerDisplay.textContent = String(requiredMinutes).padStart(2,'0') + ':00';
 
                 const firstName = user.name.split(' ')[0];
                 const hour = new Date().getHours();
