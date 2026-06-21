@@ -19484,17 +19484,27 @@ gg==" alt="Effort Online">
     <script>
         function openVideoModal(url, name) {
             let embedUrl = url;
-            // Convertir YouTube a embed
             const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([^&?]+)/);
             if (ytMatch) embedUrl = `https://www.youtube.com/embed/${ytMatch[1]}?autoplay=1`;
             document.getElementById('videoIframe').src = embedUrl;
             document.getElementById('videoModalTitle').textContent = name;
             document.getElementById('videoModal').style.display = 'flex';
+            // Push history state so back button closes modal instead of leaving app
+            history.pushState({ videoModal: true }, '');
         }
         function closeVideoModal() {
             document.getElementById('videoIframe').src = '';
             document.getElementById('videoModal').style.display = 'none';
+            // Remove history state if still present
+            if (history.state && history.state.videoModal) history.back();
         }
+        // Handle back button / back gesture
+        window.addEventListener('popstate', (e) => {
+            if (document.getElementById('videoModal').style.display !== 'none') {
+                document.getElementById('videoIframe').src = '';
+                document.getElementById('videoModal').style.display = 'none';
+            }
+        });
     </script>
     <script>if('serviceWorker'in navigator)navigator.serviceWorker.register('/sw.js').catch(()=>{});</script>
 </body>
