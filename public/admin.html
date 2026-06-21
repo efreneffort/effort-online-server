@@ -18441,6 +18441,13 @@ gg==" alt="Effort Online">
                             <input type="date" value="${subEndVal}" style="font-size:0.78rem;border:1px solid #ddd;border-radius:6px;padding:0.2rem 0.4rem"
                                 onchange="updateSubscriptionEnd('${c._id}', this.value, this)">
                         </div>
+                        <div style="margin-top:0.3rem;display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap">
+                            <label style="font-size:0.78rem;color:#666">Duración sesión:</label>
+                            <select style="font-size:0.78rem;border:1px solid #ddd;border-radius:6px;padding:0.2rem 0.4rem"
+                                onchange="updateSessionDuration('${c._id}', this.value)">
+                                ${[15,20,30,40,45,50,60,75,90].map(m => `<option value="${m}" ${(c.sessionDuration||60)===m?'selected':''}>${m} min</option>`).join('')}
+                            </select>
+                        </div>
                     </div>
                     <div style="display:flex;flex-direction:column;gap:0.4rem;align-items:flex-end">
                         <span class="client-plan ${planClass[c.plan] || ''}">${(c.plan || '').toUpperCase()}</span>
@@ -18471,6 +18478,20 @@ gg==" alt="Effort Online">
                 if (clientsRes.ok) renderClients(await clientsRes.json());
             } catch {
                 alert('Error al cambiar estado del cliente.');
+            }
+        }
+
+        async function updateSessionDuration(clientId, minutes) {
+            const token = localStorage.getItem('authToken');
+            try {
+                const res = await fetch(`/api/admin/clients/${clientId}/session-duration`, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sessionDuration: parseInt(minutes) })
+                });
+                if (!res.ok) throw new Error();
+            } catch {
+                alert('Error al actualizar duración de sesión.');
             }
         }
 

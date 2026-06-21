@@ -17921,23 +17921,12 @@ gg==" alt="Effort Online">
                     
                     <div id="timerNotStarted">
                         <div class="alert alert-warning">
-                            Debes completar el tiempo mínimo para que la sesión cuente como realizada.
-                        </div>
-
-                        <div class="workout-duration">
-                            <label for="workoutDuration">Duración de tu sesión:</label>
-                            <select id="workoutDuration">
-                                <option value="10">10 minutos</option>
-                                <option value="20">20 minutos</option>
-                                <option value="30">30 minutos</option>
-                                <option value="40">40 minutos</option>
-                                <option value="50">50 minutos</option>
-                                <option value="60">60 minutos</option>
-                            </select>
+                            Tu entrenador ha fijado la duración de tu sesión. Pulsa iniciar cuando estés listo.
                         </div>
 
                         <div class="timer-container">
-                            <h3 style="color: var(--navy); margin-bottom: 1rem;">Timer de Entrenamiento</h3>
+                            <h3 style="color: var(--navy); margin-bottom: 0.5rem;">Timer de Entrenamiento</h3>
+                            <p style="color:#666;font-size:0.9rem;margin-bottom:1rem;">Duración: <strong id="sessionDurationLabel">— min</strong></p>
                             <div class="timer-display" id="timerDisplay">00:00</div>
                             <div class="timer-buttons">
                                 <button class="btn btn-primary" id="startBtn" onclick="startWorkout()"><i data-lucide="play" style="width:16px;height:16px;vertical-align:middle;margin-right:6px;"></i>Iniciar Sesión</button>
@@ -17947,7 +17936,7 @@ gg==" alt="Effort Online">
 
                     <div id="timerRunning" style="display: none;">
                         <div class="alert alert-success">
-                            ¡Sesión en curso! Completa <span id="requiredTime"></span> minutos para validar tu entrenamiento.
+                            ¡Sesión en curso! Tiempo restante: <strong><span id="requiredTime"></span> min</strong>
                         </div>
 
                         <div class="timer-container">
@@ -18283,9 +18272,10 @@ gg==" alt="Effort Online">
 
     <script>
         let timerInterval;
-        let seconds = 0;
+        let secondsLeft = 0;
+        let totalSeconds = 0;
         let isPaused = false;
-        let requiredMinutes = 10;
+        let requiredMinutes = 60;
         let timerActive = false;
 
         function updateTimerNavBadge() {
@@ -18341,41 +18331,49 @@ gg==" alt="Effort Online">
         }
 
         function startWorkout() {
-            requiredMinutes = parseInt(document.getElementById('workoutDuration').value);
+            totalSeconds = requiredMinutes * 60;
+            secondsLeft = totalSeconds;
             document.getElementById('requiredTime').textContent = requiredMinutes;
 
             document.getElementById('timerNotStarted').style.display = 'none';
             document.getElementById('timerRunning').style.display = 'block';
 
-            seconds = 0;
             isPaused = false;
             timerActive = true;
             updateTimerNavBadge();
+            renderCountdown();
 
             timerInterval = setInterval(updateTimer, 1000);
         }
 
+        function renderCountdown() {
+            const mins = Math.floor(secondsLeft / 60);
+            const secs = secondsLeft % 60;
+            const timeStr = String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+            document.getElementById('timerDisplayRunning').textContent = timeStr;
+            const bubble = document.getElementById('bubbleTime');
+            if (bubble) bubble.textContent = timeStr;
+            const elapsed = totalSeconds - secondsLeft;
+            const progress = Math.min((elapsed / totalSeconds) * 100, 100);
+            document.getElementById('progressBar').style.width = progress + '%';
+            document.getElementById('progressText').textContent = Math.floor(progress) + '%';
+            updateTimerCircle(elapsed, totalSeconds);
+        }
+
         function updateTimer() {
             if (!isPaused) {
-                seconds++;
+                secondsLeft--;
+                renderCountdown();
+                // Actualizar minutos restantes en el alert
+                const minsLeft = Math.ceil(secondsLeft / 60);
+                const reqEl = document.getElementById('requiredTime');
+                if (reqEl) reqEl.textContent = Math.max(0, minsLeft);
 
-                const mins = Math.floor(seconds / 60);
-                const secs = seconds % 60;
-                const timeStr = String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
-
-                document.getElementById('timerDisplayRunning').textContent = timeStr;
-
-                // Sincronizar burbuja flotante
-                const bubble = document.getElementById('bubbleTime');
-                if (bubble) bubble.textContent = timeStr;
-                
-                const progress = Math.min((seconds / (requiredMinutes * 60)) * 100, 100);
-                document.getElementById('progressBar').style.width = progress + '%';
-                document.getElementById('progressText').textContent = Math.floor(progress) + '%';
-                updateTimerCircle(seconds, requiredMinutes * 60);
-                
-                if (seconds >= requiredMinutes * 60) {
-                    document.getElementById('finishBtn').disabled = false;
+                if (secondsLeft <= 0) {
+                    clearInterval(timerInterval);
+                    secondsLeft = 0;
+                    renderCountdown();
+                    finishWorkout();
                 }
             }
         }
@@ -18396,13 +18394,9 @@ gg==" alt="Effort Online">
         }
 
         async function finishWorkout() {
-            if (seconds < requiredMinutes * 60) {
-                alert('Debes completar al menos ' + requiredMinutes + ' minutos para validar la sesión.');
-                return;
-            }
-
             clearInterval(timerInterval);
-            const mins = Math.floor(seconds / 60);
+            const elapsed = totalSeconds - secondsLeft;
+            const mins = Math.max(1, Math.floor(elapsed / 60));
 
             const feedback = document.getElementById('workoutFeedback');
             const finishBtn = document.getElementById('finishBtn');
@@ -18464,7 +18458,8 @@ gg==" alt="Effort Online">
             document.getElementById('finishBtn').disabled = true;
             const circ = document.getElementById('timerCircleFill');
             if (circ) circ.style.strokeDashoffset = '339.29';
-            seconds = 0;
+            secondsLeft = 0;
+            totalSeconds = 0;
             isPaused = false;
             timerActive = false;
             updateTimerNavBadge();
@@ -19101,6 +19096,13 @@ gg==" alt="Effort Online">
                 document.getElementById('userNameText').textContent = user.name;
 
                 // Saludo dinámico con nombre real
+                // Duración de sesión fijada por el entrenador
+                requiredMinutes = user.sessionDuration || 60;
+                const durLabel = document.getElementById('sessionDurationLabel');
+                if (durLabel) durLabel.textContent = requiredMinutes + ' min';
+                const timerDisplay = document.getElementById('timerDisplay');
+                if (timerDisplay) timerDisplay.textContent = String(requiredMinutes).padStart(2,'0') + ':00';
+
                 const firstName = user.name.split(' ')[0];
                 const hour = new Date().getHours();
                 const saludo = hour < 13 ? 'Buenos días' : hour < 20 ? 'Buenas tardes' : 'Buenas noches';

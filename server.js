@@ -150,6 +150,7 @@ const UserSchema = new mongoose.Schema({
     isActive: { type: Boolean, default: true },
     subscriptionEnd: { type: Date, default: null },
     subscriptionReminderSent: { type: Boolean, default: false },
+    sessionDuration: { type: Number, default: 60 },
     role: { type: String, enum: ['client', 'admin'], default: 'client' },
     createdAt: { type: Date, default: Date.now }
 });
@@ -697,6 +698,23 @@ app.put('/api/admin/clients/:clientId/subscription-end', authenticateToken, isAd
         res.json({ subscriptionEnd: client.subscriptionEnd });
     } catch (error) {
         res.status(500).json({ error: 'Error al actualizar suscripción' });
+    }
+});
+
+// Actualizar duración de sesión por cliente
+app.put('/api/admin/clients/:clientId/session-duration', authenticateToken, isAdmin, async (req, res) => {
+    try {
+        const duration = parseInt(req.body.sessionDuration);
+        if (!duration || duration < 5 || duration > 180) return res.status(400).json({ error: 'Duración inválida (5–180 min)' });
+        const client = await User.findByIdAndUpdate(
+            req.params.clientId,
+            { sessionDuration: duration },
+            { new: true }
+        ).select('-password');
+        if (!client) return res.status(404).json({ error: 'Cliente no encontrado' });
+        res.json({ sessionDuration: client.sessionDuration });
+    } catch (error) {
+        res.status(500).json({ error: 'Error al actualizar duración' });
     }
 });
 
