@@ -18278,6 +18278,7 @@ gg==" alt="Effort Online">
         let sessionStartTime = null;
         let elapsedInterval = null;
         let finishChecked = false;
+        let resetSessionTimeout = null;
         let userRoutine = null;
         let requiredMinutes = 60;
         let timerActive = false; // kept for nav bubble compatibility
@@ -18331,6 +18332,7 @@ gg==" alt="Effort Online">
         }
 
         function selectDay(dayIndex) {
+            clearTimeout(resetSessionTimeout);
             sessionDayIndex = dayIndex;
             checkedExercises = new Set();
             finishChecked = false;
@@ -18471,7 +18473,7 @@ gg==" alt="Effort Online">
                     updateTimerNavBadge();
                     loadAchievements();
                     loadSessionHistory(localStorage.getItem('authToken'));
-                    setTimeout(() => resetSession(), 3000);
+                    resetSessionTimeout = setTimeout(() => resetSession(), 3000);
                 } else {
                     feedback.style.display = 'block';
                     feedback.innerHTML = `<div class="alert alert-warning"><i data-lucide="alert-triangle" style="width:16px;height:16px;vertical-align:middle;margin-right:4px;"></i> La sesión terminó pero no se pudo guardar.</div>`;
