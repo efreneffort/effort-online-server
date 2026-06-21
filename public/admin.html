@@ -18612,18 +18612,21 @@ gg==" alt="Effort Online">
                 let startX, startY;
 
                 el.addEventListener('touchstart', e => {
-                    e.preventDefault(); // bloquea menú nativo iOS inmediatamente
                     longPressed = false;
                     startX = e.touches[0].clientX;
                     startY = e.touches[0].clientY;
                     timer = setTimeout(() => {
                         longPressed = true;
                         showExerciseMenu(el, { clientX: startX, clientY: startY });
-                    }, 500);
-                }, { passive: false });
+                    }, 600);
+                }, { passive: true });
 
-                el.addEventListener('touchend', () => { clearTimeout(timer); longPressed = false; });
-                el.addEventListener('touchmove', () => clearTimeout(timer));
+                el.addEventListener('touchend', () => { clearTimeout(timer); });
+                el.addEventListener('touchmove', e => {
+                    const dx = Math.abs(e.touches[0].clientX - startX);
+                    const dy = Math.abs(e.touches[0].clientY - startY);
+                    if (dx > 8 || dy > 8) clearTimeout(timer);
+                });
                 el.addEventListener('contextmenu', e => { e.preventDefault(); showExerciseMenu(el, e); });
             });
         }
@@ -18700,7 +18703,7 @@ gg==" alt="Effort Online">
             document.getElementById('uploadVideoBtn').disabled = true;
             document.getElementById('uploadVideoInput').value = '';
             uploadVideoFile_selected = null;
-            openModal('uploadVideoModal');
+            document.getElementById('uploadVideoModal').classList.add('active');
         }
 
         function handleVideoDropZone(event) {
