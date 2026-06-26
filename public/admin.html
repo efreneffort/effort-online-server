@@ -18249,6 +18249,7 @@ gg==" alt="Effort Online">
                     style="position:absolute;top:0;left:0;width:100%;height:100%;display:none"></iframe>
                 <video id="viewVideoPlayer" src="" controls playsinline
                     style="position:absolute;top:0;left:0;width:100%;height:100%;display:none;background:#000"></video>
+                <div id="viewVideoError" style="display:none;position:absolute;top:0;left:0;width:100%;height:100%;align-items:center;justify-content:center;text-align:center;color:#fff;padding:1.5rem;font-size:0.9rem;background:#000"></div>
             </div>
         </div>
     </div>
@@ -18719,6 +18720,9 @@ gg==" alt="Effort Online">
             if (!url) return;
             const iframe = document.getElementById('viewVideoIframe');
             const player = document.getElementById('viewVideoPlayer');
+            const errBox = document.getElementById('viewVideoError');
+            errBox.style.display = 'none';
+            errBox.textContent = '';
             const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([^&?]+)/);
             const isDirectVideo = /\.(mp4|mov|webm|mkv)(\?.*)?$/i.test(url);
             if (ytMatch) {
@@ -18732,6 +18736,15 @@ gg==" alt="Effort Online">
                 iframe.src = '';
                 // Sin autoplay forzado: el navegador lo bloquea/pausa sin un
                 // gesto real del usuario, dejando el vídeo en el primer fotograma.
+                // Igual que en la pantalla del cliente: si falla aquí, falla
+                // allí también, y se muestra el error en vez de quedar en blanco.
+                player.onerror = () => {
+                    player.style.display = 'none';
+                    errBox.style.display = 'flex';
+                    const code = player.error ? player.error.code : null;
+                    const reasons = { 1: 'Carga abortada', 2: 'Error de red', 3: 'Error al decodificar el vídeo', 4: 'Formato no soportado por el navegador' };
+                    errBox.textContent = `❌ Error al reproducir el vídeo${code ? ' (' + (reasons[code] || 'código ' + code) + ')' : ''}.`;
+                };
                 player.src = url;
             } else {
                 iframe.src = url;
