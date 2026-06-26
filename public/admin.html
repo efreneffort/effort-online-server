@@ -18205,6 +18205,7 @@ gg==" alt="Effort Online">
         <hr class="ctx-divider">
         <button class="ctx-item" onclick="openEditExercise()">✏️ Editar nombre</button>
         <hr class="ctx-divider">
+        <button class="ctx-item" id="ctxViewVideoBtn" onclick="openViewVideoModal()" style="display:none">▶️ Ver vídeo</button>
         <button class="ctx-item" onclick="openUploadVideoModal()">🎬 Subir vídeo</button>
         <hr class="ctx-divider">
         <button class="ctx-item danger" onclick="confirmDeleteExercise()">🗑️ Eliminar</button>
@@ -18232,6 +18233,22 @@ gg==" alt="Effort Online">
             <div style="display:flex;gap:0.8rem;justify-content:flex-end">
                 <button class="btn btn-secondary" onclick="closeModal('uploadVideoModal')">Cancelar</button>
                 <button class="btn btn-primary" id="uploadVideoBtn" onclick="uploadVideoFile()" disabled>Subir vídeo</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal ver vídeo (comprobar subida sin salir a un usuario) -->
+    <div id="viewVideoModal" class="modal">
+        <div class="modal-content" style="max-width:420px">
+            <div class="modal-header">
+                <h3 class="modal-title">Vista previa del vídeo</h3>
+                <button class="close-btn" onclick="closeViewVideoModal()">&times;</button>
+            </div>
+            <div style="position:relative;border-radius:12px;overflow:hidden;background:#000;padding-bottom:177.7%;height:0">
+                <iframe id="viewVideoIframe" src="" frameborder="0" allowfullscreen
+                    style="position:absolute;top:0;left:0;width:100%;height:100%;display:none"></iframe>
+                <video id="viewVideoPlayer" src="" controls playsinline
+                    style="position:absolute;top:0;left:0;width:100%;height:100%;display:none;background:#000"></video>
             </div>
         </div>
     </div>
@@ -18648,6 +18665,8 @@ gg==" alt="Effort Online">
             ctxExerciseName = el.dataset.name;
             const menu = document.getElementById('exerciseContextMenu');
             document.getElementById('ctxExerciseName').textContent = ctxExerciseName;
+            const ex = exercisesCache.find(x => x._id === ctxExerciseId);
+            document.getElementById('ctxViewVideoBtn').style.display = ex?.videoUrl ? 'block' : 'none';
             menu.style.display = 'block';
 
             const mw = menu.offsetWidth  || 220;
@@ -18691,6 +18710,44 @@ gg==" alt="Effort Online">
             } catch {
                 alert('Error al guardar el ejercicio.');
             }
+        }
+
+        function openViewVideoModal() {
+            closeExerciseMenu();
+            const ex = exercisesCache.find(x => x._id === ctxExerciseId);
+            const url = ex?.videoUrl;
+            if (!url) return;
+            const iframe = document.getElementById('viewVideoIframe');
+            const player = document.getElementById('viewVideoPlayer');
+            const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([^&?]+)/);
+            const isDirectVideo = /\.(mp4|mov|webm|mkv)(\?.*)?$/i.test(url);
+            if (ytMatch) {
+                iframe.src = `https://www.youtube.com/embed/${ytMatch[1]}`;
+                iframe.style.display = 'block';
+                player.style.display = 'none';
+                player.src = '';
+            } else if (isDirectVideo) {
+                player.style.display = 'block';
+                iframe.style.display = 'none';
+                iframe.src = '';
+                // Sin autoplay forzado: el navegador lo bloquea/pausa sin un
+                // gesto real del usuario, dejando el vídeo en el primer fotograma.
+                player.src = url;
+            } else {
+                iframe.src = url;
+                iframe.style.display = 'block';
+                player.style.display = 'none';
+                player.src = '';
+            }
+            document.getElementById('viewVideoModal').classList.add('active');
+        }
+
+        function closeViewVideoModal() {
+            document.getElementById('viewVideoIframe').src = '';
+            const player = document.getElementById('viewVideoPlayer');
+            player.pause();
+            player.src = '';
+            document.getElementById('viewVideoModal').classList.remove('active');
         }
 
         let uploadVideoFile_selected = null;
