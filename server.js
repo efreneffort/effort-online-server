@@ -39,7 +39,12 @@ function transcodeToH264(inputBuffer, inputExt) {
             ffmpeg(inputPath)
                 .videoCodec('libx264')
                 .audioCodec('aac')
-                .outputOptions(['-pix_fmt yuv420p', '-movflags +faststart', '-preset veryfast'])
+                // Limitar a 1080p: de sobra para ver el ejercicio y evita que
+                // convertir un vídeo 4K agote la memoria/CPU del servidor.
+                .outputOptions([
+                    '-pix_fmt yuv420p', '-movflags +faststart', '-preset veryfast',
+                    "-vf", "scale='min(1920,iw)':'min(1920,ih)':force_original_aspect_ratio=decrease"
+                ])
                 .on('end', () => {
                     fs.readFile(outputPath, (readErr, outputBuffer) => {
                         fs.unlink(inputPath, () => {});
@@ -907,24 +912,30 @@ app.post('/api/admin/exercises/:id/video', authenticateToken, isAdmin, upload.si
         if (!allowed.includes(ext)) return res.status(400).json({ error: 'Formato no permitido. Usa MP4, MOV o WEBM.' });
 
         // Los iPhone graban en HEVC/H.265 dentro de .MOV, códec que la mayoría de
-        // navegadores no Apple no decodifican. Se transcodifica siempre a H.264/MP4
-        // para que el vídeo se reproduzca igual en todos los dispositivos.
-        let outputBuffer;
+        // navegadores no Apple no decodifican. Se transcodifica a H.264/MP4 para
+        // que el vídeo se reproduzca igual en todos los dispositivos. Si la
+        // conversión falla (p.ej. por límites de memoria/CPU), se sube el
+        // archivo original tal cual en vez de cancelar la subida entera.
+        let outputBuffer, outputExt, contentType;
         try {
             outputBuffer = await transcodeToH264(req.file.buffer, ext);
+            outputExt = 'mp4';
+            contentType = 'video/mp4';
         } catch (transcodeErr) {
-            console.error('Error transcodificando vídeo:', transcodeErr);
-            return res.status(500).json({ error: 'Error al procesar el vídeo' });
+            console.error('Error transcodificando vídeo, se sube el original sin convertir:', transcodeErr);
+            outputBuffer = req.file.buffer;
+            outputExt = ext;
+            contentType = req.file.mimetype;
         }
 
-        const key = `exercises/${req.params.id}.mp4`;
+        const key = `exercises/${req.params.id}.${outputExt}`;
         const cfUrl = `https://api.cloudflare.com/client/v4/accounts/${process.env.CF_ACCOUNT_ID}/r2/buckets/${process.env.CF_R2_BUCKET}/objects/${key}`;
 
         const cfRes = await fetch(cfUrl, {
             method: 'PUT',
             headers: {
                 'Authorization': `Bearer ${process.env.CF_API_TOKEN}`,
-                'Content-Type': 'video/mp4'
+                'Content-Type': contentType
             },
             body: outputBuffer
         });
