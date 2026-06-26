@@ -19394,7 +19394,7 @@ gg==" alt="Effort Online">
             <div style="position:relative;padding-bottom:56.25%;height:0">
                 <iframe id="videoIframe" src="" frameborder="0" allowfullscreen allow="autoplay"
                     style="position:absolute;top:0;left:0;width:100%;height:100%;display:none"></iframe>
-                <video id="videoPlayer" src="" controls autoplay playsinline
+                <video id="videoPlayer" src="" controls playsinline
                     style="position:absolute;top:0;left:0;width:100%;height:100%;display:none;background:#000"></video>
             </div>
         </div>
@@ -19412,10 +19412,14 @@ gg==" alt="Effort Online">
                 player.style.display = 'none';
                 player.src = '';
             } else if (isDirectVideo) {
-                player.src = url;
                 player.style.display = 'block';
                 iframe.style.display = 'none';
                 iframe.src = '';
+                // No forzar autoplay: el navegador bloquea/pausa la reproducción
+                // automática sin un gesto real del usuario, dejando el vídeo
+                // parado en el primer fotograma como si fuera una imagen. Se
+                // carga listo y el usuario le da al play nativo (gesto real).
+                player.src = url;
             } else {
                 iframe.src = url;
                 iframe.style.display = 'block';
