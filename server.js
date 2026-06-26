@@ -17,8 +17,46 @@ const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
+const os = require('os');
+const fs = require('fs');
+const crypto = require('crypto');
 const multer = require('multer');
+const ffmpeg = require('fluent-ffmpeg');
+const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
+ffmpeg.setFfmpegPath(ffmpegPath);
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 200 * 1024 * 1024 } });
+
+// Convierte cualquier vídeo (incluido HEVC/H.265 de iPhone) a H.264/MP4,
+// que es el único formato que reproducen todos los navegadores de forma fiable.
+function transcodeToH264(inputBuffer, inputExt) {
+    const tmpDir = os.tmpdir();
+    const id = crypto.randomUUID();
+    const inputPath = path.join(tmpDir, `${id}-in.${inputExt}`);
+    const outputPath = path.join(tmpDir, `${id}-out.mp4`);
+    return new Promise((resolve, reject) => {
+        fs.writeFile(inputPath, inputBuffer, (writeErr) => {
+            if (writeErr) return reject(writeErr);
+            ffmpeg(inputPath)
+                .videoCodec('libx264')
+                .audioCodec('aac')
+                .outputOptions(['-pix_fmt yuv420p', '-movflags +faststart', '-preset veryfast'])
+                .on('end', () => {
+                    fs.readFile(outputPath, (readErr, outputBuffer) => {
+                        fs.unlink(inputPath, () => {});
+                        fs.unlink(outputPath, () => {});
+                        if (readErr) return reject(readErr);
+                        resolve(outputBuffer);
+                    });
+                })
+                .on('error', (err) => {
+                    fs.unlink(inputPath, () => {});
+                    fs.unlink(outputPath, () => {});
+                    reject(err);
+                })
+                .save(outputPath);
+        });
+    });
+}
 
 const app = express();
 
@@ -868,16 +906,27 @@ app.post('/api/admin/exercises/:id/video', authenticateToken, isAdmin, upload.si
         const allowed = ['mp4', 'mov', 'webm', 'mkv'];
         if (!allowed.includes(ext)) return res.status(400).json({ error: 'Formato no permitido. Usa MP4, MOV o WEBM.' });
 
-        const key = `exercises/${req.params.id}.${ext}`;
+        // Los iPhone graban en HEVC/H.265 dentro de .MOV, códec que la mayoría de
+        // navegadores no Apple no decodifican. Se transcodifica siempre a H.264/MP4
+        // para que el vídeo se reproduzca igual en todos los dispositivos.
+        let outputBuffer;
+        try {
+            outputBuffer = await transcodeToH264(req.file.buffer, ext);
+        } catch (transcodeErr) {
+            console.error('Error transcodificando vídeo:', transcodeErr);
+            return res.status(500).json({ error: 'Error al procesar el vídeo' });
+        }
+
+        const key = `exercises/${req.params.id}.mp4`;
         const cfUrl = `https://api.cloudflare.com/client/v4/accounts/${process.env.CF_ACCOUNT_ID}/r2/buckets/${process.env.CF_R2_BUCKET}/objects/${key}`;
 
         const cfRes = await fetch(cfUrl, {
             method: 'PUT',
             headers: {
                 'Authorization': `Bearer ${process.env.CF_API_TOKEN}`,
-                'Content-Type': req.file.mimetype
+                'Content-Type': 'video/mp4'
             },
-            body: req.file.buffer
+            body: outputBuffer
         });
 
         if (!cfRes.ok) {

@@ -19393,17 +19393,35 @@ gg==" alt="Effort Online">
             </div>
             <div style="position:relative;padding-bottom:56.25%;height:0">
                 <iframe id="videoIframe" src="" frameborder="0" allowfullscreen allow="autoplay"
-                    style="position:absolute;top:0;left:0;width:100%;height:100%"></iframe>
+                    style="position:absolute;top:0;left:0;width:100%;height:100%;display:none"></iframe>
+                <video id="videoPlayer" src="" controls autoplay playsinline
+                    style="position:absolute;top:0;left:0;width:100%;height:100%;display:none;background:#000"></video>
             </div>
         </div>
     </div>
 
     <script>
         function openVideoModal(url, name) {
-            let embedUrl = url;
+            const iframe = document.getElementById('videoIframe');
+            const player = document.getElementById('videoPlayer');
             const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([^&?]+)/);
-            if (ytMatch) embedUrl = `https://www.youtube.com/embed/${ytMatch[1]}?autoplay=1`;
-            document.getElementById('videoIframe').src = embedUrl;
+            const isDirectVideo = /\.(mp4|mov|webm|mkv)(\?.*)?$/i.test(url);
+            if (ytMatch) {
+                iframe.src = `https://www.youtube.com/embed/${ytMatch[1]}?autoplay=1`;
+                iframe.style.display = 'block';
+                player.style.display = 'none';
+                player.src = '';
+            } else if (isDirectVideo) {
+                player.src = url;
+                player.style.display = 'block';
+                iframe.style.display = 'none';
+                iframe.src = '';
+            } else {
+                iframe.src = url;
+                iframe.style.display = 'block';
+                player.style.display = 'none';
+                player.src = '';
+            }
             document.getElementById('videoModalTitle').textContent = name;
             document.getElementById('videoModal').style.display = 'flex';
             // Push history state so back button closes modal instead of leaving app
@@ -19411,6 +19429,9 @@ gg==" alt="Effort Online">
         }
         function closeVideoModal() {
             document.getElementById('videoIframe').src = '';
+            const player = document.getElementById('videoPlayer');
+            player.pause();
+            player.src = '';
             document.getElementById('videoModal').style.display = 'none';
             // Remove history state if still present
             if (history.state && history.state.videoModal) history.back();
@@ -19419,6 +19440,9 @@ gg==" alt="Effort Online">
         window.addEventListener('popstate', (e) => {
             if (document.getElementById('videoModal').style.display !== 'none') {
                 document.getElementById('videoIframe').src = '';
+                const player = document.getElementById('videoPlayer');
+                player.pause();
+                player.src = '';
                 document.getElementById('videoModal').style.display = 'none';
             }
         });

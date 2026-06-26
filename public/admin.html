@@ -18706,21 +18706,74 @@ gg==" alt="Effort Online">
             document.getElementById('uploadVideoModal').classList.add('active');
         }
 
+        function isVideoFile(file) {
+            if (file.type && file.type.startsWith('video/')) return true;
+            const ext = file.name.split('.').pop().toLowerCase();
+            return ['mp4', 'mov', 'webm', 'mkv'].includes(ext);
+        }
+
         function handleVideoDropZone(event) {
             event.preventDefault();
             document.getElementById('uploadVideoDropZone').style.borderColor = '#c8d0e0';
-            const file = event.dataTransfer.files[0];
-            if (file) handleVideoFileSelected(file);
+            // Live Photos / ráfagas arrastradas desde la Fototeca entregan varios archivos
+            // (la imagen fija + el .mov del movimiento): hay que elegir el que sea vídeo,
+            // no asumir que es el primero.
+            const files = Array.from(event.dataTransfer.files);
+            const videoFile = files.find(isVideoFile);
+            if (videoFile) {
+                handleVideoFileSelected(videoFile);
+            } else if (files.length) {
+                const status = document.getElementById('uploadVideoStatus');
+                status.style.display = 'block';
+                status.textContent = '❌ El archivo arrastrado no es un vídeo (MP4, MOV o WEBM).';
+                document.getElementById('uploadVideoBtn').disabled = true;
+            }
         }
 
         function handleVideoFileSelected(file) {
             if (!file) return;
-            uploadVideoFile_selected = file;
+            if (!isVideoFile(file)) {
+                const status = document.getElementById('uploadVideoStatus');
+                status.style.display = 'block';
+                status.textContent = '❌ El archivo seleccionado no es un vídeo (MP4, MOV o WEBM).';
+                document.getElementById('uploadVideoBtn').disabled = true;
+                return;
+            }
             const mb = (file.size / 1024 / 1024).toFixed(1);
             const status = document.getElementById('uploadVideoStatus');
             status.style.display = 'block';
-            status.innerHTML = `📄 <strong>${file.name}</strong> (${mb} MB)`;
-            document.getElementById('uploadVideoBtn').disabled = false;
+            status.innerHTML = `🔎 Comprobando <strong>${file.name}</strong> (${mb} MB)...`;
+            document.getElementById('uploadVideoBtn').disabled = true;
+
+            // El selector de iOS puede entregar un vídeo "vacío" (duración 0) si el
+            // original todavía no se ha descargado completo desde iCloud. Lo detectamos
+            // antes de subir, en vez de descubrirlo después como una imagen estática.
+            checkVideoDuration(file).then((duration) => {
+                if (duration !== null && duration < 0.2) {
+                    status.innerHTML = `❌ El vídeo parece incompleto (no se ha descargado del todo desde iCloud). Ábrelo en la app Fotos para descargarlo y vuelve a intentarlo.`;
+                    document.getElementById('uploadVideoBtn').disabled = true;
+                    return;
+                }
+                uploadVideoFile_selected = file;
+                status.innerHTML = `📄 <strong>${file.name}</strong> (${mb} MB)`;
+                document.getElementById('uploadVideoBtn').disabled = false;
+            });
+        }
+
+        function checkVideoDuration(file) {
+            return new Promise((resolve) => {
+                const url = URL.createObjectURL(file);
+                const videoEl = document.createElement('video');
+                videoEl.preload = 'metadata';
+                const cleanup = () => URL.revokeObjectURL(url);
+                videoEl.onloadedmetadata = () => {
+                    const duration = videoEl.duration;
+                    cleanup();
+                    resolve(Number.isFinite(duration) ? duration : null);
+                };
+                videoEl.onerror = () => { cleanup(); resolve(null); };
+                videoEl.src = url;
+            });
         }
 
         async function uploadVideoFile() {
